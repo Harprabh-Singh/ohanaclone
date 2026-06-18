@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --teal-dark: #0A2E2A;
+  --teal-mid: #0E3B36;
+  --teal-card: #163D38;
+  --cream: #FAF7F1;
+  --cream-dark: #EDE9E0;
+  --magenta: #C42D78;
+  --magenta-dark: #A02060;
+  --gold: #B6912E;
+  --text-dark: #1A1A1A;
+  --text-mid: #4A4A4A;
+  --white: #FFFFFF;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-cream text-text-dark font-body antialiased;
+  background-color: var(--cream);
+  color: var(--text-dark);
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: rgba(196, 45, 120, 0.25);
+}
+
+button, input, textarea, select {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+@keyframes wave {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(12deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.bg-scrim {
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 46, 42, 0.2) 0%,
+    rgba(10, 46, 42, 0.5) 50%,
+    rgba(10, 46, 42, 0.85) 100%
+  );
+}
+
+.animate-wave {
+  animation: wave 4.5s ease-in-out infinite;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.text-shadow-soft {
+  text-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+.heading-display {
+  font-family: 'Archivo Black', sans-serif;
+}
+
+.section-heading {
+  font-family: 'Archivo Black', sans-serif;
+}
+
+.label-uppercase {
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle at top left, rgba(255, 255, 255, 0.04), transparent 18%), radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.03), transparent 16%);
+  pointer-events: none;
+}

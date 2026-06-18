@@ -1,0 +1,63 @@
+OHANA CAFE — TODO LIST
+
+1. Replace hero image on Home page
+   - File: src/pages/Home.jsx
+   - Replace the placeholder Unsplash URL with the actual terrace/dining photo for the hero
+   - Best photo: Golden-hour terrace with string lights, 1600x900px minimum
+
+2. Update category tile images
+   - File: src/data/menuData.js
+   - Replace each `image:` URL with your real category photos
+   - 7 Home category tiles, 17 Menu category tiles
+   - Use 800x600px minimum, JPG or WebP, 4:3 ratio
+
+3. Replace signature dish photos
+   - File: src/data/menuData.js
+   - Replace the 6 signature dish `image:` URLs with real food photos
+
+4. Replace gallery images
+   - File: src/data/galleryImages.js
+   - Replace all placeholder `src:` URLs with actual food/interior/terrace photos
+
+5. Replace About page photos
+   - File: src/pages/About.jsx
+   - Replace the two story section `img` sources with real team/kitchen/ambience images
+
+6. Add Google Maps embed
+   - File: src/pages/Contact.jsx
+   - Replace the placeholder div with the Google Maps iframe for Ohana Cafe Jorhat
+
+7. Replace contact details
+   - Files: src/pages/Contact.jsx and src/components/Footer.jsx
+   - Replace placeholder phone/email values with the real contact info
+
+8. Replace WhatsApp links
+   - Files: src/components/FloatingCTA.jsx and src/pages/Contact.jsx
+   - Replace `https://wa.me/919999999999` with your actual WhatsApp number
+
+9. Replace Instagram grid photos
+   - File: src/pages/Home.jsx
+   - Replace placeholder Instagram tile images with actual @ohana.jrt post photos
+   - Use square crops, 400x400px minimum
+
+10. Review menu data
+    - File: src/data/menuData.js
+    - Confirm every item name, description, price, and label matches the real menu
+    - Add any new menu categories or items if needed
+
+11. Update fonts and metadata
+    - File: index.html
+    - Confirm Google Fonts import is correct
+    - Update the page title and metadata as needed
+
+12. Add favicon and update meta tags
+    - File: index.html
+    - Add `favicon.ico` to /public and update title/description if needed
+
+13. Connect the reservations form to a real backend
+    - Options: Formspree, WhatsApp redirect, or EmailJS
+    - Currently the form only shows a success toast
+
+14. Ongoing polishing
+    - Check for real photos to replace all placeholders
+    - Adjust copy, pricing, contact details, and category names as actual brand data becomes available
