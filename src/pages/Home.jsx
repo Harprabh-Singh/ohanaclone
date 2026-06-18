@@ -1,12 +1,11 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, Instagram as InstagramIcon, MapPin, Clock, Phone } from 'lucide-react';
-import CategoryTile from '../components/CategoryTile';
 import SectionReveal from '../components/SectionReveal';
 import HeroParticles from '../components/HeroParticles';
 import SignatureCarousel from '../components/SignatureCarousel';
 import TestimonialCarousel from '../components/TestimonialCarousel';
 import ScrollIndicator from '../components/ScrollIndicator';
-import { menuSummary } from '../data/menuData';
+import PalateShowcase from '../components/PalateShowcase';
 import { testimonials } from '../data/testimonials';
 
 const instagramTiles = [
@@ -62,7 +61,7 @@ const signatureDishes = [
 
 const Home = () => {
   return (
-    <main className="relative overflow-hidden pt-24">
+    <main className="relative overflow-hidden">
       <section className="relative min-h-[760px] overflow-hidden bg-teal-dark text-white md:min-h-[820px]">
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -98,22 +97,7 @@ const Home = () => {
         </div>
       </section>
 
-      <SectionReveal>
-        <section className="bg-cream py-20">
-          <div className="mx-auto max-w-7xl px-5 md:px-8">
-            <div className="mx-auto max-w-2xl text-center">
-              <p className="section-heading text-4xl font-black text-teal-dark md:text-5xl">Our Palate-Pleasers</p>
-              <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-magenta" />
-              <p className="mt-6 text-base leading-8 text-text-mid md:text-lg">Seven ways to make you stay a little longer.</p>
-            </div>
-            <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-              {menuSummary.homepageCategories.map((item) => (
-                <CategoryTile key={item.slug} item={item} to={`/menu/${item.slug}`} />
-              ))}
-            </div>
-          </div>
-        </section>
-      </SectionReveal>
+      <PalateShowcase />
 
       <SectionReveal>
         <section className="bg-teal-mid py-20 text-white">

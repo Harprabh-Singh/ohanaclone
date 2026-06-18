@@ -27,7 +27,7 @@ const Navbar = () => {
     setMenuOpen(false);
   }, [location.pathname]);
 
-  const navBg = solid ? 'bg-[rgba(14,59,54,0.95)] backdrop-blur-xl border-b border-white/10 shadow-black/10' : 'bg-transparent';
+  const navBg = 'bg-[rgba(14,59,54,0.95)] backdrop-blur-xl border-b border-white/10 shadow-black/10';
 
   return (
     <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${navBg}`}>
@@ -87,17 +87,12 @@ const Navbar = () => {
 
       {location.pathname === '/' && (
         <div className="absolute inset-x-0 bottom-0 mx-auto flex max-w-7xl items-center justify-between px-5 pb-4 md:px-8">
-          <div className="rounded-full bg-white/10 border border-white/20 px-3 py-1.5 text-sm text-white backdrop-blur-sm shadow-lg">
-            <Instagram className="mr-2 inline-block h-4 w-4" /> @ohana.jrt
-          </div>
-          <div className="flex items-center gap-2 text-white/90">
-            <ChevronDown className="h-6 w-6 animate-bounce-slow" />
-            <span className="text-sm uppercase tracking-[0.16em]">Scroll</span>
-          </div>
+          
+          
         </div>
       )}
     </header>
-  );
+  ); 
 };
 
 export default Navbar;
