@@ -6,6 +6,15 @@ export default {
         display: ['Archivo Black', 'sans-serif'],
         body: ['Work Sans', 'sans-serif'],
       },
+      animation: {
+        marquee: 'marquee 28s linear infinite',
+      },
+      keyframes: {
+        marquee: {
+          '0%':   { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-33.333%)' },
+        },
+      },
       colors: {
         'teal-dark': '#0A2E2A',
         'teal-mid': '#0E3B36',
