@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, Instagram as InstagramIcon, MapPin, Clock, Phone } from 'lucide-react';
 import SectionReveal from '../components/SectionReveal';
-import HeroParticles from '../components/HeroParticles';
+import HeroSection from '../components/HeroSection';
 import SignatureCarousel from '../components/SignatureCarousel';
 import TestimonialCarousel from '../components/TestimonialCarousel';
-import ScrollIndicator from '../components/ScrollIndicator';
 import PalateShowcase from '../components/PalateShowcase';
 import { testimonials } from '../data/testimonials';
 
@@ -62,40 +61,7 @@ const signatureDishes = [
 const Home = () => {
   return (
     <main className="relative overflow-hidden">
-      <section className="relative min-h-[760px] overflow-hidden bg-teal-dark text-white md:min-h-[820px]">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1600)' }}
-          data-replace-image="Replace with hero terrace/dining photo, golden hour, 1600x900 minimum"
-        />
-        <div className="absolute inset-0 bg-scrim" />
-        <HeroParticles />
-        <div className="relative mx-auto flex min-h-[760px] max-w-7xl flex-col justify-center px-5 py-20 text-center md:min-h-[820px] md:px-8">
-          <div className="mx-auto max-w-3xl space-y-6">
-            <p className="label-uppercase text-sm tracking-[0.24em] text-gold">Ohana Cafe Kitchen & Terraces</p>
-            <h1 className="heading-display text-5xl uppercase leading-tight tracking-[-0.04em] text-white md:text-7xl lg:text-8xl">
-              Terrace dining with a warm, global twist.
-            </h1>
-            <p className="mx-auto max-w-2xl text-base leading-7 text-white/80 md:text-lg">
-              Above KFC, Gar-Ali in Jorhat. Breakfast through late dinner, multi-cuisine comfort food served under string lights, with tropical warmth and cinematic flavour.
-            </p>
-            <div className="mx-auto flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-              <Link to="/menu" className="inline-flex items-center justify-center rounded-full bg-magenta px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_20px_40px_rgba(196,45,120,0.28)] transition hover:bg-magenta-dark">
-                View Menu
-              </Link>
-              <Link to="/reservations" className="inline-flex items-center justify-center rounded-full border border-white/25 bg-white/10 px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition hover:border-magenta hover:text-magenta">
-                Reserve a Table
-              </Link>
-            </div>
-            <div className="mt-8 flex flex-col items-center gap-4 md:hidden">
-              <Link to="/reservations" className="inline-flex items-center justify-center rounded-full bg-magenta px-8 py-4 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_20px_40px_rgba(196,45,120,0.28)] transition hover:bg-magenta-dark">
-                Reserve Now
-              </Link>
-              <ScrollIndicator />
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroSection />
 
       <PalateShowcase />
 

@@ -1,0 +1,97 @@
+/* ─── Ambient background glows ───────────────────────────────────────── */
+
+.hero-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  will-change: transform;
+}
+
+.hero-glow--1 {
+  width: 420px;
+  height: 420px;
+  left: -10%;
+  top: -10%;
+  background: radial-gradient(circle, rgba(196, 45, 120, 0.22), transparent 70%);
+  animation: glow-drift-1 22s ease-in-out infinite;
+}
+
+.hero-glow--2 {
+  width: 360px;
+  height: 360px;
+  right: -8%;
+  top: 20%;
+  background: radial-gradient(circle, rgba(245, 200, 66, 0.16), transparent 70%);
+  animation: glow-drift-2 26s ease-in-out infinite;
+}
+
+.hero-glow--3 {
+  width: 300px;
+  height: 300px;
+  left: 40%;
+  bottom: -10%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.08), transparent 70%);
+  animation: glow-drift-3 30s ease-in-out infinite;
+}
+
+@keyframes glow-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(60px, 40px) scale(1.15); }
+}
+
+@keyframes glow-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-50px, 60px) scale(1.1); }
+}
+
+@keyframes glow-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(40px, -50px) scale(1.2); }
+}
+
+/* ─── Drifting particles ──────────────────────────────────────────────── */
+
+.hero-particle {
+  position: absolute;
+  bottom: -5%;
+  border-radius: 50%;
+  animation-name: particle-rise;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+}
+
+.hero-particle--white {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+}
+
+.hero-particle--gold {
+  background: radial-gradient(circle, rgba(245, 200, 66, 0.95), rgba(245, 200, 66, 0));
+  box-shadow: 0 0 8px rgba(245, 200, 66, 0.55);
+}
+
+@keyframes particle-rise {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(var(--drift), -115vh);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-glow,
+  .hero-particle {
+    animation: none;
+    opacity: 0.15;
+  }
+}
