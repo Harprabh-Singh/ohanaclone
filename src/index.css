@@ -108,6 +108,10 @@ a {
   text-transform: uppercase;
 }
 
+.ohana-experience {
+  background: #F8F4EE;
+}
+
 body::before {
   content: '';
   position: fixed;

@@ -1,309 +1,295 @@
-import { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import './PalateShowcase.css';
 
 const categories = [
   {
     key: 'breakfast',
     title: 'Breakfast',
+    sub: 'Morning Rituals',
     copy: 'Golden mornings built around coffee steam, citrus light, and the first flavorful bite.',
-    accent: 'Warm beige mornings',
-    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1800&auto=format&fit=crop',
-    signature: 'rays',
+    image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=1400&auto=format&fit=crop&q=85',
+    color: '#e8a838',
+    colorDark: '#7a4e0a',
   },
   {
     key: 'appetizers',
     title: 'Appetizers',
-    copy: 'Shared plates that arrive with artful detail and the perfect first impression.',
-    accent: 'Light, layered, unforgettable',
-    image: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=1800&auto=format&fit=crop',
-    signature: 'flecks',
+    sub: 'First Impressions',
+    copy: 'Shared plates that arrive with artful detail and the perfect opening note.',
+    image: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=1400&auto=format&fit=crop&q=85',
+    color: '#4aad6e',
+    colorDark: '#1a5c34',
   },
   {
     key: 'burgers',
     title: 'Burgers',
-    copy: 'Layered texture, smoke, and chemistry in every bite — elevated to a modern classic.',
-    accent: 'Deep charcoal luxury',
-    image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=1800&auto=format&fit=crop',
-    signature: 'stack',
+    sub: 'Elevated Classics',
+    copy: 'Layered texture, smoke, and chemistry in every bite — a modern classic perfected.',
+    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1400&auto=format&fit=crop&q=85',
+    color: '#e8622a',
+    colorDark: '#7a2a08',
   },
   {
     key: 'pizza',
     title: 'Pizza',
+    sub: 'Wood-Fired Soul',
     copy: 'Thin crust, molten cheese, and a basil-flecked edge made for slow evenings.',
-    accent: 'Terracotta warmth',
-    image: 'https://images.unsplash.com/photo-1548365328-1103f2f4d4ad?w=1800&auto=format&fit=crop',
-    signature: 'toppings',
+    image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=1400&auto=format&fit=crop&q=85',
+    color: '#e84a2a',
+    colorDark: '#7a1a08',
   },
   {
     key: 'pasta',
     title: 'Pasta',
-    copy: 'Comfort from the fork up: glossy ribbons, rich sauce, and a touch of unexpected spice.',
-    accent: 'Polished amber tones',
-    image: 'https://images.unsplash.com/photo-1521389508051-d7ffb5dc8e5d?w=1800&auto=format&fit=crop',
-    signature: 'steam',
+    sub: 'Comfort Elevated',
+    copy: 'Glossy ribbons, rich sauce, and a touch of unexpected spice. Comfort from the fork up.',
+    image: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=1400&auto=format&fit=crop&q=85',
+    color: '#e8c42a',
+    colorDark: '#7a5c08',
   },
   {
     key: 'beverages',
     title: 'Beverages',
+    sub: 'Liquid Craft',
     copy: 'Bright pours designed to refresh, delight, and carry the same premium finish.',
-    accent: 'Emerald depth',
-    image: 'https://images.unsplash.com/photo-1505577058444-a3dab5d1d8b8?w=1800&auto=format&fit=crop',
-    signature: 'pour',
+    image: 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=1400&auto=format&fit=crop&q=85',
+    color: '#2a8ce8',
+    colorDark: '#0a3a7a',
   },
   {
     key: 'desserts',
     title: 'Desserts',
+    sub: 'Sweet Finale',
     copy: 'Soft finishes, berry brightness, and chocolate whispers that close the story beautifully.',
-    accent: 'Soft blush finale',
-    image: 'https://images.unsplash.com/photo-1505251216167-40b63bd84227?w=1800&auto=format&fit=crop',
-    signature: 'drizzle',
+    image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=1400&auto=format&fit=crop&q=85',
+    color: '#c42d78',
+    colorDark: '#6a0a38',
   },
 ];
 
-/* ── Per-category signature animation markup ──────────────────────────── */
-const Signature = ({ type }) => {
-  switch (type) {
-    case 'rays':
-      return (
-        <div className="sig-rays" aria-hidden="true">
-          <span className="sig-ray sig-ray--1" />
-          <span className="sig-ray sig-ray--2" />
-          <span className="sig-ray sig-ray--3" />
-        </div>
-      );
+const N = categories.length;
+const CARD_ANGLE = 360 / N;
 
-    case 'flecks':
-      return (
-        <div className="sig-flecks" aria-hidden="true">
-          {Array.from({ length: 7 }).map((_, i) => (
-            <span key={i} className={`sig-fleck sig-fleck--${i}`} />
-          ))}
-        </div>
-      );
-
-    case 'stack':
-      return (
-        <div className="sig-stack" aria-hidden="true">
-          <span className="sig-bar sig-bar--bun" />
-          <span className="sig-bar sig-bar--patty" />
-          <span className="sig-bar sig-bar--lettuce" />
-        </div>
-      );
-
-    case 'toppings':
-      return (
-        <div className="sig-toppings" aria-hidden="true">
-          <svg viewBox="0 0 28 28" className="sig-top sig-top--1"><circle cx="14" cy="14" r="13" fill="#b3392f"/></svg>
-          <svg viewBox="0 0 28 28" className="sig-top sig-top--2"><circle cx="14" cy="14" r="13" fill="#b3392f"/></svg>
-          <svg viewBox="0 0 24 24" className="sig-top sig-top--3"><path d="M12 2c5 2 8 7 8 12a8 8 0 1 1-16 0c0-5 3-10 8-12z" fill="#4c7a4a"/></svg>
-          <svg viewBox="0 0 24 24" className="sig-top sig-top--4"><path d="M12 2c5 2 8 7 8 12a8 8 0 1 1-16 0c0-5 3-10 8-12z" fill="#4c7a4a"/></svg>
-          <svg viewBox="0 0 20 20" className="sig-top sig-top--5"><ellipse cx="10" cy="10" rx="6" ry="9" fill="#2f2a1d"/></svg>
-          <svg viewBox="0 0 20 20" className="sig-top sig-top--6"><ellipse cx="10" cy="10" rx="6" ry="9" fill="#2f2a1d"/></svg>
-        </div>
-      );
-
-    case 'steam':
-      return (
-        <div className="sig-steam" aria-hidden="true">
-          <span className="sig-wisp sig-wisp--1" />
-          <span className="sig-wisp sig-wisp--2" />
-          <span className="sig-wisp sig-wisp--3" />
-        </div>
-      );
-
-    case 'pour':
-      return (
-        <div className="sig-pour" aria-hidden="true">
-          <div className="sig-pour__glass">
-            <div className="sig-pour__liquid" />
-          </div>
-        </div>
-      );
-
-    case 'drizzle':
-      return (
-        <svg className="sig-drizzle" viewBox="0 0 400 120" aria-hidden="true" preserveAspectRatio="none">
-          <path
-            className="sig-drizzle__path"
-            d="M10,60 C60,10 100,100 150,55 C200,15 230,95 280,50 C320,18 350,80 390,45"
-            fill="none"
-            stroke="#5a3a24"
-            strokeWidth="5"
-            strokeLinecap="round"
-          />
-        </svg>
-      );
-
-    default:
-      return null;
-  }
-};
-
-const PalateShowcase = () => {
+export default function PalateShowcase() {
   const sectionRef    = useRef(null);
-  const introRef      = useRef(null);
-  const finalRef      = useRef(null);
-  const slidesRef     = useRef([]);
-  const progressItems = useRef([]);
-  const fillRef       = useRef(null);
+  const carouselRef   = useRef(null);
+  const rafRef        = useRef(null);
+  const currentAngle  = useRef(0);   // current rendered angle
+  const targetAngle   = useRef(0);   // angle we're easing toward
+  const isDragging    = useRef(false);
+  const dragStart     = useRef(0);
+  const dragAngleStart= useRef(0);
+  const lastVelocity  = useRef(0);
+  const lastDragX     = useRef(0);
+  const autoSpin      = useRef(true);
+  const autoTimer     = useRef(null);
 
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Which card index is front-facing based on angle
+  const angleToIdx = (angle) => {
+    const norm = (((-angle % 360) + 360) % 360);
+    return Math.round(norm / CARD_ANGLE) % N;
+  };
+
+  // Intersection observer
   useEffect(() => {
-    const section = sectionRef.current;
-    const intro   = introRef.current;
-    const final   = finalRef.current;
-    if (!section || !intro || !final) return;
-
-    gsap.registerPlugin(ScrollTrigger);
-    ScrollTrigger.getAll().forEach((t) => { if (t.trigger === section) t.kill(); });
-
-    const slides      = slidesRef.current.filter(Boolean);
-    const allPanels   = [intro, ...slides, final];
-    const totalScenes = categories.length + 2;
-
-    const showScene = (scene) => {
-      allPanels.forEach((el) => el && el.classList.remove('palate-panel--visible'));
-
-      if (scene === 0) {
-        intro.classList.add('palate-panel--visible');
-
-      } else if (scene >= 1 && scene <= categories.length) {
-        const i = scene - 1;
-        if (slides[i]) slides[i].classList.add('palate-panel--visible');
-
-        const pct = ((i + 1) / categories.length) * 100;
-        if (fillRef.current) fillRef.current.style.setProperty('--fill-percent', `${pct}%`);
-        progressItems.current.forEach((ref, idx) => {
-          if (ref) ref.classList.toggle('palate-progress__item--active', idx === i);
-        });
-      } else {
-        final.classList.add('palate-panel--visible');
-      }
-    };
-
-    showScene(0);
-    if (fillRef.current) fillRef.current.style.setProperty('--fill-percent', '0%');
-
-    const st = ScrollTrigger.create({
-      trigger: section,
-      start: 'top top',
-      end: () => `+=${window.innerHeight * totalScenes}`,
-      pin: true,
-      scrub: 1,
-      invalidateOnRefresh: true,
-      onUpdate: (self) => {
-        const scene = Math.floor(Math.min(self.progress, 0.9999) * totalScenes);
-        showScene(scene);
-      },
-    });
-
-    const images = Array.from(section.querySelectorAll('img, [data-bg-img]'));
-    let loaded = 0;
-    const onImgLoad = () => { loaded += 1; if (loaded >= images.length) ScrollTrigger.refresh(); };
-    images.forEach((img) => {
-      if (img.tagName === 'IMG') {
-        if (img.complete && img.naturalHeight) onImgLoad();
-        else img.addEventListener('load', onImgLoad, { once: true });
-      } else {
-        onImgLoad();
-      }
-    });
-
-    return () => { st.kill(); };
+    const el = sectionRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => setIsVisible(e.isIntersecting), { threshold: 0.1 });
+    obs.observe(el);
+    return () => obs.disconnect();
   }, []);
 
+  // Animation loop
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const tick = () => {
+      // Auto-spin slowly
+      if (autoSpin.current && !isDragging.current) {
+        targetAngle.current -= 0.018;
+      }
+
+      // Apply momentum after drag release
+      if (!isDragging.current && Math.abs(lastVelocity.current) > 0.01) {
+        targetAngle.current += lastVelocity.current;
+        lastVelocity.current *= 0.94;
+      }
+
+      // Ease current toward target
+      currentAngle.current += (targetAngle.current - currentAngle.current) * 0.07;
+
+      // Apply to carousel
+      const el = carouselRef.current;
+      if (el) {
+        el.style.transform = `rotateY(${currentAngle.current}deg)`;
+      }
+
+      // Update active card
+      const idx = angleToIdx(currentAngle.current);
+      setActiveIdx(idx);
+
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [isVisible]);
+
+  const resumeAuto = useCallback(() => {
+    clearTimeout(autoTimer.current);
+    autoTimer.current = setTimeout(() => { autoSpin.current = true; }, 3000);
+  }, []);
+
+  // Drag / touch
+  const onPointerDown = useCallback((e) => {
+    isDragging.current   = true;
+    autoSpin.current     = false;
+    dragStart.current    = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
+    dragAngleStart.current = targetAngle.current;
+    lastDragX.current    = dragStart.current;
+    lastVelocity.current = 0;
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+  }, []);
+
+  const onPointerMove = useCallback((e) => {
+    if (!isDragging.current) return;
+    const x = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
+    const delta = x - dragStart.current;
+    targetAngle.current = dragAngleStart.current + delta * 0.28;
+    lastVelocity.current = (x - lastDragX.current) * 0.28;
+    lastDragX.current = x;
+  }, []);
+
+  const onPointerUp = useCallback(() => {
+    isDragging.current = false;
+    resumeAuto();
+  }, [resumeAuto]);
+
+  const goTo = useCallback((idx) => {
+    autoSpin.current = false;
+    // Rotate to bring idx to front
+    const current = (((-currentAngle.current % 360) + 360) % 360);
+    const target  = idx * CARD_ANGLE;
+    let diff = target - current;
+    if (diff > 180)  diff -= 360;
+    if (diff < -180) diff += 360;
+    targetAngle.current = currentAngle.current - diff;
+    resumeAuto();
+  }, [resumeAuto]);
+
+  const activeCat = categories[activeIdx];
+
   return (
-    <section className="palate-showcase" ref={sectionRef}>
-      <div className="palate-showcase__inner">
+    <section ref={sectionRef} className="ps-root">
 
-        {/* ── Intro ── */}
-        <div className="palate-showcase__intro" ref={introRef}>
-          <div className="palate-showcase__intro-copy">
-            <span className="palate-intro-eyebrow">Ohana Cafe Kitchen &amp; Terraces</span>
-            <h2 className="palate-showcase__intro-title">Our Palate Pleasers</h2>
-            <p className="palate-intro-copy">Every dish tells a story.</p>
-            <div className="palate-intro-hint">
-              <span>Scroll to explore</span>
-              <span className="palate-intro-arrow">↓</span>
-            </div>
-          </div>
-        </div>
+      {/* Ambient background that changes with active category */}
+      <div
+        className="ps-ambient"
+        style={{ background: `radial-gradient(ellipse 70% 60% at 50% 60%, ${activeCat.colorDark}55 0%, transparent 70%)` }}
+      />
 
-        {/* ── Progress sidebar ── */}
-        <aside className="palate-progress" aria-label="Menu categories">
-          <div className="palate-progress__track-wrap" aria-hidden="true">
-            <div className="palate-progress__fill" ref={fillRef} />
-          </div>
-          <ul className="palate-progress__list">
-            {categories.map((cat, i) => (
-              <li
-                key={cat.key}
-                ref={(el) => { progressItems.current[i] = el; }}
-                className="palate-progress__item"
-              >
-                <span className="palate-progress__label">{cat.title}</span>
-              </li>
-            ))}
-          </ul>
-        </aside>
+      {/* Noise grain */}
+      <div className="ps-grain" aria-hidden="true" />
 
-        {/* ── Slides : full-bleed ── */}
-        <div className="palate-showcase__slides">
+      {/* ── Header ── */}
+      <header className="ps-header">
+        <span className="ps-header__eye">Ohana Cafe Kitchen &amp; Terraces</span>
+        <h2 className="ps-header__title">
+          <span className="ps-header__title-plain">Our</span>
+          <span className="ps-header__title-accent" style={{ color: activeCat.color }}>
+            {activeCat.title}
+          </span>
+        </h2>
+        <p className="ps-header__sub" style={{ color: activeCat.color }}>{activeCat.sub}</p>
+      </header>
+
+      {/* ── 3-D carousel stage ── */}
+      <div
+        className="ps-stage"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerLeave={onPointerUp}
+      >
+        <div
+          ref={carouselRef}
+          className="ps-carousel"
+          style={{ transformStyle: 'preserve-3d' }}
+        >
           {categories.map((cat, i) => {
-            const wipe = i % 2 === 0 ? 'wipe-left' : 'wipe-right';
-            const num  = String(i + 1).padStart(2, '0');
+            const angle   = i * CARD_ANGLE;
+            const isActive = i === activeIdx;
             return (
-              <article
+              <div
                 key={cat.key}
-                className={`palate-slide palate-slide--${wipe}`}
-                ref={(el) => { slidesRef.current[i] = el; }}
+                className={`ps-card${isActive ? ' ps-card--active' : ''}`}
+                style={{
+                  transform: `rotateY(${angle}deg) translateZ(480px)`,
+                  '--accent': cat.color,
+                }}
+                onClick={() => goTo(i)}
               >
-                {/* Full-bleed image */}
-                <div className="palate-slide__media">
+                {/* Card image */}
+                <div className="ps-card__img-wrap">
                   <img
-                    loading="lazy"
                     src={cat.image}
                     alt={cat.title}
-                    className="palate-slide__img"
+                    className="ps-card__img"
+                    loading="lazy"
                   />
-                  <div className="palate-slide__scrim" />
-                  <Signature type={cat.signature} />
+                  <div className="ps-card__img-scrim" />
                 </div>
 
-                {/* Overlaid text */}
-                <div className="palate-slide__overlay">
-                  <span className="palate-slide__number">{num}</span>
-                  <div className="palate-slide__text">
-                    <span className="palate-slide__tag">{cat.accent}</span>
-                    <h3 className="palate-slide__title">{cat.title}</h3>
-                    <p className="palate-slide__description">{cat.copy}</p>
-                    <button type="button" className="palate-slide__button">
-                      <span>Explore</span>
-                      <span aria-hidden="true">→</span>
-                    </button>
-                  </div>
+                {/* Card content */}
+                <div className="ps-card__content">
+                  <span className="ps-card__sub">{cat.sub}</span>
+                  <h3 className="ps-card__title">{cat.title}</h3>
+                  <div className="ps-card__line" style={{ background: cat.color }} />
                 </div>
-              </article>
+
+                {/* Active glow border */}
+                <div className="ps-card__glow" style={{ boxShadow: `0 0 0 1.5px ${cat.color}66, 0 0 60px ${cat.color}22` }} />
+              </div>
             );
           })}
-
-          {/* Final CTA */}
-          <article className="palate-slide palate-slide--final" ref={finalRef}>
-            <div className="palate-slide__final-copy">
-              <span className="palate-slide__final-eyebrow">Jorhat's favourite terrace</span>
-              <p className="palate-slide__final-title">Ready to find your favourite?</p>
-              <button type="button" className="palate-slide__final-button">
-                <span>View Full Menu</span>
-                <span aria-hidden="true">→</span>
-              </button>
-            </div>
-          </article>
         </div>
 
+        {/* Floor reflection plane */}
+        <div className="ps-floor" />
       </div>
+
+      {/* ── Active category description ── */}
+      <div className="ps-desc">
+        <p className="ps-desc__copy" key={activeCat.key}>{activeCat.copy}</p>
+        <button className="ps-desc__btn" type="button" style={{ '--accent': activeCat.color }}>
+          <span>Explore {activeCat.title}</span>
+          <span className="ps-desc__btn-arrow">→</span>
+        </button>
+      </div>
+
+      {/* ── Dot nav ── */}
+      <nav className="ps-dots" aria-label="Menu categories">
+        {categories.map((cat, i) => (
+          <button
+            key={cat.key}
+            className={`ps-dot${i === activeIdx ? ' ps-dot--active' : ''}`}
+            style={{ '--accent': cat.color }}
+            onClick={() => goTo(i)}
+            aria-label={cat.title}
+            title={cat.title}
+          />
+        ))}
+      </nav>
+
+      {/* ── Drag hint ── */}
+      <p className="ps-drag-hint" aria-hidden="true">
+        <span className="ps-drag-hint__icon">⟵</span>
+        drag to rotate
+        <span className="ps-drag-hint__icon">⟶</span>
+      </p>
     </section>
   );
-};
-
-export default PalateShowcase;
+}
