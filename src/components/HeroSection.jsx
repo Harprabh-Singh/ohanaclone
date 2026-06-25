@@ -327,7 +327,7 @@ export default function HeroSection() {
       fontFamily: 'inherit',
     }}>
       <style>{`
-        @keyframes hz-dot-pulse {
+        @keyframes hz-dot-pulse { 
           0%,100% { box-shadow: 0 0 5px rgba(74,173,110,0.5); }
           50%      { box-shadow: 0 0 16px rgba(74,173,110,1); }
         }
@@ -463,7 +463,7 @@ export default function HeroSection() {
                 }}>tells a story.</span>
               </span>
             </h1>
-
+ 
             {/* Divider */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: isMobile ? '1.5rem' : '2rem' }}>
               <span style={{ display: 'block', width: 40, height: 1.5, background: '#c42d78', flexShrink: 0 }} />
