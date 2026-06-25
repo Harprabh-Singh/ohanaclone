@@ -437,7 +437,20 @@ const Home = () => {
               </p>
             </div>
             <FeaturedDish dish={signatureDishes[1]} />
-            <div className="mt-24">
+          </div>
+
+          {/* Carousel — same visual width as content, overflow clipped to container */}
+          <div style={{ overflow: 'hidden', marginTop: '80px', paddingBottom: '20px' }}>
+            <div className="mx-auto max-w-7xl px-5 md:px-8">
+              <div style={{ marginBottom: '28px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
+                  <div style={{ width: '32px', height: '1.5px', background: 'linear-gradient(90deg, #D4AF37, transparent)' }} />
+                  <span style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.26em', textTransform: 'uppercase', color: '#D4AF37' }}>Popular Right Now</span>
+                </div>
+                <h3 style={{ fontSize: 'clamp(1.6rem, 3vw, 2.4rem)', fontWeight: '900', color: '#FFFFFF', margin: 0, lineHeight: 1.05, letterSpacing: '-0.025em' }}>
+                  What Everyone's Ordering.
+                </h3>
+              </div>
               <SignatureCarousel items={signatureDishes} />
             </div>
           </div>
