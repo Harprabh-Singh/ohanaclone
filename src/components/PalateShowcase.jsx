@@ -227,7 +227,7 @@ export default function PalateShowcase() {
                 key={cat.key}
                 className={`ps-card${isActive ? ' ps-card--active' : ''}`}
                 style={{
-                  transform: `rotateY(${angle}deg) translateZ(480px)`,
+                  transform: `rotateY(${angle}deg) translateZ(430px)`,
                   '--accent': cat.color,
                 }}
                 onClick={() => goTo(i)}

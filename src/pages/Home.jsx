@@ -421,6 +421,15 @@ const Home = () => {
   return (
     <main className="relative overflow-hidden">
       <HeroSection />
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '0px 0 0px' }}>
+        <div style={{
+          width: '100000%',
+          maxWidth: '20000px',
+          height: '1px',
+          borderTop: '1px solid #0A2E2A',
+          borderRadius: 9,
+        }} />
+      </div>
       <PalateShowcase />
 
       {/* House Favourites */}
