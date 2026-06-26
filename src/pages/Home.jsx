@@ -421,13 +421,12 @@ const Home = () => {
   return (
     <main className="relative overflow-hidden">
       <HeroSection />
-      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '0px 0 0px' }}>
+      <div style={{ width: '100%', display: 'block' }}>
         <div style={{
-          width: '100000%',
-          maxWidth: '20000px',
+          width: '100%',
           height: '1px',
-          borderTop: '1px solid #0A2E2A',
-          borderRadius: 9,
+          background: '#0A2E2A',
+          display: 'block',
         }} />
       </div>
       <PalateShowcase />

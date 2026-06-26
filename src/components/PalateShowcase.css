@@ -17,6 +17,10 @@
   gap: 0;
   overflow: hidden;
   padding: 9.2vh 0 6.5vh;
+  /* carousel spacing control (distance from rotation center)
+     Set per-breakpoint with --carousel-radius to change horizontal spacing
+     independently of card size. */
+  --carousel-radius: 540px;
   /* Perspective on root so everything is in the same 3-D space */
   perspective: 1700px;
   perspective-origin: 50% 42%;
@@ -370,14 +374,18 @@
 /* ─── Responsive ─────────────────────────────────────────────────────── */
 
 @media (max-width: 900px) {
-  .ps-root { perspective: 1000px; }
+  .ps-root { perspective: 1200px; }
   .ps-card {
     width: 180px;
     height: 260px;
     top: -130px;
     left: -90px;
     border-radius: 16px;
+    --card-translate-z: 245px;
+    /* short-hand override for the carousel radius at this breakpoint */
+    --carousel-radius: 350px;
   }
+  .ps-floor { width: 520px; }
   /* Tighter radius on tablet */
   .ps-carousel > .ps-card {
     transform-origin: center center;
@@ -386,18 +394,50 @@
 }
 
 @media (max-width: 540px) {
-  .ps-root { perspective: 800px; padding: 5vh 0 4vh; }
-  .ps-stage { height: 260px; }
+  .ps-root { perspective: 900px; padding: 9.5vh 0 4vh; }
+  .ps-header { transform: translateY(0); margin-bottom: 2.25vh; }
+  .ps-stage { height: 248px; }
   .ps-card {
-    width: 140px;
-    height: 200px;
-    top: -100px;
-    left: -70px;
+    width: 135px;
+    height: 210px;
+    top: -80px;
+    left: -57px;
     border-radius: 12px;
+    --card-translate-z: 245px;
+    /* short-hand override for the carousel radius at this breakpoint */
+    --carousel-radius: 270px;
   }
+  .ps-floor { width: 360px; }
   .ps-header__title { font-size: clamp(2.4rem, 10vw, 3.5rem); }
   .ps-desc { padding: 0 1.5rem; }
   .ps-desc__copy { font-size: 0.9rem; }
+}
+
+@media (max-width: 420px) {
+  .ps-root { padding: 7.5vh 0 3vh; }
+  .ps-stage { height: 200px; }
+  .ps-card {
+    width: 100px;
+    height: 150px;
+    top: -52px;
+    left: -47px;
+    --card-translate-z: 220px;
+  }
+  .ps-floor { width: 280px; }
+  .ps-header__title { font-size: clamp(1.9rem, 12vw, 3rem); }
+  .ps-desc__copy { font-size: 0.85rem; }
+  .ps-desc__btn { padding: 0.65rem 1.3rem; font-size: 0.72rem; }
+  .ps-dot { width: 5px; height: 5px; }
+  .ps-dot--active { width: 18px; }
+  .ps-root { padding: 7.5vh 0 3vh; --carousel-radius: 220px; }
+  .ps-card {
+    width: 130px;
+    height: 190px;
+    top: -62px;
+    left: -47px;
+    --card-translate-z: 220px;
+    --carousel-radius: 230px;
+  }
 }
 
 /* ─── Reduced motion ─────────────────────────────────────────────────── */

@@ -1,0 +1,86 @@
+/* Hero carousel card size control via CSS variables */
+
+:root {
+  /* Hero carousel: default card dimensions (desktop) */
+  --hero-card-width: 350px;
+  --hero-card-height: 500px;
+  --hero-stage-height: 760px;
+
+  /* Hero carousel: position offsets (can adjust left/right/up/down per breakpoint) */
+  --hero-offset-x: 0px;
+  --hero-offset-y: 0px;
+}
+/* @media (max-width: 1350px) {
+  :root {
+    --hero-card-width: 300px;
+    --hero-card-height:350px;
+  }
+} */
+@media (max-width: 1450px) {
+  :root {
+    --hero-card-width: 300px;
+    --hero-card-height: 370px;
+    --hero-stage-height: 760px;
+    --hero-offset-x: 100px;
+    --hero-offset-y: 0px;
+  }
+}
+@media (max-width: 1350px) {
+  :root {
+    --hero-card-width: 300px;
+    --hero-card-height: 320px;
+    --hero-stage-height: 760px;
+    --hero-offset-x: 90px;
+    --hero-offset-y: 0px;
+  }
+}
+@media (max-width: 1150px) {
+  :root {
+    --hero-card-width: 300px;
+    --hero-card-height: 270px;
+    --hero-stage-height: 760px;
+    --hero-offset-x: 90px;
+    --hero-offset-y: 0px;
+  }
+}
+@media (max-width: 1050px) {
+  :root {
+    --hero-card-width: 270px;
+    --hero-card-height: 250px;
+    --hero-stage-height: 760px;
+    --hero-offset-x: 130px;
+    --hero-offset-y: 0px;
+  }
+}
+/* Tablet/smaller screens (max-width: 900px) */
+@media (max-width: 900px) {
+  :root {
+    --hero-card-width: 300px;
+    --hero-card-height: 230px;
+    --hero-stage-height: 420px;
+    --hero-offset-x: 0px;
+    --hero-offset-y: 0px;
+  }
+}
+
+/* Mobile (max-width: 540px) — optional: adjust further if needed */
+@media (max-width: 540px) {
+  :root {
+    --hero-card-width: 280px;
+    --hero-card-height: 210px;
+    --hero-stage-height: 380px;
+    --hero-offset-x: 0px;
+    --hero-offset-y: 0px;
+  }
+}
+
+/* Extra small (max-width: 420px) — optional: adjust further if needed */
+@media (max-width: 420px) {
+  :root {
+    --hero-card-width: 240px;
+    --hero-card-height: 200px;
+    --hero-stage-height: 320px;
+    --hero-offset-x: 0px;
+    --hero-offset-y: 0px;
+  }
+}

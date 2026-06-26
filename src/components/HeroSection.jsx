@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import './HeroSection.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -67,8 +68,8 @@ function ClockPill() {
         boxShadow: open ? '0 0 10px rgba(74,173,110,0.9)' : 'none',
         animation: open ? 'hz-dot-pulse 2s ease-in-out infinite' : 'none',
       }} />
-      <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.01em' }}>{time}</span>
-      <span style={{ fontSize: '0.57rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)', fontWeight: 600 }}>
+      <span style={{ fontSize: '0.78rem',alignItems: 'center', fontWeight: 800, color: '#fff', letterSpacing: '-0.01em' }}>{time}</span>
+      <span style={{ fontSize: '0.57rem',alignItems: 'center', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)', fontWeight: 600 }}>
         {open ? "We're open" : 'Opens 11 AM'}
       </span>
     </div>
@@ -76,7 +77,7 @@ function ClockPill() {
 }
 
 /* ── 3D Carousel ────────────────────────────────────────────────── */
-function DishCarousel({ stageHeight = 420, cardWidth = 320, isMobile = false }) {
+function DishCarousel({ stageHeight = 420, cardWidth = 320, cardHeight = 500, isMobile = false }) {
   const [active, setActive] = useState(0);
   const autoRef = useRef(null);
   const dragStart = useRef(null);
@@ -105,6 +106,7 @@ function DishCarousel({ stageHeight = 420, cardWidth = 320, isMobile = false }) 
       top: '50%',
       width: `${cardWidth}px`,
       marginLeft: `${-cardWidth / 2}px`,
+      minHeight: `${cardHeight + 132}px`,
       marginTop: '-210px',
       borderRadius: '24px',
       overflow: 'hidden',
@@ -152,7 +154,7 @@ function DishCarousel({ stageHeight = 420, cardWidth = 320, isMobile = false }) 
         {CARDS.map((c, i) => (
           <div key={i} style={cardStyle(i)} onClick={() => { if (i !== active) { setActive(i); startAuto(); } }}>
             {/* Image */}
-            <div style={{ height: isMobile ? '240px' : '500px', overflow: 'hidden', position: 'relative' }}>
+            <div style={{ height: `${cardHeight}px`, overflow: 'hidden', position: 'relative' }}>
               <img src={c.img} alt={c.dish}
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.5s ease' }}
                 onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.08)'}
@@ -245,6 +247,9 @@ export default function HeroSection() {
   const statsRef = useRef(null);
   const clockRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [carouselWidth, setCarouselWidth] = useState(400);
+  const [carouselHeight, setCarouselHeight] = useState(760);
+  const [carouselCardHeight, setCarouselCardHeight] = useState(500);
   const mouse    = useRef({ nx: 0, ny: 0 });
   const lerp     = useRef({ x: 0, y: 0 });
   const rafRef   = useRef(null);
@@ -296,6 +301,19 @@ export default function HeroSection() {
       }
     };
   }, []);
+
+  /* Read carousel dimensions and position offsets from CSS variables */
+  useEffect(() => {
+    const readCSSVar = (varName, fallback) => {
+      if (typeof window === 'undefined') return fallback;
+      const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+      if (!value) return fallback;
+      return parseInt(value, 10);
+    };
+    setCarouselWidth(readCSSVar('--hero-card-width', 400));
+    setCarouselCardHeight(readCSSVar('--hero-card-height', 500));
+    setCarouselHeight(readCSSVar('--hero-stage-height', 760));
+  }, [isMobile]);
 
   /* Mouse parallax */
   useEffect(() => {
@@ -389,10 +407,13 @@ export default function HeroSection() {
       <div ref={clockRef} style={{
         position: 'absolute',
         top: isMobile ? 98 : 84,
-        left: '50%',
-        transform: 'translateX(-50%)',
+        left: 0,
+        right: 0,
         zIndex: 40,
         opacity: 0,
+        display: 'flex',
+        justifyContent: 'center',
+        pointerEvents: 'none',
       }}>
         <ClockPill />
       </div>
@@ -482,8 +503,8 @@ export default function HeroSection() {
         </div>
 
         {/* RIGHT */}
-        <div ref={rightRef} style={{ gridArea: 'right', padding: isMobile ? '1.5rem 5vw 0' : '-50px 2vw 0 0', opacity: 0, justifySelf: isMobile ? 'center' : 'start', width: isMobile ? '100%' : 'auto' }}>
-          <DishCarousel stageHeight={isMobile ? 420 : 760} cardWidth={isMobile ? 300 : 400} isMobile={isMobile} />
+        <div ref={rightRef} style={{ position: 'relative', gridArea: 'right', padding: isMobile ? '1.5rem 5vw 0' : '-50px 2vw 0 0', opacity: 0, justifySelf: isMobile ? 'center' : 'start', width: isMobile ? '100%' : 'auto', left: 'var(--hero-offset-x, 0px)', top: 'var(--hero-offset-y, 0px)' }}>
+          <DishCarousel stageHeight={carouselHeight} cardWidth={carouselWidth} cardHeight={carouselCardHeight} isMobile={isMobile} />
         </div>
 
         {/* LEFT BOTTOM */}
@@ -534,7 +555,7 @@ export default function HeroSection() {
               { val: '3 Yrs', lbl: 'In Jorhat' },
             ].map((s, i) => (
               <div key={i} style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 3, padding: `0 ${i === 0 ? '1.3rem 0 0' : '1.3rem'}`, textAlign: isMobile ? 'center' : 'left' }}>
-                <strong style={{ fontSize: '0.88rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>{s.val}</strong>
+                <strong style={{ fontSize: '1.88rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>{s.val}</strong>
                 <span style={{ fontSize: '0.57rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', fontWeight: 500 }}>{s.lbl}</span>
                 {i < 2 && !isMobile && <div style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', width: 1, height: '1.8rem', background: 'rgba(255,255,255,0.1)' }} />}
               </div>
