@@ -149,11 +149,11 @@ const StorySection = () => {
         </div>
       </div>
 
-      <style>{`
+      {/* <style>{`
         @media (max-width: 900px) {
           .story-grid { grid-template-columns: 1fr !important; gap: 60px !important; }
         }
-      `}</style>
+      `}</style> */}
     </section>
   );
 };

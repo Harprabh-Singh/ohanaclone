@@ -59,7 +59,7 @@ import { useRef } from 'react';
 import { useLoader, useFrame } from '@react-three/fiber';
 import { TextureLoader, SRGBColorSpace, MathUtils } from 'three';
 
-import cup5Url from './models/satellites/cup5.png';
+import { CUP_CONFIG_BY_ID } from './cupConfig';
 
 const CUP5_ASPECT = 445 / 523;
 const ROTATION    = [0, 0, -0.15];
@@ -136,78 +136,82 @@ const RISEN_SCALE_SMALL  = RISEN_SCALE * SMALL_SCALE_FACTOR; // ≈ 1.704
 
 const MESH_OFFSET_X_SMALL = MESH_OFFSET_X * SMALL_SCALE_FACTOR; // ≈ 0.211
 
+// Easy fixed controls for the main cup below 700px.
+// Edit these values only — no interpolation, so the cup stays pinned
+// inside each breakpoint band as the viewport changes.
+const MOBILE_CUP_LAYOUT_600_700 = {
+  idleY: -0.87,
+  idleScale: IDLE_SCALE * 0.481,
+  risenY: 0.24,
+  risenScale: RISEN_SCALE * 0.65,
+  meshOffsetX: -0.02,
+};
+
+const MOBILE_CUP_LAYOUT_300_599 = {
+  idleY: -0.15,
+  idleScale: IDLE_SCALE * 0.62,
+  risenY: 0.20,
+  risenScale: RISEN_SCALE * 0.54,
+  meshOffsetX: 0.0,
+};
+
+function getMainCupLayout(width) {
+  if (width >= 700) {
+    return {
+      idleY: IDLE_Y,
+      idleScale: IDLE_SCALE,
+      risenY: RISEN_Y,
+      risenScale: RISEN_SCALE,
+      meshOffsetX: MESH_OFFSET_X,
+    };
+  }
+
+  if (width >= 600) {
+    return MOBILE_CUP_LAYOUT_600_700;
+  }
+
+  return MOBILE_CUP_LAYOUT_300_599;
+}
+
 export default function MainCupImage({ scrollProgress, freezeCupsRef, tRef, tMidRef, t2Ref }) {
-  const texture = useLoader(TextureLoader, cup5Url);
+  const cfg = CUP_CONFIG_BY_ID.cup5;
+  const texture = useLoader(TextureLoader, cfg.url);
   if (texture.colorSpace !== SRGBColorSpace) texture.colorSpace = SRGBColorSpace;
 
-  // Resolve the CORRECT idle Y/scale for the current viewport right at
-  // mount time (not the raw desktop IDLE_Y/IDLE_SCALE constants). Without
-  // this, currentY/currentSc/the initial <group> position all started at
-  // the desktop value regardless of actual screen size — on mobile, the
-  // lerp toward the real (much higher/smaller) mobile idle position took
-  // several frames to catch up, which read as the cup "moving up then
-  // snapping to its real starting position" on every fresh scroll-start
-  // (initial page load, or returning to this section after scrolling
-  // away and back). Resolving once here means the very first rendered
-  // frame is already correct — no catch-up lerp needed.
-  const resolveInitialIdle = () => {
-    const t    = tRef?.current    ?? 0;
-    const tMid = tMidRef?.current ?? 0;
-    const t2   = t2Ref?.current   ?? 0;
-    let y     = MathUtils.lerp(IDLE_Y,     IDLE_Y_MOBILE,     t);
-    let scale = MathUtils.lerp(IDLE_SCALE, IDLE_SCALE_MOBILE, t);
-    if (tMid) {
-      y     = MathUtils.lerp(y,     IDLE_Y_MID_MOBILE,     tMid);
-      scale = MathUtils.lerp(scale, IDLE_SCALE_MID_MOBILE, tMid);
-    }
-    if (t2) {
-      y     = MathUtils.lerp(y,     IDLE_Y_SMALL,     t2);
-      scale = MathUtils.lerp(scale, IDLE_SCALE_SMALL, t2);
-    }
-    return { y, scale };
+  const BASE_HEIGHT = 1.205;
+  const BASE_WIDTH = BASE_HEIGHT * CUP5_ASPECT;
+
+  const resolveInitial = () => {
+    const width = typeof window !== 'undefined' ? window.innerWidth : 1400;
+    const layout = getMainCupLayout(width);
+
+    return {
+      y: layout.idleY,
+      scale: layout.idleScale,
+      meshOffsetX: layout.meshOffsetX,
+    };
   };
 
   const groupRef   = useRef(null);
   const meshRef    = useRef(null);
-  const initialIdle = useRef(resolveInitialIdle());
+  const initialIdle = useRef(resolveInitial());
   const currentY   = useRef(initialIdle.current.y);
   const currentSc  = useRef(initialIdle.current.scale);
 
   useFrame(() => {
     if (!groupRef.current) return;
 
-    const t    = tRef?.current    ?? 0;
-    const tMid = tMidRef?.current ?? 0;
-    const t2   = t2Ref?.current   ?? 0;
+    const width = typeof window !== 'undefined' ? window.innerWidth : 1400;
+    const layout = getMainCupLayout(width);
 
-    // Stage 1: desktop → mobile (floors at width<=700px)
-    let idleY       = MathUtils.lerp(IDLE_Y,          IDLE_Y_MOBILE,        t);
-    let idleScale   = MathUtils.lerp(IDLE_SCALE,       IDLE_SCALE_MOBILE,    t);
-    let risenY      = MathUtils.lerp(RISEN_Y,          RISEN_Y_MOBILE,       t);
-    let risenScale  = MathUtils.lerp(RISEN_SCALE,      RISEN_SCALE_MOBILE,   t);
-    let meshOffsetX = MathUtils.lerp(MESH_OFFSET_X,    MESH_OFFSET_X_MOBILE, t);
+    const idleY = layout.idleY;
+    const idleScale = layout.idleScale;
+    const risenY = layout.risenY;
+    const risenScale = layout.risenScale;
+    const meshOffsetX = layout.meshOffsetX;
 
-    // Stage 2: mobile → mid-mobile (600–700px band)
-    if (tMid) {
-      idleY       = MathUtils.lerp(idleY,       IDLE_Y_MID_MOBILE,        tMid);
-      idleScale   = MathUtils.lerp(idleScale,   IDLE_SCALE_MID_MOBILE,    tMid);
-      risenY      = MathUtils.lerp(risenY,      RISEN_Y_MID_MOBILE,       tMid);
-      risenScale  = MathUtils.lerp(risenScale,  RISEN_SCALE_MID_MOBILE,   tMid);
-      meshOffsetX = MathUtils.lerp(meshOffsetX, MESH_OFFSET_X_MID_MOBILE, tMid);
-    }
+    if (meshRef.current) meshRef.current.position.x = meshOffsetX;
 
-    // Stage 3: mid-mobile → small-mobile (0 at width>=700px, 1 at width<=300px)
-    if (t2) {
-      idleY       = MathUtils.lerp(idleY,       IDLE_Y_SMALL,            t2);
-      idleScale   = MathUtils.lerp(idleScale,   IDLE_SCALE_SMALL,        t2);
-      risenY      = MathUtils.lerp(risenY,      RISEN_Y_SMALL,           t2);
-      risenScale  = MathUtils.lerp(risenScale,  RISEN_SCALE_SMALL,       t2);
-      meshOffsetX = MathUtils.lerp(meshOffsetX, MESH_OFFSET_X_SMALL,     t2);
-    }
-
-    if (meshRef.current) {
-      meshRef.current.position.x = meshOffsetX;
-    }
 
     // Consume freeze signal — snap to idle, no lerp
     if (freezeCupsRef?.current) {
@@ -221,42 +225,29 @@ export default function MainCupImage({ scrollProgress, freezeCupsRef, tRef, tMid
     }
 
     const p = scrollProgress.current;
-    const clock = performance.now() / 1000; // clock in seconds
+    const clock = performance.now() / 1000;
 
-    // Rise curve: 0 → 1 over the FULL scroll range (0 → 1). Previously
-    // this clamped at p/0.78, meaning the cup reached its fully-risen
-    // pose at 78% scroll and then sat motionless for the remaining 22%
-    // — that dead zone read as an abrupt stop/snap once scroll passed
-    // ~78%. Now the ease-out-quad curve runs across the entire scroll
-    // range, so motion keeps gently settling all the way to 100%
-    // instead of hitting a hard plateau partway through.
     const scrollT = p;
-    const easedT  = 1 - Math.pow(1 - scrollT, 2); // ease-out-quad
+    const easedT  = 1 - Math.pow(1 - scrollT, 2);
 
     const targetY  = MathUtils.lerp(idleY,  risenY,  easedT);
     const targetSc = MathUtils.lerp(idleScale, risenScale, easedT);
 
-    // Smooth follow (same lerp factor as before)
     currentY.current  = MathUtils.lerp(currentY.current,  targetY,  0.06);
     currentSc.current = MathUtils.lerp(currentSc.current, targetSc, 0.06);
 
-    // X stays centered — no dock-to-left
     groupRef.current.position.x = 0;
     groupRef.current.position.y = currentY.current;
     groupRef.current.scale.setScalar(currentSc.current);
 
-    // Idle float bob: fades out as scroll increases (same as before)
     const floatAmp = 1 - Math.min(p / 0.35, 1);
     groupRef.current.position.y = currentY.current + Math.sin(clock * 0.5) * 0.04 * floatAmp;
   });
 
-  const height = 1.205;
-  const width  = height * CUP5_ASPECT;
-
   return (
     <group ref={groupRef} position={[0, initialIdle.current.y, 0]} scale={initialIdle.current.scale}>
-      <mesh ref={meshRef} position={[MESH_OFFSET_X, height / 2, 0]} rotation={ROTATION}>
-        <planeGeometry args={[width, height]} />
+      <mesh ref={meshRef} position={[initialIdle.current.meshOffsetX, BASE_HEIGHT / 2, 0]} rotation={ROTATION}>
+        <planeGeometry args={[BASE_WIDTH, BASE_HEIGHT]} />
         <meshBasicMaterial
           map={texture}
           transparent

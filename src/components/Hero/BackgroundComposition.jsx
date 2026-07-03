@@ -104,7 +104,7 @@ import p12Url from './models/satellites/particles/p12.png';
  * DOM content regardless of aria-hidden.
  */
 const DISH_ITEMS = [
-  { id: 'cup1', url: cup1Url, alt: 'Pizza',  left: 8.37,  top: 19.99, width: 30.40, height: 45.50, opacity: 0.90, depth: -0.55 },
+  { id: 'cup1', url: cup1Url, alt: 'Pizza',  left: 80.37,  top: 19.99, width: 30.40, height: 45.50, opacity: 0.90, depth: -0.55 },
   { id: 'cup2', url: cup2Url, alt: 'Burger', left: 89.69, top: 23.86, width: 32.53, height: 40.66, opacity: 0.85, depth: -0.50 },
   { id: 'cup3', url: cup3Url, alt: 'Cake',   left: 11.28, top: 82.91, width: 27.11, height: 33.88, opacity: 0.78, depth: -0.45 },
   { id: 'cup4', url: cup4Url, alt: 'Fries',  left: 86.79, top: 85.82, width: 20.14, height: 25.17, opacity: 0.65, depth: -0.40 },
@@ -140,18 +140,30 @@ function blurFor(depth) {
   return +(t * 1.1).toFixed(2);
 }
 
+// `data-id` on the <img> (added for the 600–700px layout pass) lets
+// Hero.css target individual dish items with breakpoint-scoped
+// overrides (e.g. repositioning cup1-4 for a tighter/looser frame
+// around the cup at a specific width) without touching the shared
+// left/top/width/height numbers above, which still drive every other
+// sub-700px tier.
 function BgImage({ item }) {
   const blur = blurFor(item.depth);
+  const left = `var(--oh4-edit-image-${item.id}-left, ${item.left}%)`;
+  const top = `var(--oh4-edit-image-${item.id}-top, ${item.top}%)`;
+  const width = `var(--oh4-edit-image-${item.id}-width, ${item.width}vh)`;
+  const height = `var(--oh4-edit-image-${item.id}-height, ${item.height}vh)`;
+
   return (
     <img
       src={item.url}
       alt={item.alt}
       className="oh5-bg-item"
+      data-id={item.id}
       style={{
-        left: `${item.left}%`,
-        top: `${item.top}%`,
-        width: `${item.width}vh`,
-        height: `${item.height}vh`,
+        left,
+        top,
+        width,
+        height,
         opacity: item.opacity,
         filter: blur > 0 ? `blur(${blur}px)` : 'none',
         zIndex: Math.round((item.depth + 1.5) * 10), // more negative depth → lower z-index

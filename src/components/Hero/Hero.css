@@ -175,6 +175,54 @@
 
 @media (max-width: 700px) {
   .oh5-bg-composition { display: block; }
+
+  .oh4-hero {
+    --oh4-catbar-top-offset: 0px;
+    --oh4-catbar-padding-bottom: 0px;
+  }
+
+  .oh4-hero-para,
+  .oh4-hero-ctas,
+  .oh4-cat-bar {
+    position: absolute;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .oh4-hero-para,
+  .oh4-hero-ctas {
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    justify-content: center;
+  }
+
+  .oh4-cat-bar {
+    top: calc(
+      var(--oh4-head-h, 0px)
+      + var(--oh4-cup-h, 0px)
+      + var(--oh4-para-h, 0px)
+      + var(--oh4-cta-h, 0px)
+      + var(--oh4-catbar-top-offset)
+    );
+    padding-bottom: var(--oh4-catbar-padding-bottom);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 10px;
+  }
+
+  .oh4-cat-item {
+    flex: 0 0 auto;
+    min-width: 90px;
+  }
+
+  .oh4-canvas-wrap {
+    z-index: 11;
+  }
+
+  .oh4-text-layer {
+    z-index: 10;
+  }
 }
 
 /* ── CANVAS ─────────────────────────────────────────────── */
@@ -183,6 +231,18 @@
   inset: 0;
   z-index: 1;
   will-change: transform;
+}
+@media (max-width: 700px) {
+  .oh4-canvas-wrap {
+    z-index: 9999 !important;
+  }
+  .oh4-canvas-wrap canvas {
+    position: relative !important;
+    z-index: 9999 !important;
+  }
+  .oh4-text-layer {
+    z-index: 10 !important;
+  }
 }
 .oh4-canvas-wrap canvas {
   width: 100% !important;
@@ -775,7 +835,13 @@
   .oh4-left-col   { width: clamp(320px, 42vw, 520px); }
 }
 
-@media (max-width: 900px) {
+/* Mobile: tighten layout and ensure category bar + text are visible
+   and centered for viewports below 700px. Fixes disappearing
+   category bar (was pushed off-screen by fixed min-widths and the
+   menu panel) and improves text/image placement. */
+
+
+/* @media (max-width: 900px) {
   .oh4-menu-panel {
     right: auto; left: 0; width: 100%;
     top: auto; bottom: clamp(72px, 10vh, 90px);
@@ -793,25 +859,25 @@
        in the 701-900px band, which is the gap that produced
        left-aligned text on devices reporting a logical width just
        above 700px (common on several phones depending on OS/zoom). */
-    align-items: center;
+    /* align-items: center;
     text-align: center;
   }
   .oh4-eyebrow    { justify-content: center; }
   .oh4-headline   { align-items: center; }
   .oh4-stamp      { top: clamp(74px, 11vh, 96px); }
-}
+}  */
 
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   .oh4-left-col {
     width: 100%;
     padding: 0 clamp(20px, 6vw, 32px);
     padding-top: clamp(90px, 16vh, 130px);
-    justify-content: flex-start;
+    justify-content: flex-start; */
     /* Same centering fix as the 900px tier above — this block
        previously reset width/padding/justify-content but never
        re-asserted centering, so it silently fell back to the base
        desktop left-aligned default. */
-    align-items: center;
+    /* align-items: center;
     text-align: center;
   }
   .oh4-eyebrow    { justify-content: center; }
@@ -822,7 +888,7 @@
   .oh4-stamp      { display: none; }
   .oh4-flourish   { display: none; }
   .oh4-menu-grid  { grid-template-columns: 1fr 1fr; }
-}
+} */
 
 @media (max-width: 600px) {
   .oh4-stat-divider:nth-child(6),
@@ -874,184 +940,7 @@
    computed with the same running-offset variables as the text zones,
    keeping all four in lockstep even though they're not DOM siblings.
    ═══════════════════════════════════════════════════════════ */
-@media (max-width: 700px) {
-  .oh4-hero {
-    min-height: 100svh;
-    height: 100svh;
-    --oh4-head-h: clamp(180px, 24vh, 320px);  /* eyebrow + 3-line headline zone */
-    --oh4-cup-h:  clamp(220px, 32vh, 320px);  /* cup/canvas zone */
-    --oh4-para-h: clamp(96px, 16vh, 132px);  /* 3-line paragraph zone */
-    --oh4-cta-h:  clamp(96px, 15vh, 130px);  /* CTAs zone — needed now that
-                                                 Zone 5 sits after it; see
-                                                 Zone 5 comment below for why
-                                                 this budget was split out */
-    
-    /* HEADLINE (Zone 1) */
-    --oh4-head-top-offset: 0px;
-    --oh4-head-left-offset: clamp(0px, 8vw, 110px);
-    --oh4-head-padding-top: clamp(36px, 8vh, 60px);
-    --oh4-head-padding-x: clamp(20px, 6vw, 32px);
-    
-    /* CANVAS/CUP (Zone 2) */
-    --oh4-cup-top-offset: 0px;
-    
-    /* PARAGRAPH (Zone 3) */
-    --oh4-para-top-offset: 0px;
-    --oh4-para-left-offset: 0px;
-    --oh4-para-max-width: min(32ch, 88vw);
-    --oh4-para-font-size: clamp(12px, 1.8vw, 13px);
-    --oh4-para-padding-x: clamp(20px, 6vw, 36px);
-    
-    /* CTAs (Zone 4) */
-    --oh4-cta-top-offset: 0px;
-    --oh4-cta-left-offset: 0px;
-    --oh4-cta-gap: clamp(8px, 1.6vh, 10px);
-    --oh4-cta-max-width: min(300px, 82vw);
-    --oh4-cta-padding-bottom: clamp(14px, 2.6vh, 22px); /* reduced — Zone 5
-      now follows, so this only needs to separate CTAs from the cat-bar,
-      not reach the bottom of the screen the way it used to as the last
-      zone (see --oh4-catbar-padding-bottom below for that job now) */
 
-    /* CATEGORY BAR (Zone 5 — new) */
-    --oh4-catbar-top-offset: 0px;
-    --oh4-catbar-max-width: min(380px, 90vw);
-    --oh4-catbar-padding-bottom: clamp(20px, 4vh, 36px);
-  }
-
-  /* Zone 1: eyebrow + headline — top-anchored, fixed pixel height */
-  .oh4-left-col {
-    position: absolute;
-    left: var(--oh4-head-left-offset);
-    right: 0;
-    top: var(--oh4-head-top-offset);
-    height: var(--oh4-head-h);
-    width: 100%;
-    padding: var(--oh4-head-padding-top) var(--oh4-head-padding-x) 0;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    text-align: center;
-    gap: 0;
-  }
-
-  .oh4-eyebrow { justify-content: center; margin-bottom: clamp(10px, 1.6vh, 16px); }
-
-  .oh4-headline { align-items: center; }
-  .oh4-hl-line1, .oh4-hl-line2 {
-    font-size: clamp(26px, 8vw, 38px);
-    text-align: center;
-  }
-  .oh4-hl-line3 {
-    font-size: clamp(30px, 9vw, 44px);
-    text-align: center;
-  }
-  .oh4-headline::after { margin-left: auto; margin-right: auto; }
-
-  /* Zone 2: cup — starts exactly where zone 1 ends. Deliberately spans
-     the FULL remaining hero height (not just --oh4-cup-h) via inset:0 +
-     top:0 + height:100% — the satellite scatter layer (cupConfig.js's
-     mobileScatterPos, rendered only when SatelliteCups is in scatterMode)
-     uses this extra vertical room to extend up behind the headline and
-     down behind the paragraph/CTAs, matching the reference's overlapping
-     composition. Zone 2's own --oh4-cup-h budget is still what every
-     zone BELOW it adds into its top offset, so the additive stacking
-     for zones 3/4/5 is unaffected by the canvas painting outside that
-     budget — only the canvas's own visual bounds are wider than the box
-     used for layout math.
-   */
-  .oh4-canvas-wrap {
-    inset: 0;
-    top: 0;
-    height: 100%;
-  }
-
-  /* Zone 3: paragraph — starts exactly where zone 2 ends */
-  .oh4-hero-para {
-    position: absolute;
-    left: var(--oh4-para-left-offset);
-    right: auto;
-    top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-top-offset));
-    height: var(--oh4-para-h);
-    width: 100%;
-    margin: 0;
-    padding: 0 var(--oh4-para-padding-x);
-    text-align: center;
-    max-width: var(--oh4-para-max-width);
-    font-size: var(--oh4-para-font-size);
-    margin-left: auto;
-    margin-right: auto;
-    pointer-events: none;
-  }
-
-  /* Zone 4: CTAs — starts exactly where zone 3 ends. No `bottom`
-     anchor anywhere in this block (mixing top+bottom on the same
-     absolutely-positioned element is what caused the previous
-     overlap bug — see history). Sized by its own content + padding,
-     not pinned to the section's bottom edge. */
-  .oh4-hero-ctas {
-    position: absolute;
-    left: var(--oh4-cta-left-offset);
-    right: 0;
-    top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-h) + var(--oh4-cta-top-offset));
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--oh4-cta-gap);
-    width: calc(100% - clamp(48px, 14vw, 72px));
-    max-width: var(--oh4-cta-max-width);
-    margin: 0 auto;
-    padding-bottom: var(--oh4-cta-padding-bottom);
-    pointer-events: auto;
-  }
-  .oh4-cta-gold, .oh4-cta-outline {
-    justify-content: center;
-    width: 100%;
-  }
-  .oh4-cta-outline { display: inline-flex; } /* re-show — hidden at 480px previously */
-
-  /* Zone 5: category bar — starts exactly where zone 4 ends. Brought
-     back for the reference-matched mobile layout (the "What's Calling
-     You Today" equivalent — see Hero.jsx's CAT_BAR array, already
-     populated, previously just hidden here). Restyled from its desktop
-     row-flex treatment to a centered, contained block: same glass-panel
-     visual language, but laid out for a narrow stacked column instead
-     of sitting inline next to a wide left-col. pointer-events stays
-     auto since these items are non-interactive display-only on this
-     screen (no onClick in CAT_BAR's current usage in Hero.jsx), but
-     auto costs nothing and keeps the option open if that changes. */
-  .oh4-cat-bar {
-    display: flex;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-h) + var(--oh4-cta-h) + var(--oh4-catbar-top-offset));
-    margin: 0 auto;
-    width: calc(100% - clamp(40px, 12vw, 64px));
-    max-width: var(--oh4-catbar-max-width);
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    gap: clamp(6px, 1.6vw, 12px);
-    padding: clamp(12px, 2vh, 16px) clamp(10px, 2vw, 14px);
-    padding-bottom: var(--oh4-catbar-padding-bottom);
-  }
-  .oh4-cat-bar .oh4-cat-item { flex: 0 1 auto; }
-  .oh4-cat-bar .oh4-cat-name { font-size: 9px; }
-  .oh4-cat-bar .oh4-cat-sub  { display: none; } /* sub-labels too tight
-    at this width across 6 items — name + icon alone reads cleanly,
-    matching the reference's icon+single-label treatment */
-
-  /* Stamp, flourish, stats bar — still not part of this screen's
-     design language; only the cat-bar comes back (Zone 5 above). */
-  .oh4-stamp      { display: none; }
-  .oh4-flourish   { display: none; }
-  .oh4-stats-bar  { display: none; }
-
-  /* Menu panel (post-scroll) still takes the full screen on its
-     own — bottom-anchored rule from the 900px breakpoint already
-     applies and continues to work once scroll starts */
-  .oh4-menu-panel { bottom: clamp(56px, 9vh, 76px); }
-
-  .oh4-scroll-hint { bottom: 10px; }
-}
 
 /* ═══════════════════════════════════════════════════════════
    SUB-700px TIERS — only the --oh4-*-h pixel budgets and font/spacing
@@ -1069,57 +958,331 @@
 
 /* ── 600–700px ── */
 @media (max-width: 700px) and (min-width: 601px) {
+  .oh4-canvas-wrap canvas {
+    transform: scale(var(--oh4-cup-visual-scale));
+    transform-origin: 50% 50%;
+    position: relative !important;
+    z-index: 9999 !important;
+  }
+  .oh4-canvas-wrap {
+    top: 0;
+    height: 100%;
+    z-index: 9999 !important;
+  }
+  .oh4-text-layer {
+    z-index: 10 !important;
+  }
   .oh4-hero {
-    --oh4-head-h: clamp(300px, 42vh, 370px);
+    --oh4-head-h: clamp(30px, 42vh, 370px);
     --oh4-cup-h:  clamp(180px, 26vh, 220px);
     --oh4-para-h: clamp(92px, 14vh, 110px);
-    
-    /* HEADLINE — adjust position, size, padding */
-    --oh4-head-top-offset: 0px;
-    --oh4-head-left-offset: clamp(90px, 16vw, 175px);
-    --oh4-head-padding-top: clamp(34px, 8vh, 60px);
-    --oh4-head-padding-x: clamp(20px, 6vw, 30px);
-    --oh4-hl-line1-size: clamp(30px, 6.2vw, 34px);
-    --oh4-hl-line3-size: clamp(32px, 7vw, 38px);
-    --oh4-eyebrow-size: 10px;
-    --oh4-eyebrow-gap: 10px;
-    --oh4-eyebrow-margin-bottom: clamp(10px, 1.6vh, 16px);
-    --oh4-eyebrow-margin-left: clamp(10px, 1.6vh, 16px);
-    --oh4-eyebrow-margin-right: 10px;
+    text-align: center;
 
-    /* CANVAS/CUP — adjust offset */
-    --oh4-cup-top-offset: clamp(-48px, -5vh, -40px);
-    
-    /* PARAGRAPH — adjust freely */
-    --oh4-para-top-offset: clamp(-8px, -1vh, -5px);
-    --oh4-para-left-offset: clamp(0px, 1vw, 5px);
-    --oh4-para-max-width: min(32ch, 88vw);
-    --oh4-para-font-size: clamp(12.5px, 2vw, 13.5px);
-    --oh4-para-padding-x: clamp(20px, 6vw, 36px);
-    
-    /* CTAs — adjust */
-    --oh4-cta-top-offset: 0px;
-    --oh4-cta-left-offset: clamp(0px, 3vw, 30px);
-    --oh4-cta-gap: clamp(8px, 1.5vh, 10px);
-    --oh4-cta-max-width: min(250px, 82vw);
-    --oh4-cta-padding-bottom: clamp(14px, 2.6vh, 22px);
-    --oh4-cta-h: clamp(86px, 13.5vh, 116px);
+    /* EASY EDIT SECTION — change only these values for text layout */
+    --oh4-edit-headline-top: -200px;
+    --oh4-edit-headline-left: clamp(180px, 16vw, 175px);
+    /* --oh4-edit-headline-padding-top: clamp(34px, 8vh, 60px); */
+    --oh4-edit-headline-padding-x: clamp(20px, 6vw, 30px);
+    --oh4-edit-headline1-size: clamp(40px, 6.2vw, 34px);
+    --oh4-edit-headline3-size: clamp(40px, 7vw, 38px);
+    --oh4-edit-eyebrow-size: 10px;
+    --oh4-edit-eyebrow-gap: 10px;
+    --oh4-edit-eyebrow-margin-bottom: clamp(10px, 1.6vh, 16px);
+    --oh4-edit-eyebrow-margin-left: clamp(200px, 1.6vh, 16px);
+    --oh4-edit-eyebrow-margin-right: 100px;
+    --oh4-edit-paragraph-top-offset: clamp(170px, 0.6vh, 8px);
+    --oh4-edit-paragraph-left: clamp(0px, 1vw, 5px);
+    --oh4-edit-paragraph-max-width: min(32ch, 88vw);
+    --oh4-edit-paragraph-font-size: clamp(17.5px, 2vw, 13.5px);
+    --oh4-edit-paragraph-padding-x: clamp(20px, 6vw, 36px);
+    --oh4-edit-cta-top-offset: clamp(180px, 2.2vh, 20px);
+    --oh4-edit-cta-left: clamp(0px, 3vw, 30px);
+    --oh4-edit-cta-gap: clamp(8px, 1.5vh, 10px);
+    --oh4-edit-cta-max-width: min(250px, 82vw);
+    --oh4-edit-cta-padding-bottom: clamp(22px, 4vh, 32px);
+    --oh4-edit-catbar-top-offset: clamp(1000px, 2vh, 18px);
+    --oh4-edit-catbar-padding-bottom: clamp(18px, 3.6vh, 30px);
 
-    /* CATEGORY BAR (Zone 5) */
-    --oh4-catbar-padding-bottom: clamp(18px, 3.6vh, 30px);
+    /* internal layout variables — keep these unless you want to change the structure */
+    --oh4-head-top-offset: var(--oh4-edit-headline-top);
+    --oh4-head-left-offset: var(--oh4-edit-headline-left);
+    --oh4-head-padding-top: var(--oh4-edit-headline-padding-top);
+    --oh4-head-padding-x: var(--oh4-edit-headline-padding-x);
+    --oh4-hl-line1-size: var(--oh4-edit-headline1-size);
+    --oh4-hl-line3-size: var(--oh4-edit-headline3-size);
+    --oh4-eyebrow-size: var(--oh4-edit-eyebrow-size);
+    --oh4-eyebrow-gap: var(--oh4-edit-eyebrow-gap);
+    --oh4-eyebrow-margin-bottom: var(--oh4-edit-eyebrow-margin-bottom);
+    --oh4-eyebrow-margin-left: var(--oh4-edit-eyebrow-margin-left);
+    --oh4-eyebrow-margin-right: var(--oh4-edit-eyebrow-margin-right);
+    --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
+    --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
+    --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
+    --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
+    --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
+    --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
+    --oh4-cta-left-offset: var(--oh4-edit-cta-left);
+    --oh4-cta-gap: var(--oh4-edit-cta-gap);
+    --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
+    --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
+    --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
+    --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
+
+    /* CANVAS/CUP — pulled further up than the base <700px block so the
+       cup sits closer to the headline (was reading as too low/floating
+       in the middle of a tall gap). --oh4-cup-visual-scale below zooms
+       the cup ~20% larger purely as a CSS transform on the canvas
+       WRAPPER (not the Three.js group/scale in MainCupImage.jsx) — the
+       GSAP rise/dock animation and its own internal scale math are
+       untouched; this only magnifies the already-rendered pixels. */
+    --oh4-cup-top-offset: clamp(-88px, -11vh, -72px);
+    --oh4-cup-visual-scale: 1.2;
+    
+    /* PARAGRAPH — pushed down slightly to keep clear of the now-larger,
+       higher-sitting cup, and to open up breathing room before CTAs */
+    --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
+    --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
+    --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
+    --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
+    --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
+    
+    /* CTAs — extra top offset + bottom padding so the button pair no
+       longer crowds the paragraph above or the category bar below */
+    --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
+    --oh4-cta-left-offset: var(--oh4-edit-cta-left);
+    --oh4-cta-gap: var(--oh4-edit-cta-gap);
+    --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
+    --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
+    --oh4-cta-h: clamp(96px, 15vh, 128px);
+
+    /* CATEGORY BAR (Zone 5) — extra top offset opens a clear gap below
+       the CTAs instead of sitting right underneath them */
+    --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
+    --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
+
+    /* EASY EDIT SECTION — change only these values for the background images */
+    --oh4-edit-image-cup1-left: 15%;
+    --oh4-edit-image-cup1-top: 20%;
+    --oh4-edit-image-cup1-width: 34vh;
+    --oh4-edit-image-cup1-height: 46vh;
+
+    --oh4-edit-image-cup2-left: 83%;
+    --oh4-edit-image-cup2-top: 27%;
+    --oh4-edit-image-cup2-width: 25vh;
+    --oh4-edit-image-cup2-height: 31vh;
+
+    --oh4-edit-image-cup3-left: 17%;
+    --oh4-edit-image-cup3-top: 80%;
+    --oh4-edit-image-cup3-width: 31vh;
+    --oh4-edit-image-cup3-height: 36vh; 
+
+    --oh4-edit-image-cup4-left: 81%;
+    --oh4-edit-image-cup4-top: 80%;
+    --oh4-edit-image-cup4-width: 36vh;
+    --oh4-edit-image-cup4-height: 40vh;
   }
   
   .oh4-left-col {
     top: var(--oh4-head-top-offset);
-    left: var(--oh4-head-left-offset);
+    left: 50%;
+    transform: translateX(-50%);
     padding-top: var(--oh4-head-padding-top);
     padding-left: var(--oh4-head-padding-x);
     padding-right: var(--oh4-head-padding-x);
+    align-items: center;
+    text-align: center;
+  }
+  
+  
+
+  /* Visual-only ~20% zoom on the cup, applied to the canvas element
+     itself so it scales from center without shifting the wrapper's
+     own top/height box math above (which everything below still
+     stacks against). transform-origin centers the zoom on the
+     canvas's own box, keeping the cup horizontally centered — same
+     centering MainCupImage.jsx's group already guarantees. */
+  
+  .oh4-hl-line1, .oh4-hl-line2 { font-size: var(--oh4-hl-line1-size); }
+  .oh4-hl-line3 { font-size: var(--oh4-hl-line3-size); }
+  .oh4-eyebrow { 
+    font-size: var(--oh4-eyebrow-size);
+    margin-bottom: var(--oh4-eyebrow-margin-bottom);
+  }
+  
+  .oh4-hero-para {
+    top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-top-offset));
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    max-width: var(--oh4-para-max-width);
+    font-size: var(--oh4-para-font-size);
+    padding: 0 var(--oh4-para-padding-x);
+    text-align: center;
+  }
+  
+  .oh4-hero-ctas {
+    top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-h) + var(--oh4-cta-top-offset));
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    gap: var(--oh4-cta-gap);
+    max-width: var(--oh4-cta-max-width);
+    padding-bottom: var(--oh4-cta-padding-bottom);
+    justify-content: center;
+  }
+
+  /* ── BACKGROUND FOOD (pizza/burger/cake/fries) — repositioned to
+     frame the cup from the four corners with real spacing, instead of
+     the tighter default <700px placement (which reads congested once
+     the cup itself grows ~20% via --oh4-cup-visual-scale above). Only
+     the four dish items are touched — the 12 atmosphere particles
+     inherit BackgroundComposition.jsx's default positions unchanged.
+     Selectors target the `data-id` attribute added to each <img> in
+     BackgroundComposition.jsx specifically for per-breakpoint overrides
+     like this one. */
+
+  /* The dish item positions are now controlled by inline-style CSS vars
+     in BackgroundComposition.jsx, so these selectors are no longer needed.
+     The easy-edit variables above still control each cup via those vars. */
+}
+
+/* ── 500–600px ── */
+@media (max-width: 600px) {
+  .oh4-hero {
+    --oh4-head-h: clamp(30px, 42vh, 370px);
+    --oh4-cup-h:  clamp(180px, 26vh, 220px);
+    --oh4-para-h: clamp(92px, 14vh, 110px);
+    text-align: center;
+
+    /* EASY EDIT SECTION — change only these values for text layout */
+    --oh4-edit-headline-top: -200px;
+    --oh4-edit-headline-left: clamp(180px, 16vw, 175px);
+    /* --oh4-edit-headline-padding-top: clamp(34px, 8vh, 60px); */
+    --oh4-edit-headline-padding-x: clamp(20px, 6vw, 30px);
+    --oh4-edit-headline1-size: clamp(40px, 6.2vw, 34px);
+    --oh4-edit-headline3-size: clamp(40px, 7vw, 38px);
+    --oh4-edit-eyebrow-size: 10px;
+    --oh4-edit-eyebrow-gap: 10px;
+    --oh4-edit-eyebrow-margin-bottom: clamp(10px, 1.6vh, 16px);
+    --oh4-edit-eyebrow-margin-left: clamp(200px, 1.6vh, 16px);
+    --oh4-edit-eyebrow-margin-right: 100px;
+    --oh4-edit-paragraph-top-offset: clamp(170px, 0.6vh, 8px);
+    --oh4-edit-paragraph-left: clamp(0px, 1vw, 5px);
+    --oh4-edit-paragraph-max-width: min(32ch, 88vw);
+    --oh4-edit-paragraph-font-size: clamp(17.5px, 2vw, 13.5px);
+    --oh4-edit-paragraph-padding-x: clamp(20px, 6vw, 36px);
+    --oh4-edit-cta-top-offset: clamp(180px, 2.2vh, 20px);
+    --oh4-edit-cta-left: clamp(0px, 3vw, 30px);
+    --oh4-edit-cta-gap: clamp(8px, 1.5vh, 10px);
+    --oh4-edit-cta-max-width: min(250px, 82vw);
+    --oh4-edit-cta-padding-bottom: clamp(22px, 4vh, 32px);
+    --oh4-edit-catbar-top-offset: clamp(1000px, 2vh, 18px);
+    --oh4-edit-catbar-padding-bottom: clamp(18px, 3.6vh, 30px);
+
+    /* internal layout variables — keep these unless you want to change the structure */
+    --oh4-head-top-offset: var(--oh4-edit-headline-top);
+    --oh4-head-left-offset: var(--oh4-edit-headline-left);
+    --oh4-head-padding-top: var(--oh4-edit-headline-padding-top);
+    --oh4-head-padding-x: var(--oh4-edit-headline-padding-x);
+    --oh4-hl-line1-size: var(--oh4-edit-headline1-size);
+    --oh4-hl-line3-size: var(--oh4-edit-headline3-size);
+    --oh4-eyebrow-size: var(--oh4-edit-eyebrow-size);
+    --oh4-eyebrow-gap: var(--oh4-edit-eyebrow-gap);
+    --oh4-eyebrow-margin-bottom: var(--oh4-edit-eyebrow-margin-bottom);
+    --oh4-eyebrow-margin-left: var(--oh4-edit-eyebrow-margin-left);
+    --oh4-eyebrow-margin-right: var(--oh4-edit-eyebrow-margin-right);
+    --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
+    --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
+    --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
+    --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
+    --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
+    --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
+    --oh4-cta-left-offset: var(--oh4-edit-cta-left);
+    --oh4-cta-gap: var(--oh4-edit-cta-gap);
+    --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
+    --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
+    --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
+    --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
+
+    /* CANVAS/CUP — pulled further up than the base <700px block so the
+       cup sits closer to the headline (was reading as too low/floating
+       in the middle of a tall gap). --oh4-cup-visual-scale below zooms
+       the cup ~20% larger purely as a CSS transform on the canvas
+       WRAPPER (not the Three.js group/scale in MainCupImage.jsx) — the
+       GSAP rise/dock animation and its own internal scale math are
+       untouched; this only magnifies the already-rendered pixels. */
+    --oh4-cup-top-offset: clamp(-88px, -11vh, -72px);
+    --oh4-cup-visual-scale: 1.2;
+    
+    /* PARAGRAPH — pushed down slightly to keep clear of the now-larger,
+       higher-sitting cup, and to open up breathing room before CTAs */
+    --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
+    --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
+    --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
+    --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
+    --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
+    
+    /* CTAs — extra top offset + bottom padding so the button pair no
+       longer crowds the paragraph above or the category bar below */
+    --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
+    --oh4-cta-left-offset: var(--oh4-edit-cta-left);
+    --oh4-cta-gap: var(--oh4-edit-cta-gap);
+    --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
+    --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
+    --oh4-cta-h: clamp(96px, 15vh, 128px);
+
+    /* CATEGORY BAR (Zone 5) — extra top offset opens a clear gap below
+       the CTAs instead of sitting right underneath them */
+    --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
+    --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
+
+    /* EASY EDIT SECTION — change only these values for the background images */
+    --oh4-edit-image-cup1-left: 15%;
+    --oh4-edit-image-cup1-top: 20%;
+    --oh4-edit-image-cup1-width: 34vh;
+    --oh4-edit-image-cup1-height: 46vh;
+
+    --oh4-edit-image-cup2-left: 83%;
+    --oh4-edit-image-cup2-top: 27%;
+    --oh4-edit-image-cup2-width: 25vh;
+    --oh4-edit-image-cup2-height: 31vh;
+
+    --oh4-edit-image-cup3-left: 17%;
+    --oh4-edit-image-cup3-top: 80%;
+    --oh4-edit-image-cup3-width: 31vh;
+    --oh4-edit-image-cup3-height: 36vh; 
+
+    --oh4-edit-image-cup4-left: 81%;
+    --oh4-edit-image-cup4-top: 80%;
+    --oh4-edit-image-cup4-width: 36vh;
+    --oh4-edit-image-cup4-height: 40vh;
+  }
+  
+  .oh4-left-col {
+    top: var(--oh4-head-top-offset);
+    left: 50%;
+    transform: translateX(-50%);
+    padding-top: var(--oh4-head-padding-top);
+    padding-left: var(--oh4-head-padding-x);
+    padding-right: var(--oh4-head-padding-x);
+    align-items: center;
+    text-align: center;
   }
   
   .oh4-canvas-wrap {
     top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset));
     height: calc(100% - var(--oh4-head-h) - var(--oh4-cup-top-offset));
+  }
+
+  /* Visual-only ~20% zoom on the cup, applied to the canvas element
+     itself so it scales from center without shifting the wrapper's
+     own top/height box math above (which everything below still
+     stacks against). transform-origin centers the zoom on the
+     canvas's own box, keeping the cup horizontally centered — same
+     centering MainCupImage.jsx's group already guarantees. */
+  .oh4-canvas-wrap canvas {
+    transform: scale(var(--oh4-cup-visual-scale));
+    transform-origin: 50% 50%;
   }
   
   .oh4-hl-line1, .oh4-hl-line2 { font-size: var(--oh4-hl-line1-size); }
@@ -1131,143 +1294,148 @@
   
   .oh4-hero-para {
     top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-top-offset));
-    left: var(--oh4-para-left-offset);
+    left: 50%;
     right: auto;
+    transform: translateX(-50%);
     max-width: var(--oh4-para-max-width);
     font-size: var(--oh4-para-font-size);
     padding: 0 var(--oh4-para-padding-x);
+    text-align: center;
   }
   
   .oh4-hero-ctas {
     top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-h) + var(--oh4-cta-top-offset));
-    left: var(--oh4-cta-left-offset);
+    left: 50%;
     right: auto;
+    transform: translateX(-50%);
     gap: var(--oh4-cta-gap);
     max-width: var(--oh4-cta-max-width);
     padding-bottom: var(--oh4-cta-padding-bottom);
-  }
-}
-
-/* ── 500–600px ── */
-@media (max-width: 600px) {
-  .oh4-hero {
-    --oh4-head-h: clamp(160px, 24vh, 220px);
-    --oh4-cup-h:  clamp(200px, 30vh, 240px);
-    --oh4-para-h: clamp(90px, 14vh, 110px);
-    
-    /* HEADLINE */
-    --oh4-head-top-offset: 0px;
-    --oh4-head-left-offset: 0px;
-    --oh4-head-padding-top: clamp(30px, 7vh, 48px);
-    --oh4-head-padding-x: clamp(20px, 6vw, 30px);
-    --oh4-hl-line1-size: clamp(24px, 7.5vw, 34px);
-    --oh4-hl-line3-size: clamp(27px, 8.5vw, 38px);
-    --oh4-eyebrow-size: 9px;
-    --oh4-eyebrow-margin-bottom: clamp(10px, 1.6vh, 16px);
-    
-    /* CANVAS/CUP */
-    --oh4-cup-top-offset: clamp(-4px, -0.8vh, 0px);
-    
-    /* PARAGRAPH */
-    --oh4-para-top-offset: 0px;
-    --oh4-para-left-offset: 0px;
-    --oh4-para-max-width: min(30ch, 88vw);
-    --oh4-para-font-size: clamp(12px, 2vw, 12.5px);
-    --oh4-para-padding-x: clamp(20px, 6vw, 36px);
-    
-    /* CTAs */
-    --oh4-cta-top-offset: 0px;
-    --oh4-cta-left-offset: 0px;
-    --oh4-cta-gap: clamp(8px, 1.4vh, 9px);
-    --oh4-cta-max-width: min(280px, 82vw);
-    --oh4-cta-padding-bottom: clamp(12px, 2.2vh, 18px);
-    --oh4-cta-h: clamp(80px, 12.5vh, 108px);
-
-    /* CATEGORY BAR (Zone 5) */
-    --oh4-catbar-padding-bottom: clamp(16px, 3.2vh, 26px);
-  }
-  
-  .oh4-left-col {
-    top: var(--oh4-head-top-offset);
-    left: var(--oh4-head-left-offset);
-    padding-top: var(--oh4-head-padding-top);
-    padding-left: var(--oh4-head-padding-x);
-    padding-right: var(--oh4-head-padding-x);
-  }
-  
-  .oh4-canvas-wrap {
-    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset));
-    height: calc(100% - var(--oh4-head-h) - var(--oh4-cup-top-offset));
-  }
-  
-  .oh4-hl-line1, .oh4-hl-line2 { font-size: var(--oh4-hl-line1-size); }
-  .oh4-hl-line3   { font-size: var(--oh4-hl-line3-size); }
-  .oh4-eyebrow    { font-size: var(--oh4-eyebrow-size); }
-
-  .oh4-hero-para {
-    top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-top-offset));
-    left: var(--oh4-para-left-offset);
-    right: auto;
-    max-width: var(--oh4-para-max-width);
-    font-size: var(--oh4-para-font-size);
-    padding: 0 var(--oh4-para-padding-x);
-  }
-  
-  .oh4-hero-ctas {
-    top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-h) + var(--oh4-cta-top-offset));
-    left: var(--oh4-cta-left-offset);
-    right: auto;
-    gap: var(--oh4-cta-gap);
-    max-width: var(--oh4-cta-max-width);
-    padding-bottom: var(--oh4-cta-padding-bottom);
+    justify-content: center;
   }
 }
 
 /* ── 400–500px ── */
 @media (max-width: 500px) {
   .oh4-hero {
-    --oh4-head-h: clamp(148px, 22vh, 190px);
-    --oh4-cup-h:  clamp(180px, 28vh, 220px);
-    --oh4-para-h: clamp(90px, 14vh, 105px);
-    
-    /* HEADLINE */
-    --oh4-head-top-offset: 0px;
-    --oh4-head-left-offset: 0px;
-    --oh4-head-padding-top: clamp(24px, 5.5vh, 36px);
-    --oh4-head-padding-x: clamp(14px, 4.6vw, 22px);
-    --oh4-hl-line1-size: clamp(20px, 7vw, 29px);
-    --oh4-hl-line3-size: clamp(22px, 7.8vw, 33px);
-    --oh4-eyebrow-size: 8px;
-    --oh4-eyebrow-margin-bottom: clamp(8px, 1.2vh, 12px);
-    
-    /* CANVAS/CUP */
-    --oh4-cup-top-offset: clamp(-8px, -1.2vh, 0px);
-    
-    /* PARAGRAPH */
-    --oh4-para-top-offset: 0px;
-    --oh4-para-left-offset: 0px;
-    --oh4-para-font-size: clamp(11px, 2vw, 11.5px);
-    --oh4-para-max-width: min(27ch, 88vw);
-    --oh4-para-padding-x: clamp(14px, 4.6vw, 24px);
-    
-    /* CTAs */
-    --oh4-cta-top-offset: 0px;
-    --oh4-cta-left-offset: 0px;
-    --oh4-cta-gap: clamp(7px, 1.2vh, 8px);
-    --oh4-cta-max-width: min(240px, 82vw);
-    --oh4-cta-padding-bottom: clamp(10px, 2vh, 16px);
-    --oh4-cta-h: clamp(74px, 11.5vh, 98px);
+    --oh4-head-h: clamp(30px, 42vh, 370px);
+    --oh4-cup-h:  clamp(180px, 26vh, 220px);
+    --oh4-para-h: clamp(92px, 14vh, 110px);
+    text-align: center;
 
-    /* CATEGORY BAR (Zone 5) */
-    --oh4-catbar-padding-bottom: clamp(14px, 2.8vh, 22px);
+    /* EASY EDIT SECTION — change only these values for text layout */
+    --oh4-edit-headline-top: -200px;
+    --oh4-edit-headline-left: clamp(180px, 16vw, 175px);
+    /* --oh4-edit-headline-padding-top: clamp(34px, 8vh, 60px); */
+    --oh4-edit-headline-padding-x: clamp(20px, 6vw, 30px);
+    --oh4-edit-headline1-size: clamp(40px, 6.2vw, 34px);
+    --oh4-edit-headline3-size: clamp(40px, 7vw, 38px);
+    --oh4-edit-eyebrow-size: 10px;
+    --oh4-edit-eyebrow-gap: 10px;
+    --oh4-edit-eyebrow-margin-bottom: clamp(10px, 1.6vh, 16px);
+    --oh4-edit-eyebrow-margin-left: clamp(200px, 1.6vh, 16px);
+    --oh4-edit-eyebrow-margin-right: 100px;
+    --oh4-edit-paragraph-top-offset: clamp(170px, 0.6vh, 8px);
+    --oh4-edit-paragraph-left: clamp(0px, 1vw, 5px);
+    --oh4-edit-paragraph-max-width: min(32ch, 88vw);
+    --oh4-edit-paragraph-font-size: clamp(17.5px, 2vw, 13.5px);
+    --oh4-edit-paragraph-padding-x: clamp(20px, 6vw, 36px);
+    --oh4-edit-cta-top-offset: clamp(180px, 2.2vh, 20px);
+    --oh4-edit-cta-left: clamp(0px, 3vw, 30px);
+    --oh4-edit-cta-gap: clamp(8px, 1.5vh, 10px);
+    --oh4-edit-cta-max-width: min(250px, 82vw);
+    --oh4-edit-cta-padding-bottom: clamp(22px, 4vh, 32px);
+    --oh4-edit-catbar-top-offset: clamp(1000px, 2vh, 18px);
+    --oh4-edit-catbar-padding-bottom: clamp(18px, 3.6vh, 30px);
+
+    /* internal layout variables — keep these unless you want to change the structure */
+    --oh4-head-top-offset: var(--oh4-edit-headline-top);
+    --oh4-head-left-offset: var(--oh4-edit-headline-left);
+    --oh4-head-padding-top: var(--oh4-edit-headline-padding-top);
+    --oh4-head-padding-x: var(--oh4-edit-headline-padding-x);
+    --oh4-hl-line1-size: var(--oh4-edit-headline1-size);
+    --oh4-hl-line3-size: var(--oh4-edit-headline3-size);
+    --oh4-eyebrow-size: var(--oh4-edit-eyebrow-size);
+    --oh4-eyebrow-gap: var(--oh4-edit-eyebrow-gap);
+    --oh4-eyebrow-margin-bottom: var(--oh4-edit-eyebrow-margin-bottom);
+    --oh4-eyebrow-margin-left: var(--oh4-edit-eyebrow-margin-left);
+    --oh4-eyebrow-margin-right: var(--oh4-edit-eyebrow-margin-right);
+    --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
+    --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
+    --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
+    --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
+    --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
+    --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
+    --oh4-cta-left-offset: var(--oh4-edit-cta-left);
+    --oh4-cta-gap: var(--oh4-edit-cta-gap);
+    --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
+    --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
+    --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
+    --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
+
+    /* CANVAS/CUP — pulled further up than the base <700px block so the
+       cup sits closer to the headline (was reading as too low/floating
+       in the middle of a tall gap). --oh4-cup-visual-scale below zooms
+       the cup ~20% larger purely as a CSS transform on the canvas
+       WRAPPER (not the Three.js group/scale in MainCupImage.jsx) — the
+       GSAP rise/dock animation and its own internal scale math are
+       untouched; this only magnifies the already-rendered pixels. */
+    --oh4-cup-top-offset: clamp(-88px, -11vh, -72px);
+    --oh4-cup-visual-scale: 1.2;
+    
+    /* PARAGRAPH — pushed down slightly to keep clear of the now-larger,
+       higher-sitting cup, and to open up breathing room before CTAs */
+    --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
+    --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
+    --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
+    --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
+    --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
+    
+    /* CTAs — extra top offset + bottom padding so the button pair no
+       longer crowds the paragraph above or the category bar below */
+    --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
+    --oh4-cta-left-offset: var(--oh4-edit-cta-left);
+    --oh4-cta-gap: var(--oh4-edit-cta-gap);
+    --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
+    --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
+    --oh4-cta-h: clamp(96px, 15vh, 128px);
+
+    /* CATEGORY BAR (Zone 5) — extra top offset opens a clear gap below
+       the CTAs instead of sitting right underneath them */
+    --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
+    --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
+
+    /* EASY EDIT SECTION — change only these values for the background images */
+    --oh4-edit-image-cup1-left: 15%;
+    --oh4-edit-image-cup1-top: 20%;
+    --oh4-edit-image-cup1-width: 34vh;
+    --oh4-edit-image-cup1-height: 46vh;
+
+    --oh4-edit-image-cup2-left: 83%;
+    --oh4-edit-image-cup2-top: 27%;
+    --oh4-edit-image-cup2-width: 25vh;
+    --oh4-edit-image-cup2-height: 31vh;
+
+    --oh4-edit-image-cup3-left: 17%;
+    --oh4-edit-image-cup3-top: 80%;
+    --oh4-edit-image-cup3-width: 31vh;
+    --oh4-edit-image-cup3-height: 36vh; 
+
+    --oh4-edit-image-cup4-left: 81%;
+    --oh4-edit-image-cup4-top: 80%;
+    --oh4-edit-image-cup4-width: 36vh;
+    --oh4-edit-image-cup4-height: 40vh;
   }
   
   .oh4-left-col {
     top: var(--oh4-head-top-offset);
-    left: var(--oh4-head-left-offset);
+    left: 50%;
+    transform: translateX(-50%);
     padding-top: var(--oh4-head-padding-top);
     padding-left: var(--oh4-head-padding-x);
     padding-right: var(--oh4-head-padding-x);
+    align-items: center;
+    text-align: center;
   }
   
   .oh4-canvas-wrap {
@@ -1275,85 +1443,169 @@
     height: calc(100% - var(--oh4-head-h) - var(--oh4-cup-top-offset));
   }
 
-  .oh4-eyebrow {
+  /* Visual-only ~20% zoom on the cup, applied to the canvas element
+     itself so it scales from center without shifting the wrapper's
+     own top/height box math above (which everything below still
+     stacks against). transform-origin centers the zoom on the
+     canvas's own box, keeping the cup horizontally centered — same
+     centering MainCupImage.jsx's group already guarantees. */
+  .oh4-canvas-wrap canvas {
+    transform: scale(var(--oh4-cup-visual-scale));
+    transform-origin: 50% 50%;
+  }
+  
+  .oh4-hl-line1, .oh4-hl-line2 { font-size: var(--oh4-hl-line1-size); }
+  .oh4-hl-line3 { font-size: var(--oh4-hl-line3-size); }
+  .oh4-eyebrow { 
     font-size: var(--oh4-eyebrow-size);
     margin-bottom: var(--oh4-eyebrow-margin-bottom);
   }
-  .oh4-hl-line1, .oh4-hl-line2 { font-size: var(--oh4-hl-line1-size); }
-  .oh4-hl-line3 { font-size: var(--oh4-hl-line3-size); }
-  .oh4-headline::after { margin-top: clamp(7px, 1.1vh, 12px); }
-
+  
   .oh4-hero-para {
     top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-top-offset));
-    left: var(--oh4-para-left-offset);
+    left: 50%;
     right: auto;
+    transform: translateX(-50%);
     max-width: var(--oh4-para-max-width);
     font-size: var(--oh4-para-font-size);
     padding: 0 var(--oh4-para-padding-x);
-    line-height: 1.55;
+    text-align: center;
   }
   
   .oh4-hero-ctas {
     top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-h) + var(--oh4-cta-top-offset));
-    left: var(--oh4-cta-left-offset);
+    left: 50%;
     right: auto;
+    transform: translateX(-50%);
     gap: var(--oh4-cta-gap);
     max-width: var(--oh4-cta-max-width);
     padding-bottom: var(--oh4-cta-padding-bottom);
+    justify-content: center;
   }
-  .oh4-cta-gold, .oh4-cta-outline { padding: 10px 18px; font-size: 11px; }
 }
 
 /* ── 360–400px ── */
 @media (max-width: 400px) {
   .oh4-hero {
     min-height: clamp(580px, 100svh, 700px);
-    --oh4-head-h: clamp(110px, 18vh, 140px);
-    --oh4-cup-h:  clamp(150px, 22vh, 180px);
-    --oh4-para-h: clamp(80px, 13vh, 95px);
-    
-    /* HEADLINE */
-    --oh4-head-top-offset: 0px;
-    --oh4-head-left-offset: 0px;
-    --oh4-head-padding-top: clamp(18px, 4.5vh, 28px);
-    --oh4-head-padding-x: 12px;
-    --oh4-hl-line1-size: clamp(18px, 6.5vw, 24px);
-    --oh4-hl-line3-size: clamp(20px, 7.2vw, 27px);
-    --oh4-eyebrow-size: 7px;
-    --oh4-eyebrow-margin-bottom: clamp(5px, 0.8vh, 8px);
-    
-    /* CANVAS/CUP */
-    --oh4-cup-top-offset: clamp(-6px, -1vh, 0px);
-    
-    /* PARAGRAPH */
-    --oh4-para-top-offset: 0px;
-    --oh4-para-left-offset: 0px;
-    --oh4-para-font-size: clamp(10px, 1.8vw, 10.5px);
-    --oh4-para-max-width: 24ch;
-    --oh4-para-padding-x: clamp(12px, 3.5vw, 16px);
-    
-    /* CTAs */
-    --oh4-cta-top-offset: 0px;
-    --oh4-cta-left-offset: 0px;
-    --oh4-cta-gap: clamp(6px, 1.2vh, 8px);
-    --oh4-cta-max-width: 200px;
-    --oh4-cta-padding-bottom: clamp(8px, 1.6vh, 12px);
-    --oh4-cta-h: clamp(64px, 10vh, 84px); /* tighter than larger tiers —
-      Zones 1-3 already consume ~415px worst-case at this tier against a
-      584-700px section height, so CTA+catbar combined need to stay lean
-      to avoid clipping against .oh4-hero's overflow:clip on short
-      real-world devices (e.g. iPhone SE-class, ~568-667px tall) */
+    --oh4-head-h: clamp(30px, 42vh, 370px);
+    --oh4-cup-h:  clamp(180px, 26vh, 220px);
+    --oh4-para-h: clamp(92px, 14vh, 110px);
+    text-align: center;
 
-    /* CATEGORY BAR (Zone 5) */
-    --oh4-catbar-padding-bottom: clamp(10px, 2vh, 16px);
+    /* EASY EDIT SECTION — change only these values for text layout */
+    --oh4-edit-headline-top: -200px;
+    --oh4-edit-headline-left: clamp(180px, 16vw, 175px);
+    /* --oh4-edit-headline-padding-top: clamp(34px, 8vh, 60px); */
+    --oh4-edit-headline-padding-x: clamp(20px, 6vw, 30px);
+    --oh4-edit-headline1-size: clamp(40px, 6.2vw, 34px);
+    --oh4-edit-headline3-size: clamp(40px, 7vw, 38px);
+    --oh4-edit-eyebrow-size: 10px;
+    --oh4-edit-eyebrow-gap: 10px;
+    --oh4-edit-eyebrow-margin-bottom: clamp(10px, 1.6vh, 16px);
+    --oh4-edit-eyebrow-margin-left: clamp(200px, 1.6vh, 16px);
+    --oh4-edit-eyebrow-margin-right: 100px;
+    --oh4-edit-paragraph-top-offset: clamp(170px, 0.6vh, 8px);
+    --oh4-edit-paragraph-left: clamp(0px, 1vw, 5px);
+    --oh4-edit-paragraph-max-width: min(32ch, 88vw);
+    --oh4-edit-paragraph-font-size: clamp(17.5px, 2vw, 13.5px);
+    --oh4-edit-paragraph-padding-x: clamp(20px, 6vw, 36px);
+    --oh4-edit-cta-top-offset: clamp(180px, 2.2vh, 20px);
+    --oh4-edit-cta-left: clamp(0px, 3vw, 30px);
+    --oh4-edit-cta-gap: clamp(8px, 1.5vh, 10px);
+    --oh4-edit-cta-max-width: min(250px, 82vw);
+    --oh4-edit-cta-padding-bottom: clamp(22px, 4vh, 32px);
+    --oh4-edit-catbar-top-offset: clamp(1000px, 2vh, 18px);
+    --oh4-edit-catbar-padding-bottom: clamp(18px, 3.6vh, 30px);
+
+    /* internal layout variables — keep these unless you want to change the structure */
+    --oh4-head-top-offset: var(--oh4-edit-headline-top);
+    --oh4-head-left-offset: var(--oh4-edit-headline-left);
+    --oh4-head-padding-top: var(--oh4-edit-headline-padding-top);
+    --oh4-head-padding-x: var(--oh4-edit-headline-padding-x);
+    --oh4-hl-line1-size: var(--oh4-edit-headline1-size);
+    --oh4-hl-line3-size: var(--oh4-edit-headline3-size);
+    --oh4-eyebrow-size: var(--oh4-edit-eyebrow-size);
+    --oh4-eyebrow-gap: var(--oh4-edit-eyebrow-gap);
+    --oh4-eyebrow-margin-bottom: var(--oh4-edit-eyebrow-margin-bottom);
+    --oh4-eyebrow-margin-left: var(--oh4-edit-eyebrow-margin-left);
+    --oh4-eyebrow-margin-right: var(--oh4-edit-eyebrow-margin-right);
+    --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
+    --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
+    --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
+    --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
+    --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
+    --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
+    --oh4-cta-left-offset: var(--oh4-edit-cta-left);
+    --oh4-cta-gap: var(--oh4-edit-cta-gap);
+    --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
+    --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
+    --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
+    --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
+
+    /* CANVAS/CUP — pulled further up than the base <700px block so the
+       cup sits closer to the headline (was reading as too low/floating
+       in the middle of a tall gap). --oh4-cup-visual-scale below zooms
+       the cup ~20% larger purely as a CSS transform on the canvas
+       WRAPPER (not the Three.js group/scale in MainCupImage.jsx) — the
+       GSAP rise/dock animation and its own internal scale math are
+       untouched; this only magnifies the already-rendered pixels. */
+    --oh4-cup-top-offset: clamp(-88px, -11vh, -72px);
+    --oh4-cup-visual-scale: 1.2;
+    
+    /* PARAGRAPH — pushed down slightly to keep clear of the now-larger,
+       higher-sitting cup, and to open up breathing room before CTAs */
+    --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
+    --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
+    --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
+    --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
+    --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
+    
+    /* CTAs — extra top offset + bottom padding so the button pair no
+       longer crowds the paragraph above or the category bar below */
+    --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
+    --oh4-cta-left-offset: var(--oh4-edit-cta-left);
+    --oh4-cta-gap: var(--oh4-edit-cta-gap);
+    --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
+    --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
+    --oh4-cta-h: clamp(96px, 15vh, 128px);
+
+    /* CATEGORY BAR (Zone 5) — extra top offset opens a clear gap below
+       the CTAs instead of sitting right underneath them */
+    --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
+    --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
+
+    /* EASY EDIT SECTION — change only these values for the background images */
+    --oh4-edit-image-cup1-left: 15%;
+    --oh4-edit-image-cup1-top: 20%;
+    --oh4-edit-image-cup1-width: 34vh;
+    --oh4-edit-image-cup1-height: 46vh;
+
+    --oh4-edit-image-cup2-left: 83%;
+    --oh4-edit-image-cup2-top: 27%;
+    --oh4-edit-image-cup2-width: 25vh;
+    --oh4-edit-image-cup2-height: 31vh;
+
+    --oh4-edit-image-cup3-left: 17%;
+    --oh4-edit-image-cup3-top: 80%;
+    --oh4-edit-image-cup3-width: 31vh;
+    --oh4-edit-image-cup3-height: 36vh; 
+
+    --oh4-edit-image-cup4-left: 81%;
+    --oh4-edit-image-cup4-top: 80%;
+    --oh4-edit-image-cup4-width: 36vh;
+    --oh4-edit-image-cup4-height: 40vh;
   }
   
   .oh4-left-col {
     top: var(--oh4-head-top-offset);
-    left: var(--oh4-head-left-offset);
+    left: 50%;
+    transform: translateX(-50%);
     padding-top: var(--oh4-head-padding-top);
     padding-left: var(--oh4-head-padding-x);
     padding-right: var(--oh4-head-padding-x);
+    align-items: center;
+    text-align: center;
   }
   
   .oh4-canvas-wrap {
@@ -1361,49 +1613,46 @@
     height: calc(100% - var(--oh4-head-h) - var(--oh4-cup-top-offset));
   }
 
-  .oh4-eyebrow {
-    font-size: var(--oh4-eyebrow-size);
-    gap: 6px;
-    margin-bottom: var(--oh4-eyebrow-margin-bottom);
+  /* Visual-only ~20% zoom on the cup, applied to the canvas element
+     itself so it scales from center without shifting the wrapper's
+     own top/height box math above (which everything below still
+     stacks against). transform-origin centers the zoom on the
+     canvas's own box, keeping the cup horizontally centered — same
+     centering MainCupImage.jsx's group already guarantees. */
+  .oh4-canvas-wrap canvas {
+    transform: scale(var(--oh4-cup-visual-scale));
+    transform-origin: 50% 50%;
   }
-  .oh4-eyebrow-rule { width: 14px; }
+  
   .oh4-hl-line1, .oh4-hl-line2 { font-size: var(--oh4-hl-line1-size); }
   .oh4-hl-line3 { font-size: var(--oh4-hl-line3-size); }
-  .oh4-headline::after {
-    width: clamp(38px, 6.5vw, 60px);
-    margin-top: clamp(4px, 0.8vh, 8px);
+  .oh4-eyebrow { 
+    font-size: var(--oh4-eyebrow-size);
+    margin-bottom: var(--oh4-eyebrow-margin-bottom);
   }
-
+  
   .oh4-hero-para {
     top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-top-offset));
-    left: var(--oh4-para-left-offset);
+    left: 50%;
     right: auto;
+    transform: translateX(-50%);
     max-width: var(--oh4-para-max-width);
     font-size: var(--oh4-para-font-size);
     padding: 0 var(--oh4-para-padding-x);
-    line-height: 1.46;
+    text-align: center;
   }
   
   .oh4-hero-ctas {
     top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-h) + var(--oh4-cta-top-offset));
-    left: var(--oh4-cta-left-offset);
+    left: 50%;
     right: auto;
+    transform: translateX(-50%);
     gap: var(--oh4-cta-gap);
     max-width: var(--oh4-cta-max-width);
     padding-bottom: var(--oh4-cta-padding-bottom);
+    justify-content: center;
   }
-  .oh4-cta-gold, .oh4-cta-outline {
-    padding: clamp(7px, 1.4vh, 9px) clamp(12px, 3.2vw, 14px);
-    font-size: clamp(9px, 1.6vw, 10px);
-    gap: clamp(5px, 1vh, 7px);
-  }
-  .oh4-cta-icon { font-size: 10px; }
-  .oh4-scroll-hint { bottom: 6px; font-size: 6px; }
 
-  /* Zone 5 (cat-bar) needs tighter sizing here than the base <700px
-     rule provides — 6 icon-items in a row at this width need every
-     pixel trimmed, and the section's overall height budget is tightest
-     at this tier (see --oh4-cta-h comment above). */
   .oh4-cat-bar {
     padding: clamp(8px, 1.4vh, 10px) clamp(6px, 1.4vw, 8px);
     gap: clamp(4px, 1.2vw, 7px);
@@ -1415,40 +1664,122 @@
 /* ── Under 360px (very small phones) ── */
 @media (max-width: 360px) {
   .oh4-hero {
-    min-height: clamp(560px, 100svh, 680px);
-    --oh4-head-h: clamp(100px, 16vh, 130px);
-    --oh4-cup-h:  clamp(140px, 20vh, 165px);
-    --oh4-para-h: clamp(75px, 12vh, 90px);
-    
-    --oh4-head-padding-top: clamp(14px, 3.5vh, 22px);
-    --oh4-head-padding-x: 10px;
-    --oh4-hl-line1-size: clamp(17px, 6vw, 22px);
-    --oh4-hl-line3-size: clamp(19px, 6.8vw, 25px);
-    --oh4-eyebrow-size: 6.5px;
-    --oh4-eyebrow-margin-bottom: clamp(4px, 0.7vh, 7px);
-    
-    --oh4-cup-top-offset: clamp(-8px, -1.2vh, -2px);
-    
-    --oh4-para-font-size: clamp(9.5px, 1.6vw, 10px);
-    --oh4-para-max-width: 23ch;
-    --oh4-para-padding-x: clamp(10px, 3vw, 14px);
-    
-    --oh4-cta-gap: clamp(5px, 1vh, 7px);
-    --oh4-cta-max-width: 185px;
-    --oh4-cta-padding-bottom: clamp(6px, 1.2vh, 10px);
-    --oh4-cta-h: clamp(58px, 9vh, 74px); /* tightest tier in the file —
-      see 360-400px tier's comment for the budget reasoning; this tier's
-      Zones 1-3 already use ~385px worst-case against a 560-680px
-      section, leaving very little room, so CTA+catbar stay minimal */
+    min-height: clamp(580px, 100svh, 700px);
+    --oh4-head-h: clamp(30px, 42vh, 370px);
+    --oh4-cup-h:  clamp(180px, 26vh, 220px);
+    --oh4-para-h: clamp(92px, 14vh, 110px);
+    text-align: center;
 
-    /* CATEGORY BAR (Zone 5) */
-    --oh4-catbar-padding-bottom: clamp(8px, 1.6vh, 14px);
+    /* EASY EDIT SECTION — change only these values for text layout */
+    --oh4-edit-headline-top: -200px;
+    --oh4-edit-headline-left: clamp(180px, 16vw, 175px);
+    /* --oh4-edit-headline-padding-top: clamp(34px, 8vh, 60px); */
+    --oh4-edit-headline-padding-x: clamp(20px, 6vw, 30px);
+    --oh4-edit-headline1-size: clamp(40px, 6.2vw, 34px);
+    --oh4-edit-headline3-size: clamp(40px, 7vw, 38px);
+    --oh4-edit-eyebrow-size: 10px;
+    --oh4-edit-eyebrow-gap: 10px;
+    --oh4-edit-eyebrow-margin-bottom: clamp(10px, 1.6vh, 16px);
+    --oh4-edit-eyebrow-margin-left: clamp(200px, 1.6vh, 16px);
+    --oh4-edit-eyebrow-margin-right: 100px;
+    --oh4-edit-paragraph-top-offset: clamp(170px, 0.6vh, 8px);
+    --oh4-edit-paragraph-left: clamp(0px, 1vw, 5px);
+    --oh4-edit-paragraph-max-width: min(32ch, 88vw);
+    --oh4-edit-paragraph-font-size: clamp(17.5px, 2vw, 13.5px);
+    --oh4-edit-paragraph-padding-x: clamp(20px, 6vw, 36px);
+    --oh4-edit-cta-top-offset: clamp(180px, 2.2vh, 20px);
+    --oh4-edit-cta-left: clamp(0px, 3vw, 30px);
+    --oh4-edit-cta-gap: clamp(8px, 1.5vh, 10px);
+    --oh4-edit-cta-max-width: min(250px, 82vw);
+    --oh4-edit-cta-padding-bottom: clamp(22px, 4vh, 32px);
+    --oh4-edit-catbar-top-offset: clamp(1000px, 2vh, 18px);
+    --oh4-edit-catbar-padding-bottom: clamp(18px, 3.6vh, 30px);
+
+    /* internal layout variables — keep these unless you want to change the structure */
+    --oh4-head-top-offset: var(--oh4-edit-headline-top);
+    --oh4-head-left-offset: var(--oh4-edit-headline-left);
+    --oh4-head-padding-top: var(--oh4-edit-headline-padding-top);
+    --oh4-head-padding-x: var(--oh4-edit-headline-padding-x);
+    --oh4-hl-line1-size: var(--oh4-edit-headline1-size);
+    --oh4-hl-line3-size: var(--oh4-edit-headline3-size);
+    --oh4-eyebrow-size: var(--oh4-edit-eyebrow-size);
+    --oh4-eyebrow-gap: var(--oh4-edit-eyebrow-gap);
+    --oh4-eyebrow-margin-bottom: var(--oh4-edit-eyebrow-margin-bottom);
+    --oh4-eyebrow-margin-left: var(--oh4-edit-eyebrow-margin-left);
+    --oh4-eyebrow-margin-right: var(--oh4-edit-eyebrow-margin-right);
+    --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
+    --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
+    --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
+    --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
+    --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
+    --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
+    --oh4-cta-left-offset: var(--oh4-edit-cta-left);
+    --oh4-cta-gap: var(--oh4-edit-cta-gap);
+    --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
+    --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
+    --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
+    --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
+
+    /* CANVAS/CUP — pulled further up than the base <700px block so the
+       cup sits closer to the headline (was reading as too low/floating
+       in the middle of a tall gap). --oh4-cup-visual-scale below zooms
+       the cup ~20% larger purely as a CSS transform on the canvas
+       WRAPPER (not the Three.js group/scale in MainCupImage.jsx) — the
+       GSAP rise/dock animation and its own internal scale math are
+       untouched; this only magnifies the already-rendered pixels. */
+    --oh4-cup-top-offset: clamp(-88px, -11vh, -72px);
+    --oh4-cup-visual-scale: 1.2;
+    
+    /* PARAGRAPH — pushed down slightly to keep clear of the now-larger,
+       higher-sitting cup, and to open up breathing room before CTAs */
+    --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
+    --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
+    --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
+    --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
+    --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
+    
+    /* CTAs — extra top offset + bottom padding so the button pair no
+       longer crowds the paragraph above or the category bar below */
+    --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
+    --oh4-cta-left-offset: var(--oh4-edit-cta-left);
+    --oh4-cta-gap: var(--oh4-edit-cta-gap);
+    --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
+    --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
+    --oh4-cta-h: clamp(96px, 15vh, 128px);
+
+    /* CATEGORY BAR (Zone 5) — extra top offset opens a clear gap below
+       the CTAs instead of sitting right underneath them */
+    --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
+    --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
+
+    /* EASY EDIT SECTION — change only these values for the background images */
+    --oh4-edit-image-cup1-left: 15%;
+    --oh4-edit-image-cup1-top: 20%;
+    --oh4-edit-image-cup1-width: 34vh;
+    --oh4-edit-image-cup1-height: 46vh;
+
+    --oh4-edit-image-cup2-left: 83%;
+    --oh4-edit-image-cup2-top: 27%;
+    --oh4-edit-image-cup2-width: 25vh;
+    --oh4-edit-image-cup2-height: 31vh;
+
+    --oh4-edit-image-cup3-left: 17%;
+    --oh4-edit-image-cup3-top: 80%;
+    --oh4-edit-image-cup3-width: 31vh;
+    --oh4-edit-image-cup3-height: 36vh; 
+
+    --oh4-edit-image-cup4-left: 81%;
+    --oh4-edit-image-cup4-top: 80%;
+    --oh4-edit-image-cup4-width: 36vh;
+    --oh4-edit-image-cup4-height: 40vh;
   }
   
   .oh4-left-col {
     padding-top: var(--oh4-head-padding-top);
     padding-left: var(--oh4-head-padding-x);
     padding-right: var(--oh4-head-padding-x);
+    align-items: center;
+    text-align: center;
   }
   
   .oh4-eyebrow {

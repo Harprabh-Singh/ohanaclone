@@ -576,12 +576,12 @@
 }
 
 /* ─── Responsive ───────────────────────────────────────────────────── */
-@media (max-width: 900px) {
+/* @media (max-width: 900px) {
   .hz-grid {
     grid-template-columns: 1fr;
     align-items: flex-start;
     padding: 140px 0 60px;
-  }
+  } */
 
   .hz-left {
     padding: 0 5vw;

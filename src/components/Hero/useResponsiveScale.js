@@ -18,10 +18,15 @@ const MOBILE_MAX  = 700;  // t = 1 at and below this width (desktop↔mobile ble
 const MID_MIN      = 600;  // tMid = 1 at and below this width (mid-mobile band ends here)
 const SMALL_MIN    = 300;  // t2 = 1 at and below this width (mobile↔small-mobile blend ends here)
 
+function easeResponsive(value) {
+  const clamped = Math.min(1, Math.max(0, value));
+  return clamped ** 1.45;
+}
+
 export function computeT(width) {
   if (width >= DESKTOP_MIN) return 0;
   if (width <= MOBILE_MAX) return 1;
-  return (DESKTOP_MIN - width) / (DESKTOP_MIN - MOBILE_MAX);
+  return easeResponsive((DESKTOP_MIN - width) / (DESKTOP_MIN - MOBILE_MAX));
 }
 
 // Mid-mobile blend: 0 at/above 700px, ramps linearly to 1 at/below 600px.
@@ -30,7 +35,7 @@ export function computeT(width) {
 export function computeTMid(width) {
   if (width >= MOBILE_MAX) return 0;
   if (width <= MID_MIN) return 1;
-  return (MOBILE_MAX - width) / (MOBILE_MAX - MID_MIN);
+  return easeResponsive((MOBILE_MAX - width) / (MOBILE_MAX - MID_MIN));
 }
 
 // Small-mobile blend: 0 at/above 700px, ramps linearly to 1 at/below 300px.
@@ -38,7 +43,7 @@ export function computeTMid(width) {
 export function computeT2(width) {
   if (width >= MOBILE_MAX) return 0;
   if (width <= SMALL_MIN) return 1;
-  return (MOBILE_MAX - width) / (MOBILE_MAX - SMALL_MIN);
+  return easeResponsive((MOBILE_MAX - width) / (MOBILE_MAX - SMALL_MIN));
 }
 
 export default function useResponsiveScale() {
