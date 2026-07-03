@@ -6,7 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SectionReveal from '../components/SectionReveal';
 import HeroSection from '../components/HeroSection';
 import PalateShowcase from '../components/PalateShowcase';
-import HouseFavourites from '../components/HouseFavourites';
+import HouseFavourites from '../components/Housefavourites';
 import OhanaExperience from '../components/OhanaExperience';
 import { testimonials } from '../data/testimonials';
 
