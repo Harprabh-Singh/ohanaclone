@@ -2,7 +2,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import FloatingCTA from './components/FloatingCTA';
 import Home from './pages/Home';
 import Menu from './pages/Menu';
 import MenuCategory from './pages/MenuCategory';
@@ -47,7 +46,6 @@ function App() {
         </Routes>
       </AnimatePresence>
       <Footer />
-      <FloatingCTA />
     </div>
   );
 }
