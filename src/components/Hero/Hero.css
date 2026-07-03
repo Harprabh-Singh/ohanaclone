@@ -894,8 +894,12 @@
   .oh4-stat-divider:nth-child(6),
   .oh4-stat-item:nth-child(7) { display: none; } /* hide last stat on mobile */
   .oh4-stat-sub   { display: none; }
-  .oh4-stats-bar  { padding: 0 clamp(12px, 3vw, 20px); }
+  .oh4-stats-bar  {
+    display: none;
+    padding: 0 clamp(12px, 3vw, 20px);
+  }
   .oh4-cat-bar    { gap: 10px; }
+  .oh4-stamp      { display: none; }
 }
 
 @media (max-width: 480px) {
@@ -1131,6 +1135,22 @@
     justify-content: center;
   }
 
+  .oh4-stats-bar {
+    display: none;
+  }
+
+  .oh4-stamp {
+    display: none;
+  }
+
+  .oh4-text-layer {
+    transform: translateY(50px);
+  }
+
+  .oh4-canvas-wrap {
+    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) - 200px) !important;
+  }
+
   /* ── BACKGROUND FOOD (pizza/burger/cake/fries) — repositioned to
      frame the cup from the four corners with real spacing, instead of
      the tighter default <700px placement (which reads congested once
@@ -1211,7 +1231,7 @@
        WRAPPER (not the Three.js group/scale in MainCupImage.jsx) — the
        GSAP rise/dock animation and its own internal scale math are
        untouched; this only magnifies the already-rendered pixels. */
-    --oh4-cup-top-offset: clamp(-88px, -11vh, -72px);
+    --oh4-cup-top-offset: clamp(-88px, -10vh, -72px);
     --oh4-cup-visual-scale: 1.2;
     
     /* PARAGRAPH — pushed down slightly to keep clear of the now-larger,
@@ -1259,7 +1279,7 @@
   }
   
   .oh4-left-col {
-    top: var(--oh4-head-top-offset);
+    top: calc(var(--oh4-head-top-offset) + 60px);
     left: 50%;
     transform: translateX(-50%);
     padding-top: var(--oh4-head-padding-top);
@@ -1269,8 +1289,12 @@
     text-align: center;
   }
   
+  .oh4-text-layer {
+    transform: translateY(-10px);
+  }
+
   .oh4-canvas-wrap {
-    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset));
+    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) + 60px);
     height: calc(100% - var(--oh4-head-h) - var(--oh4-cup-top-offset));
   }
 
@@ -1312,6 +1336,9 @@
     max-width: var(--oh4-cta-max-width);
     padding-bottom: var(--oh4-cta-padding-bottom);
     justify-content: center;
+  }
+  .oh4-canvas-wrap {
+    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) + 35px) !important;
   }
 }
 
@@ -1436,6 +1463,9 @@
     padding-right: var(--oh4-head-padding-x);
     align-items: center;
     text-align: center;
+  }
+  .oh4-text-layer {
+    transform: translateY(45px);
   }
   
   .oh4-canvas-wrap {
@@ -1598,7 +1628,7 @@
   }
   
   .oh4-left-col {
-    top: var(--oh4-head-top-offset);
+    top: calc(var(--oh4-head-top-offset) + 60px);
     left: 50%;
     transform: translateX(-50%);
     padding-top: var(--oh4-head-padding-top);
@@ -1608,8 +1638,12 @@
     text-align: center;
   }
   
+  .oh4-text-layer {
+    transform: translateY(-11px);
+  }
+
   .oh4-canvas-wrap {
-    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset));
+    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) + 60px);
     height: calc(100% - var(--oh4-head-h) - var(--oh4-cup-top-offset));
   }
 
