@@ -28,6 +28,14 @@ body {
   min-height: 100vh;
 }
 
+/* When the hero is mounted we add `has-hero` to body so the page
+   background matches the hero and the ScrollTrigger pin spacer
+   doesn't reveal a white band while the hero is pinned. */
+body.has-hero {
+  background-color: #0D0B08;
+  color: var(--cream);
+}
+
 * {
   box-sizing: border-box;
 }
