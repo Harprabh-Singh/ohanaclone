@@ -339,7 +339,8 @@ export default function Hero() {
           </h1>
 
           <p className="oh4-hero-para">
-            From comforting classics to indulgent treats,<br />
+            From comforting classics to <br className="oh4-para-break" />
+            <span className="oh4-para-split">indulgent treats,</span>
             every dish is crafted with <em className="oh4-em-gold">love</em>,<br />
             served with a <em className="oh4-em-gold">smile</em>.
           </p>
@@ -351,7 +352,7 @@ export default function Hero() {
             </Link>
             <Link to="/reservations" className="oh4-cta-outline">
               <span className="oh4-cta-icon" aria-hidden="true">📅</span>
-              Reserve a Table
+              Reserve Table
             </Link>
           </div>
 

@@ -486,6 +486,20 @@ function generateHeroCss(zones) {
   .oh4-hl-line1, .oh4-hl-line2 { font-size: ${clampStr(t300.headlineFontMin, t300.headlineFontVw, t300.headlineFontMax)}; }
   .oh4-hl-line3   { font-size: ${clampStr(t300.hl3FontMin, t300.hl3FontVw, t300.hl3FontMax)}; }
 
+  .oh4-canvas-wrap canvas {
+    transform: scale(1.2);
+    transform-origin: 50% 50%;
+    position: relative !important;
+    z-index: 9999 !important;
+  }
+  .oh4-canvas-wrap {
+    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) - 160px) !important;
+    height: calc(100% - var(--oh4-head-h) - var(--oh4-cup-top-offset));
+    z-index: 9999 !important;
+  }
+  .oh4-text-layer { z-index: 10 !important; transform: translateY(24px); }
+  .oh4-left-col { top: var(--oh4-head-top-offset); }
+
   .oh4-hero-para  {
     font-size: ${fmt(t300.paraFontPx)}px;
     line-height: 1.48;

@@ -13,7 +13,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 
-const DESKTOP_MIN = 1000; // t = 0 at and above this width
+const DESKTOP_MIN = 1150; // t = 0 at and above this width — raised to start responsiveness sooner at wider viewports
 const MOBILE_MAX  = 700;  // t = 1 at and below this width (desktop↔mobile blend ends here)
 const MID_MIN      = 600;  // tMid = 1 at and below this width (mid-mobile band ends here)
 const SMALL_MIN    = 300;  // t2 = 1 at and below this width (mobile↔small-mobile blend ends here)

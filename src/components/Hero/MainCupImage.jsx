@@ -66,15 +66,15 @@ const ROTATION    = [0, 0, -0.15];
 
 // Idle resting position — desktop
 const IDLE_Y     = -1.87;
-const IDLE_SCALE = 3.2;
+const IDLE_SCALE = 2.7;  // reduced from 3.2 so desktop cup isn't oversized at wider screens
 
 // Risen (fully scrolled) position — desktop
 const RISEN_Y     = 0.50;
-const RISEN_SCALE = 3.55;
+const RISEN_SCALE = 3.0;  // reduced proportionally from 3.55
 
 // Mesh-local X offset (desktop) — see comment above re: scaling this
 // down on mobile to keep optical center consistent.
-const MESH_OFFSET_X = 0.44;
+const MESH_OFFSET_X = 0.50;  // increased from 0.44 to center cup better on desktop
 
 // --- Mobile counterparts ---
 // Keep these in sync with cupConfig.js's cup5.mobileIdlePos /
@@ -140,14 +140,22 @@ const MESH_OFFSET_X_SMALL = MESH_OFFSET_X * SMALL_SCALE_FACTOR; // ≈ 0.211
 // Edit these values only — no interpolation, so the cup stays pinned
 // inside each breakpoint band as the viewport changes.
 const MOBILE_CUP_LAYOUT_600_700 = {
-  idleY: -0.87,
+  idleY: -0.55, /* moved up from -0.87 so the cup sits closer to the headline */
   idleScale: IDLE_SCALE * 0.481,
-  risenY: 0.24,
+  risenY: 0.30,
   risenScale: RISEN_SCALE * 0.65,
-  meshOffsetX: -0.02,
+  meshOffsetX: 0.00,  /* center the cup horizontally in the 600-700px band */
 };
 
-const MOBILE_CUP_LAYOUT_300_599 = {
+const MOBILE_CUP_LAYOUT_500_600 = {
+  idleY: -0.40,
+  idleScale: IDLE_SCALE * 0.60,
+  risenY: 0.30,
+  risenScale: RISEN_SCALE * 0.66,
+  meshOffsetX: 0.00,
+};
+
+const MOBILE_CUP_LAYOUT_300_499 = {
   idleY: -0.15,
   idleScale: IDLE_SCALE * 0.62,
   risenY: 0.20,
@@ -155,22 +163,40 @@ const MOBILE_CUP_LAYOUT_300_599 = {
   meshOffsetX: 0.0,
 };
 
-function getMainCupLayout(width) {
+function blendDesktopToMobile(t) {
+  return {
+    idleY: MathUtils.lerp(IDLE_Y, MOBILE_CUP_LAYOUT_600_700.idleY, t),
+    idleScale: MathUtils.lerp(IDLE_SCALE, MOBILE_CUP_LAYOUT_600_700.idleScale, t),
+    risenY: MathUtils.lerp(RISEN_Y, MOBILE_CUP_LAYOUT_600_700.risenY, t),
+    risenScale: MathUtils.lerp(RISEN_SCALE, MOBILE_CUP_LAYOUT_600_700.risenScale, t),
+    meshOffsetX: MathUtils.lerp(MESH_OFFSET_X, MOBILE_CUP_LAYOUT_600_700.meshOffsetX, t),
+  };
+}
+
+function getMainCupLayout(width, t = 0) {
   if (width >= 700) {
-    return {
-      idleY: IDLE_Y,
-      idleScale: IDLE_SCALE,
-      risenY: RISEN_Y,
-      risenScale: RISEN_SCALE,
-      meshOffsetX: MESH_OFFSET_X,
-    };
+    if (t <= 0) {
+      return {
+        idleY: IDLE_Y,
+        idleScale: IDLE_SCALE,
+        risenY: RISEN_Y,
+        risenScale: RISEN_SCALE,
+        meshOffsetX: MESH_OFFSET_X,
+      };
+    }
+
+    return blendDesktopToMobile(t);
   }
 
   if (width >= 600) {
     return MOBILE_CUP_LAYOUT_600_700;
   }
 
-  return MOBILE_CUP_LAYOUT_300_599;
+  if (width >= 500) {
+    return MOBILE_CUP_LAYOUT_500_600;
+  }
+
+  return MOBILE_CUP_LAYOUT_300_499;
 }
 
 export default function MainCupImage({ scrollProgress, freezeCupsRef, tRef, tMidRef, t2Ref }) {
@@ -183,7 +209,7 @@ export default function MainCupImage({ scrollProgress, freezeCupsRef, tRef, tMid
 
   const resolveInitial = () => {
     const width = typeof window !== 'undefined' ? window.innerWidth : 1400;
-    const layout = getMainCupLayout(width);
+    const layout = getMainCupLayout(width, tRef?.current ?? 0);
 
     return {
       y: layout.idleY,
@@ -202,7 +228,7 @@ export default function MainCupImage({ scrollProgress, freezeCupsRef, tRef, tMid
     if (!groupRef.current) return;
 
     const width = typeof window !== 'undefined' ? window.innerWidth : 1400;
-    const layout = getMainCupLayout(width);
+    const layout = getMainCupLayout(width, tRef?.current ?? 0);
 
     const idleY = layout.idleY;
     const idleScale = layout.idleScale;
@@ -239,9 +265,6 @@ export default function MainCupImage({ scrollProgress, freezeCupsRef, tRef, tMid
     groupRef.current.position.x = 0;
     groupRef.current.position.y = currentY.current;
     groupRef.current.scale.setScalar(currentSc.current);
-
-    const floatAmp = 1 - Math.min(p / 0.35, 1);
-    groupRef.current.position.y = currentY.current + Math.sin(clock * 0.5) * 0.04 * floatAmp;
   });
 
   return (

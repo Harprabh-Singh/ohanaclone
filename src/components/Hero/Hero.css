@@ -890,6 +890,12 @@
   .oh4-menu-grid  { grid-template-columns: 1fr 1fr; }
 } */
 
+@media (max-width: 700px) {
+  .oh4-cat-bar {
+    display: none !important;
+  }
+}
+
 @media (max-width: 600px) {
   .oh4-stat-divider:nth-child(6),
   .oh4-stat-item:nth-child(7) { display: none; } /* hide last stat on mobile */
@@ -898,13 +904,11 @@
     display: none;
     padding: 0 clamp(12px, 3vw, 20px);
   }
-  .oh4-cat-bar    { gap: 10px; }
   .oh4-stamp      { display: none; }
 }
 
 @media (max-width: 480px) {
   .oh4-hero-ctas  { flex-wrap: wrap; }
-  .oh4-cta-outline{ display: none; }
   .oh4-hl-line1, .oh4-hl-line2 { font-size: clamp(24px, 9vw, 36px); }
   .oh4-hl-line3   { font-size: clamp(28px, 10vw, 42px); }
 }
@@ -977,27 +981,34 @@
     z-index: 10 !important;
   }
   .oh4-hero {
-    --oh4-head-h: clamp(30px, 42vh, 370px);
-    --oh4-cup-h:  clamp(180px, 26vh, 220px);
-    --oh4-para-h: clamp(92px, 14vh, 110px);
+    --oh4-head-h: clamp(48px, 38vh, 420px);
+    --oh4-cup-h:  clamp(140px, 22vh, 260px); /* slightly smaller cup area to free vertical room */
+    --oh4-para-h: clamp(92px, 18vh, 180px);
     text-align: center;
 
     /* EASY EDIT SECTION — change only these values for text layout */
-    --oh4-edit-headline-top: -200px;
+    --oh4-edit-headline-top: clamp(-190px, -22vh, -170px);
     --oh4-edit-headline-left: clamp(180px, 16vw, 175px);
     /* --oh4-edit-headline-padding-top: clamp(34px, 8vh, 60px); */
     --oh4-edit-headline-padding-x: clamp(20px, 6vw, 30px);
-    --oh4-edit-headline1-size: clamp(40px, 6.2vw, 34px);
-    --oh4-edit-headline3-size: clamp(40px, 7vw, 38px);
+     /* Headlines responsive to both width and height so they don't overflow
+       when viewport height is tight. Prefer the smaller of vw/vh but cap
+       at reasonable max sizes. */
+    /* Headlines slightly larger at this breakpoint to match reference */
+    --oh4-edit-headline1-size: min(6.6vw, 8vh, 52px);
+    --oh4-edit-headline3-size: min(6.6vw, 7.6vh, 48px);
     --oh4-edit-eyebrow-size: 10px;
     --oh4-edit-eyebrow-gap: 10px;
     --oh4-edit-eyebrow-margin-bottom: clamp(10px, 1.6vh, 16px);
     --oh4-edit-eyebrow-margin-left: clamp(200px, 1.6vh, 16px);
     --oh4-edit-eyebrow-margin-right: 100px;
-    --oh4-edit-paragraph-top-offset: clamp(170px, 0.6vh, 8px);
+    /* Push paragraph down to create more vertical weight in the layout */
+    --oh4-edit-paragraph-top-offset: clamp(180px, 6vh, 220px);
     --oh4-edit-paragraph-left: clamp(0px, 1vw, 5px);
     --oh4-edit-paragraph-max-width: min(32ch, 88vw);
-    --oh4-edit-paragraph-font-size: clamp(17.5px, 2vw, 13.5px);
+    /* Paragraph size tuned to viewport height to avoid overflow */
+    /* Slightly larger paragraph text for readability on tall phones */
+    --oh4-edit-paragraph-font-size: clamp(15px, 2.2vh, 17px);
     --oh4-edit-paragraph-padding-x: clamp(20px, 6vw, 36px);
     --oh4-edit-cta-top-offset: clamp(180px, 2.2vh, 20px);
     --oh4-edit-cta-left: clamp(0px, 3vw, 30px);
@@ -1039,8 +1050,10 @@
        WRAPPER (not the Three.js group/scale in MainCupImage.jsx) — the
        GSAP rise/dock animation and its own internal scale math are
        untouched; this only magnifies the already-rendered pixels. */
-    --oh4-cup-top-offset: clamp(-88px, -11vh, -72px);
-    --oh4-cup-visual-scale: 1.2;
+     /* Move the cup slightly up and reduce the visual zoom so headline
+       sits closer and text fills more vertical space */
+     --oh4-cup-top-offset: clamp(-62px, -8.5vh, -46px);
+     --oh4-cup-visual-scale: 1.03;
     
     /* PARAGRAPH — pushed down slightly to keep clear of the now-larger,
        higher-sitting cup, and to open up breathing room before CTAs */
@@ -1112,6 +1125,11 @@
     font-size: var(--oh4-eyebrow-size);
     margin-bottom: var(--oh4-eyebrow-margin-bottom);
   }
+  /* Keep the second headline line together (prevent unwanted wrapping) */
+  .oh4-hl-line2 {
+    white-space: nowrap;
+    display: inline-block;
+  }
   
   .oh4-hero-para {
     top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-top-offset));
@@ -1122,6 +1140,12 @@
     font-size: var(--oh4-para-font-size);
     padding: 0 var(--oh4-para-padding-x);
     text-align: center;
+  }
+
+  /* Keep "Every Craving" together on one line at this breakpoint */
+  .oh4-hl-line2 {
+    white-space: nowrap;
+    display: inline-block;
   }
   
   .oh4-hero-ctas {
@@ -1135,6 +1159,17 @@
     justify-content: center;
   }
 
+  /* Make both CTA buttons compact and single-line at this breakpoint */
+  .oh4-cta-gold, .oh4-cta-outline {
+    font-size: 11px;
+    padding: 10px 18px;
+    white-space: nowrap;
+    gap: 0;
+  }
+  .oh4-cta-icon {
+    display: none;
+  }
+
   .oh4-stats-bar {
     display: none;
   }
@@ -1144,11 +1179,11 @@
   }
 
   .oh4-text-layer {
-    transform: translateY(50px);
+    transform: translateY(38px);
   }
 
   .oh4-canvas-wrap {
-    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) - 200px) !important;
+    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) - 220px) !important;
   }
 
   /* ── BACKGROUND FOOD (pizza/burger/cake/fries) — repositioned to
@@ -1167,205 +1202,47 @@
 }
 
 /* ── 500–600px ── */
-@media (max-width: 600px) {
-  .oh4-hero {
-    --oh4-head-h: clamp(30px, 42vh, 370px);
-    --oh4-cup-h:  clamp(180px, 26vh, 220px);
-    --oh4-para-h: clamp(92px, 14vh, 110px);
-    text-align: center;
-
-    /* EASY EDIT SECTION — change only these values for text layout */
-    --oh4-edit-headline-top: -200px;
-    --oh4-edit-headline-left: clamp(180px, 16vw, 175px);
-    /* --oh4-edit-headline-padding-top: clamp(34px, 8vh, 60px); */
-    --oh4-edit-headline-padding-x: clamp(20px, 6vw, 30px);
-    --oh4-edit-headline1-size: clamp(40px, 6.2vw, 34px);
-    --oh4-edit-headline3-size: clamp(40px, 7vw, 38px);
-    --oh4-edit-eyebrow-size: 10px;
-    --oh4-edit-eyebrow-gap: 10px;
-    --oh4-edit-eyebrow-margin-bottom: clamp(10px, 1.6vh, 16px);
-    --oh4-edit-eyebrow-margin-left: clamp(200px, 1.6vh, 16px);
-    --oh4-edit-eyebrow-margin-right: 100px;
-    --oh4-edit-paragraph-top-offset: clamp(170px, 0.6vh, 8px);
-    --oh4-edit-paragraph-left: clamp(0px, 1vw, 5px);
-    --oh4-edit-paragraph-max-width: min(32ch, 88vw);
-    --oh4-edit-paragraph-font-size: clamp(17.5px, 2vw, 13.5px);
-    --oh4-edit-paragraph-padding-x: clamp(20px, 6vw, 36px);
-    --oh4-edit-cta-top-offset: clamp(180px, 2.2vh, 20px);
-    --oh4-edit-cta-left: clamp(0px, 3vw, 30px);
-    --oh4-edit-cta-gap: clamp(8px, 1.5vh, 10px);
-    --oh4-edit-cta-max-width: min(250px, 82vw);
-    --oh4-edit-cta-padding-bottom: clamp(22px, 4vh, 32px);
-    --oh4-edit-catbar-top-offset: clamp(1000px, 2vh, 18px);
-    --oh4-edit-catbar-padding-bottom: clamp(18px, 3.6vh, 30px);
-
-    /* internal layout variables — keep these unless you want to change the structure */
-    --oh4-head-top-offset: var(--oh4-edit-headline-top);
-    --oh4-head-left-offset: var(--oh4-edit-headline-left);
-    --oh4-head-padding-top: var(--oh4-edit-headline-padding-top);
-    --oh4-head-padding-x: var(--oh4-edit-headline-padding-x);
-    --oh4-hl-line1-size: var(--oh4-edit-headline1-size);
-    --oh4-hl-line3-size: var(--oh4-edit-headline3-size);
-    --oh4-eyebrow-size: var(--oh4-edit-eyebrow-size);
-    --oh4-eyebrow-gap: var(--oh4-edit-eyebrow-gap);
-    --oh4-eyebrow-margin-bottom: var(--oh4-edit-eyebrow-margin-bottom);
-    --oh4-eyebrow-margin-left: var(--oh4-edit-eyebrow-margin-left);
-    --oh4-eyebrow-margin-right: var(--oh4-edit-eyebrow-margin-right);
-    --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
-    --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
-    --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
-    --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
-    --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
-    --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
-    --oh4-cta-left-offset: var(--oh4-edit-cta-left);
-    --oh4-cta-gap: var(--oh4-edit-cta-gap);
-    --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
-    --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
-    --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
-    --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
-
-    /* CANVAS/CUP — pulled further up than the base <700px block so the
-       cup sits closer to the headline (was reading as too low/floating
-       in the middle of a tall gap). --oh4-cup-visual-scale below zooms
-       the cup ~20% larger purely as a CSS transform on the canvas
-       WRAPPER (not the Three.js group/scale in MainCupImage.jsx) — the
-       GSAP rise/dock animation and its own internal scale math are
-       untouched; this only magnifies the already-rendered pixels. */
-    --oh4-cup-top-offset: clamp(-88px, -10vh, -72px);
-    --oh4-cup-visual-scale: 1.2;
-    
-    /* PARAGRAPH — pushed down slightly to keep clear of the now-larger,
-       higher-sitting cup, and to open up breathing room before CTAs */
-    --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
-    --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
-    --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
-    --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
-    --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
-    
-    /* CTAs — extra top offset + bottom padding so the button pair no
-       longer crowds the paragraph above or the category bar below */
-    --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
-    --oh4-cta-left-offset: var(--oh4-edit-cta-left);
-    --oh4-cta-gap: var(--oh4-edit-cta-gap);
-    --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
-    --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
-    --oh4-cta-h: clamp(96px, 15vh, 128px);
-
-    /* CATEGORY BAR (Zone 5) — extra top offset opens a clear gap below
-       the CTAs instead of sitting right underneath them */
-    --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
-    --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
-
-    /* EASY EDIT SECTION — change only these values for the background images */
-    --oh4-edit-image-cup1-left: 15%;
-    --oh4-edit-image-cup1-top: 20%;
-    --oh4-edit-image-cup1-width: 34vh;
-    --oh4-edit-image-cup1-height: 46vh;
-
-    --oh4-edit-image-cup2-left: 83%;
-    --oh4-edit-image-cup2-top: 27%;
-    --oh4-edit-image-cup2-width: 25vh;
-    --oh4-edit-image-cup2-height: 31vh;
-
-    --oh4-edit-image-cup3-left: 17%;
-    --oh4-edit-image-cup3-top: 80%;
-    --oh4-edit-image-cup3-width: 31vh;
-    --oh4-edit-image-cup3-height: 36vh; 
-
-    --oh4-edit-image-cup4-left: 81%;
-    --oh4-edit-image-cup4-top: 80%;
-    --oh4-edit-image-cup4-width: 36vh;
-    --oh4-edit-image-cup4-height: 40vh;
-  }
-  
-  .oh4-left-col {
-    top: calc(var(--oh4-head-top-offset) + 60px);
-    left: 50%;
-    transform: translateX(-50%);
-    padding-top: var(--oh4-head-padding-top);
-    padding-left: var(--oh4-head-padding-x);
-    padding-right: var(--oh4-head-padding-x);
-    align-items: center;
-    text-align: center;
-  }
-  
-  .oh4-text-layer {
-    transform: translateY(-10px);
-  }
-
-  .oh4-canvas-wrap {
-    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) + 60px);
-    height: calc(100% - var(--oh4-head-h) - var(--oh4-cup-top-offset));
-  }
-
-  /* Visual-only ~20% zoom on the cup, applied to the canvas element
-     itself so it scales from center without shifting the wrapper's
-     own top/height box math above (which everything below still
-     stacks against). transform-origin centers the zoom on the
-     canvas's own box, keeping the cup horizontally centered — same
-     centering MainCupImage.jsx's group already guarantees. */
+@media (min-width: 500px) and (max-width: 600px) {
   .oh4-canvas-wrap canvas {
     transform: scale(var(--oh4-cup-visual-scale));
     transform-origin: 50% 50%;
-  }
-  
-  .oh4-hl-line1, .oh4-hl-line2 { font-size: var(--oh4-hl-line1-size); }
-  .oh4-hl-line3 { font-size: var(--oh4-hl-line3-size); }
-  .oh4-eyebrow { 
-    font-size: var(--oh4-eyebrow-size);
-    margin-bottom: var(--oh4-eyebrow-margin-bottom);
-  }
-  
-  .oh4-hero-para {
-    top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-top-offset));
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-    max-width: var(--oh4-para-max-width);
-    font-size: var(--oh4-para-font-size);
-    padding: 0 var(--oh4-para-padding-x);
-    text-align: center;
-  }
-  
-  .oh4-hero-ctas {
-    top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-h) + var(--oh4-cta-top-offset));
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-    gap: var(--oh4-cta-gap);
-    max-width: var(--oh4-cta-max-width);
-    padding-bottom: var(--oh4-cta-padding-bottom);
-    justify-content: center;
+    position: relative !important;
+    z-index: 9999 !important;
   }
   .oh4-canvas-wrap {
-    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) + 35px) !important;
+    top: 0;
+    height: 100%;
+    z-index: 9999 !important;
   }
-}
-
-/* ── 400–500px ── */
-@media (max-width: 500px) {
+  .oh4-text-layer {
+    z-index: 10 !important;
+  }
   .oh4-hero {
-    --oh4-head-h: clamp(30px, 42vh, 370px);
-    --oh4-cup-h:  clamp(180px, 26vh, 220px);
-    --oh4-para-h: clamp(92px, 14vh, 110px);
+    --oh4-head-h: clamp(48px, 38vh, 420px);
+    --oh4-cup-h: clamp(140px, 22vh, 260px);
+    --oh4-para-h: clamp(92px, 18vh, 180px);
     text-align: center;
 
     /* EASY EDIT SECTION — change only these values for text layout */
-    --oh4-edit-headline-top: -200px;
+    --oh4-edit-headline-top: clamp(-190px, -22vh, -170px);
     --oh4-edit-headline-left: clamp(180px, 16vw, 175px);
     /* --oh4-edit-headline-padding-top: clamp(34px, 8vh, 60px); */
     --oh4-edit-headline-padding-x: clamp(20px, 6vw, 30px);
-    --oh4-edit-headline1-size: clamp(40px, 6.2vw, 34px);
-    --oh4-edit-headline3-size: clamp(40px, 7vw, 38px);
+    /* Keep the headline sizing from shrinking as the width enters the 500px range */
+    --oh4-edit-headline1-size: clamp(39px, 6.6vw, 52px);
+    --oh4-edit-headline3-size: clamp(38px, 6.6vw, 48px);
     --oh4-edit-eyebrow-size: 10px;
     --oh4-edit-eyebrow-gap: 10px;
     --oh4-edit-eyebrow-margin-bottom: clamp(10px, 1.6vh, 16px);
     --oh4-edit-eyebrow-margin-left: clamp(200px, 1.6vh, 16px);
     --oh4-edit-eyebrow-margin-right: 100px;
-    --oh4-edit-paragraph-top-offset: clamp(170px, 0.6vh, 8px);
+    /* Push paragraph down to create more vertical weight in the layout */
+    --oh4-edit-paragraph-top-offset: clamp(180px, 6vh, 220px);
     --oh4-edit-paragraph-left: clamp(0px, 1vw, 5px);
     --oh4-edit-paragraph-max-width: min(32ch, 88vw);
-    --oh4-edit-paragraph-font-size: clamp(17.5px, 2vw, 13.5px);
+    /* Paragraph size tuned to viewport height to avoid overflow */
+    /* Slightly larger paragraph text for readability on tall phones */
+    --oh4-edit-paragraph-font-size: clamp(15px, 2.2vh, 17px);
     --oh4-edit-paragraph-padding-x: clamp(20px, 6vw, 36px);
     --oh4-edit-cta-top-offset: clamp(180px, 2.2vh, 20px);
     --oh4-edit-cta-left: clamp(0px, 3vw, 30px);
@@ -1407,28 +1284,29 @@
        WRAPPER (not the Three.js group/scale in MainCupImage.jsx) — the
        GSAP rise/dock animation and its own internal scale math are
        untouched; this only magnifies the already-rendered pixels. */
-    --oh4-cup-top-offset: clamp(-88px, -11vh, -72px);
-    --oh4-cup-visual-scale: 1.2;
-    
-    /* PARAGRAPH — pushed down slightly to keep clear of the now-larger,
-       higher-sitting cup, and to open up breathing room before CTAs */
+    --oh4-cup-top-offset: clamp(-170px, 2.2vh, -150px);
+    --oh4-cup-visual-scale: 0.93;
+
+    /* PARAGRAPH — keep clear spacing between the headline, cup, and CTAs */
     --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
     --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
     --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
     --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
     --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
-    
-    /* CTAs — extra top offset + bottom padding so the button pair no
-       longer crowds the paragraph above or the category bar below */
+
+    /* CTAs — fixed spacing for the narrow 500–600px band */
     --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
     --oh4-cta-left-offset: var(--oh4-edit-cta-left);
     --oh4-cta-gap: var(--oh4-edit-cta-gap);
     --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
     --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
-    --oh4-cta-h: clamp(96px, 15vh, 128px);
+    --oh4-cta-h: 96px;
 
-    /* CATEGORY BAR (Zone 5) — extra top offset opens a clear gap below
-       the CTAs instead of sitting right underneath them */
+    /* Slightly larger CTA text and padding for this band */
+    --oh4-cta-font-size: 14px;
+    --oh4-cta-padding-vertical: 14px;
+
+    /* CATEGORY BAR */
     --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
     --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
 
@@ -1464,12 +1342,17 @@
     align-items: center;
     text-align: center;
   }
-  .oh4-text-layer {
-    transform: translateY(45px);
-  }
   
+  .oh4-text-layer {
+    transform: translateY(38px);
+  }
+
+  .oh4-cat-bar {
+    display: none;
+  }
+
   .oh4-canvas-wrap {
-    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset));
+    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) - 160px) !important;
     height: calc(100% - var(--oh4-head-h) - var(--oh4-cup-top-offset));
   }
 
@@ -1483,12 +1366,16 @@
     transform: scale(var(--oh4-cup-visual-scale));
     transform-origin: 50% 50%;
   }
-  
+
   .oh4-hl-line1, .oh4-hl-line2 { font-size: var(--oh4-hl-line1-size); }
   .oh4-hl-line3 { font-size: var(--oh4-hl-line3-size); }
   .oh4-eyebrow { 
     font-size: var(--oh4-eyebrow-size);
     margin-bottom: var(--oh4-eyebrow-margin-bottom);
+  }
+  .oh4-hl-line2 {
+    white-space: nowrap;
+    display: inline-block;
   }
   
   .oh4-hero-para {
@@ -1512,33 +1399,84 @@
     padding-bottom: var(--oh4-cta-padding-bottom);
     justify-content: center;
   }
+
+  .oh4-cta-gold, .oh4-cta-outline {
+    font-size: 11px;
+    padding: 10px 18px;
+    white-space: nowrap;
+    gap: 0;
+  }
+  .oh4-cta-icon {
+    display: none;
+  }
+
+  .oh4-canvas-wrap {
+    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) - 20px) !important;
+  }
+
+  .oh4-hero-para .oh4-para-split {
+    display: block;
+  }
+
+  .oh4-para-break {
+    display: none;
+  }
+
 }
 
-/* ── 360–400px ── */
-@media (max-width: 400px) {
+/* duplicate temporary override removed; values are in the main 500–600 block above */
+
+/* ── 400–500px ── */
+@media (max-width: 500px) {
+  .oh4-canvas-wrap canvas {
+    transform: scale(var(--oh4-cup-visual-scale));
+    transform-origin: 50% 50%;
+    position: relative !important;
+    z-index: 9999 !important;
+  }
+  .oh4-canvas-wrap {
+    top: 0;
+    height: 100%;
+    z-index: 9999 !important;
+  }
+  .oh4-text-layer {
+    z-index: 10 !important;
+  }
+
+  .oh4-para-break {
+    display: block;
+  }
+
+  .oh4-hero-para .oh4-para-split {
+    display: block;
+  }
+
   .oh4-hero {
-    min-height: clamp(580px, 100svh, 700px);
-    --oh4-head-h: clamp(30px, 42vh, 370px);
-    --oh4-cup-h:  clamp(180px, 26vh, 220px);
-    --oh4-para-h: clamp(92px, 14vh, 110px);
+    --oh4-head-h: clamp(48px, 38vh, 420px);
+    --oh4-cup-h: clamp(140px, 22vh, 260px);
+    --oh4-para-h: clamp(92px, 18vh, 180px);
     text-align: center;
 
     /* EASY EDIT SECTION — change only these values for text layout */
-    --oh4-edit-headline-top: -200px;
+    --oh4-edit-headline-top: clamp(-190px, -22vh, -170px);
     --oh4-edit-headline-left: clamp(180px, 16vw, 175px);
     /* --oh4-edit-headline-padding-top: clamp(34px, 8vh, 60px); */
     --oh4-edit-headline-padding-x: clamp(20px, 6vw, 30px);
-    --oh4-edit-headline1-size: clamp(40px, 6.2vw, 34px);
-    --oh4-edit-headline3-size: clamp(40px, 7vw, 38px);
+    /* Keep the headline sizing from shrinking as the width enters the 500px range */
+    --oh4-edit-headline1-size: clamp(39px, 6.6vw, 52px);
+    --oh4-edit-headline3-size: clamp(38px, 6.6vw, 48px);
     --oh4-edit-eyebrow-size: 10px;
     --oh4-edit-eyebrow-gap: 10px;
     --oh4-edit-eyebrow-margin-bottom: clamp(10px, 1.6vh, 16px);
     --oh4-edit-eyebrow-margin-left: clamp(200px, 1.6vh, 16px);
     --oh4-edit-eyebrow-margin-right: 100px;
-    --oh4-edit-paragraph-top-offset: clamp(170px, 0.6vh, 8px);
+    /* Push paragraph down to create more vertical weight in the layout */
+    --oh4-edit-paragraph-top-offset: clamp(180px, 6vh, 220px);
     --oh4-edit-paragraph-left: clamp(0px, 1vw, 5px);
     --oh4-edit-paragraph-max-width: min(32ch, 88vw);
-    --oh4-edit-paragraph-font-size: clamp(17.5px, 2vw, 13.5px);
+    /* Paragraph size tuned to viewport height to avoid overflow */
+    /* Slightly larger paragraph text for readability on tall phones */
+    --oh4-edit-paragraph-font-size: clamp(15px, 2.2vh, 17px);
     --oh4-edit-paragraph-padding-x: clamp(20px, 6vw, 36px);
     --oh4-edit-cta-top-offset: clamp(180px, 2.2vh, 20px);
     --oh4-edit-cta-left: clamp(0px, 3vw, 30px);
@@ -1580,28 +1518,29 @@
        WRAPPER (not the Three.js group/scale in MainCupImage.jsx) — the
        GSAP rise/dock animation and its own internal scale math are
        untouched; this only magnifies the already-rendered pixels. */
-    --oh4-cup-top-offset: clamp(-88px, -11vh, -72px);
-    --oh4-cup-visual-scale: 1.2;
-    
-    /* PARAGRAPH — pushed down slightly to keep clear of the now-larger,
-       higher-sitting cup, and to open up breathing room before CTAs */
+    --oh4-cup-top-offset: clamp(-170px, 2.2vh, -150px);
+    --oh4-cup-visual-scale: 0.93;
+
+    /* PARAGRAPH — keep clear spacing between the headline, cup, and CTAs */
     --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
     --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
     --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
     --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
     --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
-    
-    /* CTAs — extra top offset + bottom padding so the button pair no
-       longer crowds the paragraph above or the category bar below */
+
+    /* CTAs — fixed spacing for the narrow 500–600px band */
     --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
     --oh4-cta-left-offset: var(--oh4-edit-cta-left);
     --oh4-cta-gap: var(--oh4-edit-cta-gap);
     --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
     --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
-    --oh4-cta-h: clamp(96px, 15vh, 128px);
+    --oh4-cta-h: 96px;
 
-    /* CATEGORY BAR (Zone 5) — extra top offset opens a clear gap below
-       the CTAs instead of sitting right underneath them */
+    /* Slightly larger CTA text and padding for this band */
+    --oh4-cta-font-size: 14px;
+    --oh4-cta-padding-vertical: 14px;
+
+    /* CATEGORY BAR */
     --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
     --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
 
@@ -1619,16 +1558,16 @@
     --oh4-edit-image-cup3-left: 17%;
     --oh4-edit-image-cup3-top: 80%;
     --oh4-edit-image-cup3-width: 31vh;
-    --oh4-edit-image-cup3-height: 36vh; 
+    --oh4-edit-image-cup3-height: 36vh;
 
     --oh4-edit-image-cup4-left: 81%;
     --oh4-edit-image-cup4-top: 80%;
     --oh4-edit-image-cup4-width: 36vh;
     --oh4-edit-image-cup4-height: 40vh;
   }
-  
+
   .oh4-left-col {
-    top: calc(var(--oh4-head-top-offset) + 60px);
+    top: var(--oh4-head-top-offset);
     left: 50%;
     transform: translateX(-50%);
     padding-top: var(--oh4-head-padding-top);
@@ -1637,13 +1576,17 @@
     align-items: center;
     text-align: center;
   }
-  
+
   .oh4-text-layer {
-    transform: translateY(-11px);
+    transform: translateY(38px);
+  }
+
+  .oh4-cat-bar {
+    display: none;
   }
 
   .oh4-canvas-wrap {
-    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) + 60px);
+    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) - 160px) !important;
     height: calc(100% - var(--oh4-head-h) - var(--oh4-cup-top-offset));
   }
 
@@ -1657,14 +1600,18 @@
     transform: scale(var(--oh4-cup-visual-scale));
     transform-origin: 50% 50%;
   }
-  
+
   .oh4-hl-line1, .oh4-hl-line2 { font-size: var(--oh4-hl-line1-size); }
   .oh4-hl-line3 { font-size: var(--oh4-hl-line3-size); }
-  .oh4-eyebrow { 
+  .oh4-eyebrow {
     font-size: var(--oh4-eyebrow-size);
     margin-bottom: var(--oh4-eyebrow-margin-bottom);
   }
-  
+  .oh4-hl-line2 {
+    white-space: nowrap;
+    display: inline-block;
+  }
+
   .oh4-hero-para {
     top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-top-offset));
     left: 50%;
@@ -1675,7 +1622,7 @@
     padding: 0 var(--oh4-para-padding-x);
     text-align: center;
   }
-  
+
   .oh4-hero-ctas {
     top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-h) + var(--oh4-cta-top-offset));
     left: 50%;
@@ -1687,39 +1634,73 @@
     justify-content: center;
   }
 
-  .oh4-cat-bar {
-    padding: clamp(8px, 1.4vh, 10px) clamp(6px, 1.4vw, 8px);
-    gap: clamp(4px, 1.2vw, 7px);
+  .oh4-cta-gold, .oh4-cta-outline {
+    font-size: 11px;
+    padding: 10px 18px;
+    white-space: nowrap;
+    gap: 0;
   }
-  .oh4-cat-bar .oh4-cat-icon { font-size: 15px; }
-  .oh4-cat-bar .oh4-cat-name { font-size: 8px; }
+  .oh4-cta-icon {
+    display: none;
+  }
+
+  .oh4-canvas-wrap {
+    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) + 35px) !important;
+  }
 }
 
-/* ── Under 360px (very small phones) ── */
-@media (max-width: 360px) {
+/* ── 360–400px ── */
+@media (max-width: 400px) {
+  .oh4-canvas-wrap canvas {
+    transform: scale(var(--oh4-cup-visual-scale));
+    transform-origin: 50% 50%;
+    position: relative !important;
+    z-index: 9999 !important;
+  }
+  .oh4-canvas-wrap {
+    top: 0;
+    height: 100%;
+    z-index: 9999 !important;
+  }
+  .oh4-text-layer {
+    z-index: 10 !important;
+  }
+
+  .oh4-para-break {
+    display: block;
+  }
+
+  .oh4-hero-para .oh4-para-split {
+    display: block;
+  }
+
   .oh4-hero {
-    min-height: clamp(580px, 100svh, 700px);
-    --oh4-head-h: clamp(30px, 42vh, 370px);
-    --oh4-cup-h:  clamp(180px, 26vh, 220px);
-    --oh4-para-h: clamp(92px, 14vh, 110px);
+    min-height: 100svh;
+    --oh4-head-h: clamp(48px, 38vh, 420px);
+    --oh4-cup-h: clamp(140px, 22vh, 260px);
+    --oh4-para-h: clamp(92px, 18vh, 180px);
     text-align: center;
 
     /* EASY EDIT SECTION — change only these values for text layout */
-    --oh4-edit-headline-top: -200px;
+    --oh4-edit-headline-top: clamp(-190px, -22vh, -170px);
     --oh4-edit-headline-left: clamp(180px, 16vw, 175px);
     /* --oh4-edit-headline-padding-top: clamp(34px, 8vh, 60px); */
     --oh4-edit-headline-padding-x: clamp(20px, 6vw, 30px);
-    --oh4-edit-headline1-size: clamp(40px, 6.2vw, 34px);
-    --oh4-edit-headline3-size: clamp(40px, 7vw, 38px);
+    /* Keep the headline sizing from shrinking as the width enters the 500px range */
+    --oh4-edit-headline1-size: clamp(39px, 6.6vw, 52px);
+    --oh4-edit-headline3-size: clamp(38px, 6.6vw, 48px);
     --oh4-edit-eyebrow-size: 10px;
     --oh4-edit-eyebrow-gap: 10px;
     --oh4-edit-eyebrow-margin-bottom: clamp(10px, 1.6vh, 16px);
     --oh4-edit-eyebrow-margin-left: clamp(200px, 1.6vh, 16px);
     --oh4-edit-eyebrow-margin-right: 100px;
-    --oh4-edit-paragraph-top-offset: clamp(170px, 0.6vh, 8px);
+    /* Push paragraph down to create more vertical weight in the layout */
+    --oh4-edit-paragraph-top-offset: clamp(180px, 6vh, 220px);
     --oh4-edit-paragraph-left: clamp(0px, 1vw, 5px);
     --oh4-edit-paragraph-max-width: min(32ch, 88vw);
-    --oh4-edit-paragraph-font-size: clamp(17.5px, 2vw, 13.5px);
+    /* Paragraph size tuned to viewport height to avoid overflow */
+    /* Slightly larger paragraph text for readability on tall phones */
+    --oh4-edit-paragraph-font-size: clamp(15px, 2.2vh, 17px);
     --oh4-edit-paragraph-padding-x: clamp(20px, 6vw, 36px);
     --oh4-edit-cta-top-offset: clamp(180px, 2.2vh, 20px);
     --oh4-edit-cta-left: clamp(0px, 3vw, 30px);
@@ -1761,8 +1742,217 @@
        WRAPPER (not the Three.js group/scale in MainCupImage.jsx) — the
        GSAP rise/dock animation and its own internal scale math are
        untouched; this only magnifies the already-rendered pixels. */
-    --oh4-cup-top-offset: clamp(-88px, -11vh, -72px);
-    --oh4-cup-visual-scale: 1.2;
+    --oh4-cup-top-offset: clamp(-170px, 2.2vh, -150px);
+    --oh4-cup-visual-scale: 0.93;
+
+    /* PARAGRAPH — keep clear spacing between the headline, cup, and CTAs */
+    --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
+    --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
+    --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
+    --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
+    --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
+
+    /* CTAs — fixed spacing for the narrow 500–600px band */
+    --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
+    --oh4-cta-left-offset: var(--oh4-edit-cta-left);
+    --oh4-cta-gap: var(--oh4-edit-cta-gap);
+    --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
+    --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
+    --oh4-cta-h: 96px;
+
+    /* Slightly larger CTA text and padding for this band */
+    --oh4-cta-font-size: 14px;
+    --oh4-cta-padding-vertical: 14px;
+
+    /* CATEGORY BAR */
+    --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
+    --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
+
+    /* EASY EDIT SECTION — change only these values for the background images */
+    --oh4-edit-image-cup1-left: 15%;
+    --oh4-edit-image-cup1-top: 20%;
+    --oh4-edit-image-cup1-width: 34vh;
+    --oh4-edit-image-cup1-height: 46vh;
+
+    --oh4-edit-image-cup2-left: 83%;
+    --oh4-edit-image-cup2-top: 27%;
+    --oh4-edit-image-cup2-width: 25vh;
+    --oh4-edit-image-cup2-height: 31vh;
+
+    --oh4-edit-image-cup3-left: 17%;
+    --oh4-edit-image-cup3-top: 80%;
+    --oh4-edit-image-cup3-width: 31vh;
+    --oh4-edit-image-cup3-height: 36vh;
+
+    --oh4-edit-image-cup4-left: 81%;
+    --oh4-edit-image-cup4-top: 80%;
+    --oh4-edit-image-cup4-width: 36vh;
+    --oh4-edit-image-cup4-height: 40vh;
+  }
+
+  .oh4-left-col {
+    top: var(--oh4-head-top-offset);
+    left: 50%;
+    transform: translateX(-50%);
+    padding-top: var(--oh4-head-padding-top);
+    padding-left: var(--oh4-head-padding-x);
+    padding-right: var(--oh4-head-padding-x);
+    align-items: center;
+    text-align: center;
+  }
+
+  .oh4-text-layer {
+    transform: translateY(38px);
+  }
+
+  .oh4-cat-bar {
+    display: none;
+  }
+
+  .oh4-canvas-wrap {
+    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) - 160px) !important;
+    height: calc(100% - var(--oh4-head-h) - var(--oh4-cup-top-offset));
+  }
+
+  /* Visual-only ~20% zoom on the cup, applied to the canvas element
+     itself so it scales from center without shifting the wrapper's
+     own top/height box math above (which everything below still
+     stacks against). transform-origin centers the zoom on the
+     canvas's own box, keeping the cup horizontally centered — same
+     centering MainCupImage.jsx's group already guarantees. */
+  .oh4-canvas-wrap canvas {
+    transform: scale(var(--oh4-cup-visual-scale));
+    transform-origin: 50% 50%;
+  }
+
+  .oh4-hl-line1, .oh4-hl-line2 { font-size: var(--oh4-hl-line1-size); }
+  .oh4-hl-line3 { font-size: var(--oh4-hl-line3-size); }
+  .oh4-eyebrow {
+    font-size: var(--oh4-eyebrow-size);
+    margin-bottom: var(--oh4-eyebrow-margin-bottom);
+  }
+  .oh4-hl-line2 {
+    white-space: nowrap;
+    display: inline-block;
+  }
+
+  .oh4-hero-para {
+    top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-top-offset));
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    max-width: var(--oh4-para-max-width);
+    font-size: var(--oh4-para-font-size);
+    padding: 0 var(--oh4-para-padding-x);
+    text-align: center;
+  }
+
+  .oh4-hero-ctas {
+    top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-h) + var(--oh4-cta-top-offset));
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    gap: var(--oh4-cta-gap);
+    max-width: var(--oh4-cta-max-width);
+    padding-bottom: var(--oh4-cta-padding-bottom);
+    justify-content: center;
+  }
+
+  .oh4-cta-gold, .oh4-cta-outline {
+    font-size: 11px;
+    padding: 10px 18px;
+    white-space: nowrap;
+    gap: 0;
+  }
+  .oh4-cta-icon {
+    display: none;
+  }
+
+  .oh4-canvas-wrap {
+    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) + 35px) !important;
+  }
+}
+
+/* ── Under 360px (very small phones) ── */
+@media (max-width: 360px) {
+  .oh4-para-break {
+    display: block;
+  }
+
+  .oh4-hero-para .oh4-para-split {
+    display: block;
+  }
+
+  .oh4-hero {
+    min-height: clamp(580px, 100svh, 700px);
+    --oh4-head-h: clamp(48px, 38vh, 420px);
+    --oh4-cup-h: clamp(140px, 22vh, 260px);
+    --oh4-para-h: clamp(92px, 18vh, 180px);
+    text-align: center;
+
+    /* EASY EDIT SECTION — change only these values for text layout */
+    --oh4-edit-headline-top: clamp(-190px, -22vh, -170px);
+    --oh4-edit-headline-left: clamp(180px, 16vw, 175px);
+    /* --oh4-edit-headline-padding-top: clamp(34px, 8vh, 60px); */
+    --oh4-edit-headline-padding-x: clamp(20px, 6vw, 30px);
+    /* Keep the headline sizing from shrinking as the width enters the 500px range */
+    --oh4-edit-headline1-size: clamp(39px, 6.6vw, 52px);
+    --oh4-edit-headline3-size: clamp(38px, 6.6vw, 48px);
+    --oh4-edit-eyebrow-size: 10px;
+    --oh4-edit-eyebrow-gap: 10px;
+    --oh4-edit-eyebrow-margin-bottom: clamp(10px, 1.6vh, 16px);
+    --oh4-edit-eyebrow-margin-left: clamp(200px, 1.6vh, 16px);
+    --oh4-edit-eyebrow-margin-right: 100px;
+    /* Push paragraph down to create more vertical weight in the layout */
+    --oh4-edit-paragraph-top-offset: clamp(180px, 6vh, 220px);
+    --oh4-edit-paragraph-left: clamp(0px, 1vw, 5px);
+    --oh4-edit-paragraph-max-width: min(32ch, 88vw);
+    /* Paragraph size tuned to viewport height to avoid overflow */
+    /* Slightly larger paragraph text for readability on tall phones */
+    --oh4-edit-paragraph-font-size: clamp(15px, 2.2vh, 17px);
+    --oh4-edit-paragraph-padding-x: clamp(20px, 6vw, 36px);
+    --oh4-edit-cta-top-offset: clamp(180px, 2.2vh, 20px);
+    --oh4-edit-cta-left: clamp(0px, 3vw, 30px);
+    --oh4-edit-cta-gap: clamp(8px, 1.5vh, 10px);
+    --oh4-edit-cta-max-width: min(250px, 82vw);
+    --oh4-edit-cta-padding-bottom: clamp(22px, 4vh, 32px);
+    --oh4-edit-catbar-top-offset: clamp(1000px, 2vh, 18px);
+    --oh4-edit-catbar-padding-bottom: clamp(18px, 3.6vh, 30px);
+
+    /* internal layout variables — keep these unless you want to change the structure */
+    --oh4-head-top-offset: var(--oh4-edit-headline-top);
+    --oh4-head-left-offset: var(--oh4-edit-headline-left);
+    --oh4-head-padding-top: var(--oh4-edit-headline-padding-top);
+    --oh4-head-padding-x: var(--oh4-edit-headline-padding-x);
+    --oh4-hl-line1-size: var(--oh4-edit-headline1-size);
+    --oh4-hl-line3-size: var(--oh4-edit-headline3-size);
+    --oh4-eyebrow-size: var(--oh4-edit-eyebrow-size);
+    --oh4-eyebrow-gap: var(--oh4-edit-eyebrow-gap);
+    --oh4-eyebrow-margin-bottom: var(--oh4-edit-eyebrow-margin-bottom);
+    --oh4-eyebrow-margin-left: var(--oh4-edit-eyebrow-margin-left);
+    --oh4-eyebrow-margin-right: var(--oh4-edit-eyebrow-margin-right);
+    --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
+    --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
+    --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
+    --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
+    --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
+    --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
+    --oh4-cta-left-offset: var(--oh4-edit-cta-left);
+    --oh4-cta-gap: var(--oh4-edit-cta-gap);
+    --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
+    --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
+    --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
+    --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
+
+    /* CANVAS/CUP — pulled further up than the base <700px block so the
+       cup sits closer to the headline (was reading as too low/floating
+       in the middle of a tall gap). --oh4-cup-visual-scale below zooms
+       the cup ~20% larger purely as a CSS transform on the canvas
+       WRAPPER (not the Three.js group/scale in MainCupImage.jsx) — the
+       GSAP rise/dock animation and its own internal scale math are
+       untouched; this only magnifies the already-rendered pixels. */
+    --oh4-cup-top-offset: clamp(-170px, 2.2vh, -150px);
+    --oh4-cup-visual-scale: 0.93;
     
     /* PARAGRAPH — pushed down slightly to keep clear of the now-larger,
        higher-sitting cup, and to open up breathing room before CTAs */
@@ -1859,3 +2049,5 @@
   .oh4-fog, .oh4-stamp, .oh4-stamp-word, .oh4-stamp-big { animation: none; }
   .oh4-split-inner { transition: none; --oh4-cursor-prox: 0; }
 }
+
+/* Temporary preview helper removed; 500–600px values are now permanent. */
