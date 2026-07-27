@@ -57,9 +57,6 @@
 import { Suspense, useEffect, useRef, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
-  // Add a body class while the hero is mounted so page background
-  // can match the hero and avoid the white pin/spacer showing.
-  document.body.classList.add('has-hero');
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight, MapPin, ChefHat, Users, Heart, Star } from 'lucide-react';
 import HeroCanvas from './HeroCanvas';
@@ -164,7 +161,11 @@ export default function Hero() {
     const headlineL3 = root.querySelector('.oh4-hl-line3');
     const para       = root.querySelector('.oh4-hero-para');
     const ctas       = root.querySelector('.oh4-hero-ctas');
-    document.body.classList.remove('has-hero');
+    // Ensure both <html> and <body> carry the `has-hero` marker while
+    // the hero is mounted so overscroll/viewport bounce reveals the
+    // correct dark background instead of white.
+    document.documentElement.classList.add('has-hero');
+    document.body.classList.add('has-hero');
     const catBar     = root.querySelector('.oh4-cat-bar');
     const stamp      = root.querySelector('.oh4-stamp');
     const flourish   = root.querySelector('.oh4-flourish');
@@ -297,6 +298,8 @@ export default function Hero() {
 
     return () => {
       ScrollTrigger.getAll().forEach(st => st.kill());
+      document.body.classList.remove('has-hero');
+      document.documentElement.classList.remove('has-hero');
     };
   }, []);
 

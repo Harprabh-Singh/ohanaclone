@@ -36,6 +36,15 @@ body.has-hero {
   color: var(--cream);
 }
 
+/* Strong overrides while hero is active to beat Tailwind utility classes */
+html.has-hero,
+body.has-hero,
+.has-hero #root,
+.has-hero .min-h-screen {
+  background-color: #0D0B08 !important;
+  color: var(--cream) !important;
+}
+
 * {
   box-sizing: border-box;
 }
