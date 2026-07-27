@@ -70,6 +70,16 @@
   perspective: 1400px;
 }
 
+/* TEST: force the hero to use dynamic viewport height and hide
+   overscroll exposure on mobile devices. Remove after verification. */
+@media (max-width: 700px) {
+  .oh4-hero {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    overflow: hidden !important;
+  }
+}
+
 /* ── GRAIN ────────────────────────────────────────────── */
 .oh4-grain {
   position: absolute;
