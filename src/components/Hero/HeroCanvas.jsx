@@ -13,19 +13,23 @@ import * as THREE from 'three';
 import Scene from './Scene';
 
 function detectQuality() {
-  if (typeof navigator === 'undefined') return 'high';
+  if (typeof navigator === 'undefined') return 'medium';
   const cores  = navigator.hardwareConcurrency ?? 4;
   const mobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-  if (mobile || cores <= 4) return 'low';
+  const lowMemory = typeof navigator.deviceMemory === 'number' && navigator.deviceMemory <= 4;
+
+  if (mobile || cores <= 4 || lowMemory) return 'low';
   return 'high';
 }
 
 export default function HeroCanvas({ mouse, scrollProgress, activeModelRef, freezeCupsRef }) {
   const quality = useMemo(() => detectQuality(), []);
+  const dpr = quality === 'high' ? [1, 1.25] : [1, 1];
+  const antialias = quality === 'high';
 
   return (
     <Canvas
-      dpr={[1, quality === 'high' ? 1.5 : 1]}
+      dpr={dpr}
       camera={{
         position: [0, 0, 7.5],
         fov: 38,
@@ -33,9 +37,9 @@ export default function HeroCanvas({ mouse, scrollProgress, activeModelRef, free
         far: 50,
       }}
       gl={{
-        antialias: quality === 'high',
+        antialias,
         alpha: true,
-        powerPreference: 'high-performance',
+        powerPreference: quality === 'high' ? 'high-performance' : 'default',
       }}
       onCreated={({ gl }) => {
         gl.setClearColor(0x000000, 0);

@@ -26,12 +26,24 @@ export default function useMouseParallax(rootRef) {
       mouse.current.y += (target.current.y - mouse.current.y) * 0.075;
       root.style.setProperty('--oh3-mx', `${mouse.current.x}`);
       root.style.setProperty('--oh3-my', `${mouse.current.y}`);
-      raf.current = requestAnimationFrame(tick);
+
+      const needsMore = Math.abs(mouse.current.x - target.current.x) > 0.0005 ||
+        Math.abs(mouse.current.y - target.current.y) > 0.0005;
+
+      raf.current = needsMore ? requestAnimationFrame(tick) : null;
     };
 
-    root.addEventListener('pointermove', onMove,  { passive: true });
+    const scheduleTick = () => {
+      if (!raf.current) {
+        raf.current = requestAnimationFrame(tick);
+      }
+    };
+
+    root.addEventListener('pointermove', (event) => {
+      onMove(event);
+      scheduleTick();
+    }, { passive: true });
     root.addEventListener('pointerleave', onLeave);
-    raf.current = requestAnimationFrame(tick);
 
     return () => {
       root.removeEventListener('pointermove', onMove);

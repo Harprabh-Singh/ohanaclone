@@ -59,6 +59,10 @@
   height: 100svh;
   min-height: clamp(620px, 100svh, 920px);
   overflow: clip;
+  isolation: isolate;
+  contain: layout paint size;
+  transform: translateZ(0);
+  backface-visibility: hidden;
   background: radial-gradient(
     ellipse 120% 90% at 62% 42%,
     #2A1C08 0%,
@@ -77,6 +81,8 @@
   pointer-events: none;
   z-index: 6;
   opacity: 0.055;
+  transform: translateZ(0);
+  backface-visibility: hidden;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 160px 160px;
   mix-blend-mode: overlay;
@@ -98,6 +104,8 @@
   pointer-events: none;
   z-index: 0;
   opacity: 0.6;
+  transform: translateZ(0);
+  backface-visibility: hidden;
   background:
     radial-gradient(ellipse 55% 40% at 65% 55%, rgba(200,155,69,0.12) 0%, transparent 70%),
     radial-gradient(ellipse 40% 30% at 30% 30%, rgba(224,179,90,0.07) 0%, transparent 70%);
@@ -543,6 +551,8 @@
   inset: 0;
   z-index: 1;
   will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 @media (max-width: 700px) {
   .oh4-canvas-wrap {
@@ -576,6 +586,8 @@
   pointer-events: none;
   will-change: opacity;
   transform-style: preserve-3d;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 /* ── SPLIT TEXT (menu panel title) ──────────────────────── */
@@ -690,20 +702,20 @@
 .oh4-hero-ctas {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-top: clamp(22px, 3.2vh, 34px);
+  gap: 16px;
+  margin-top: clamp(18px, 2.4vh, 28px);
   pointer-events: auto;
 }
 .oh4-cta-gold {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  padding: 13px 26px;
+  gap: 10px;
+  padding: 14px 28px;
   border-radius: 999px;
   background: linear-gradient(135deg, var(--gold-lt), var(--gold));
   color: var(--ink);
   font-family: var(--fb);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-decoration: none;
@@ -718,8 +730,8 @@
 .oh4-cta-outline {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  padding: 13px 24px;
+  gap: 10px;
+  padding: 14px 26px;
   border-radius: 999px;
   background: rgba(247,243,236,0.04);
   border: 1.5px solid rgba(247,243,236,0.30);
@@ -727,7 +739,7 @@
   -webkit-backdrop-filter: blur(8px);
   color: var(--white);
   font-family: var(--fb);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.04em;
   text-decoration: none;
