@@ -90,13 +90,13 @@ gsap.registerPlugin(ScrollTrigger);
  * overpromise a specific dish for those two until real art exists.
  */
 const CATEGORIES = [
-  { id: 'coffee',  name: 'Coffee',  emoji: '☕', icon: '☕', desc: 'Single origin & blends', sub: 'Hand-Brewed'     },
-  { id: 'burgers', name: 'Burgers', emoji: '🍔', icon: '🍔', desc: 'Juicy, flame-grilled',    sub: 'Juicy & Bold'    },
-  { id: 'pizzas',  name: 'Pizzas',  emoji: '🍕', icon: '🍕', desc: 'Wood-fired, Neapolitan',  sub: 'Wood-Fired'      },
-  { id: 'pasta',   name: 'Pasta',   emoji: '🍝', icon: '🍝', desc: 'Italian comfort',         sub: 'Italian Comfort' },
-  { id: 'cakes',   name: 'Cakes',   emoji: '🎂', icon: '🎂', desc: 'Patisserie & classic',    sub: 'Sweet Moments'   },
-  { id: 'drinks',  name: 'Drinks',  emoji: '🥤', icon: '🥤', desc: 'Fresh & fun',             sub: 'Fresh & Fun'     },
-  { id: 'snacks',  name: 'Snacks',  emoji: '🍟', icon: '🍟', desc: 'Bite & share',            sub: 'Bite & Share'    },
+  { id: 'coffee',  name: 'Coffee',  emoji: '☕', icon: '☕', desc: 'Single origin & blends' },
+  { id: 'burgers', name: 'Burgers', emoji: '🍔', icon: '🍔', desc: 'Juicy, flame-grilled'  },
+  { id: 'pizzas',  name: 'Pizzas',  emoji: '🍕', icon: '🍕', desc: 'Wood-fired, Neapolitan' },
+  { id: 'pasta',   name: 'Pasta',   emoji: '🍝', icon: '🍝', desc: 'Italian comfort'        },
+  { id: 'cakes',   name: 'Cakes',   emoji: '🎂', icon: '🎂', desc: 'Patisserie & classic'   },
+  { id: 'drinks',  name: 'Drinks',  emoji: '🥤', icon: '🥤', desc: 'Fresh & fun'            },
+  { id: 'snacks',  name: 'Snacks',  emoji: '🍟', icon: '🍟', desc: 'Bite & share'           },
 ];
 
 // ── Scroll timing constants ────────────────────────────────
