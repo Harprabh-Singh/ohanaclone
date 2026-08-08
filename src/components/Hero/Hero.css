@@ -2120,3 +2120,146 @@
 }
 
 /* Temporary preview helper removed; 500–600px values are now permanent. */
+/* ── NEW MOBILE REDESIGN (v1) ── */
+.oh4-mobile-redesign-layer { display: none; }
+@media (max-width: 700px) {
+  .oh4-hero { background: #000 !important; }
+  .oh4-fog, .oh4-bg-glow, .oh4-bg-circle, .oh4-grain, .oh4-vignette,
+  .oh4-canvas-wrap, .oh5-bg-composition, .oh4-text-layer,
+  .oh4-stats-bar, .oh4-menu-panel, .oh4-scroll-hint {
+    display: none !important;
+  }
+  .oh4-mobile-redesign-layer.mobile-only-block {
+    display: flex !important;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding: clamp(24px, 5vw, 34px) clamp(18px, 5vw, 22px);
+    text-align: center;
+    z-index: 50;
+  }
+  .oh4-mobile-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1em;
+    padding-top: clamp(40px, 10vw, 60px);
+  }
+  .oh4-mobile-leaf {
+    width: 24px;
+    height: 24px;
+    color: #eebb4d;
+    margin-bottom: -4px;
+  }
+  .oh4-mobile-mark {
+    color: #E24F33;
+    font-family: var(--fp);
+    font-size: clamp(36px, 10vw, 56px);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    font-weight: 700;
+  }
+  .oh4-mobile-subtitle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #E24F33;
+    font-size: clamp(9px, 2.5vw, 11px);
+    letter-spacing: 0.15em;
+    font-weight: 500;
+    font-family: var(--fb);
+    text-transform: uppercase;
+  }
+  .oh4-mobile-dash {
+    margin: 0 6px;
+    font-weight: 300;
+  }
+  .oh4-mobile-headline {
+    margin-top: clamp(20px, 8vh, 90px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: min(100%, 96vw);
+  }
+  .oh4-mobile-hl-top {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(10px, 3vw, 16px);
+  }
+  .oh4-mobile-hl-eat {
+    font-family: var(--fp);
+    font-size: clamp(40px, min(22vw, 13vh), 130px);
+    line-height: 0.85;
+    font-weight: 600;
+    color: #F7F3EC;
+    letter-spacing: -0.02em;
+  }
+  .oh4-mobile-hl-like {
+    font-family: var(--fp);
+    font-size: clamp(40px, min(22vw, 13vh), 130px);
+    line-height: 0.85;
+    font-weight: 600;
+    color: transparent;
+    -webkit-text-stroke: 1.5px #E24F33;
+    letter-spacing: -0.02em;
+  }
+  .oh4-mobile-hl-bottom {
+    font-family: var(--fc);
+    font-size: clamp(45px, min(22vw, 13.5vh), 130px);
+    line-height: 0.8;
+    color: #eebb4d;
+    font-style: italic;
+    font-weight: 600;
+    margin-top: -8px;
+  }
+  .oh4-mobile-dishes {
+    width: 100%;
+    max-width: 500px;
+    margin-top: clamp(20px, 6vh, 50px);
+    object-fit: contain;
+  }
+
+  .oh4-mobile-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: clamp(15px, 4vh, 35px);
+    padding: 0 20px;
+  }
+  .oh4-btn-explore, .oh4-btn-reserve {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1;
+    max-width: 200px;
+    padding: clamp(10px, 2vh, 14px) 10px;
+    border-radius: 8px;
+    font-size: clamp(10px, 1.5vh, 12px);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-family: var(--font-sans, system-ui, sans-serif);
+  }
+  .oh4-btn-explore {
+    background: #000;
+    color: #eebb4d;
+    border: 1px solid #eebb4d;
+  }
+  .oh4-btn-reserve {
+    background: #c93608;
+    color: #fff;
+    border: 1px solid #c93608;
+  }
+  .oh4-btn-explore svg, .oh4-btn-reserve svg {
+    flex-shrink: 0;
+  }
+}
+

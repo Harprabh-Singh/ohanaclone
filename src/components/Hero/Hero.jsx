@@ -56,6 +56,8 @@
 
 import { Suspense, useEffect, useRef, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import cupImg from './ui/cup.png';
+import dishesImg from './ui/dishes.png';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight, MapPin, ChefHat, Users, Heart, Star } from 'lucide-react';
@@ -90,40 +92,44 @@ gsap.registerPlugin(ScrollTrigger);
  * overpromise a specific dish for those two until real art exists.
  */
 const CATEGORIES = [
-  { id: 'coffee',  name: 'Coffee',  emoji: '☕', icon: '☕', desc: 'Single origin & blends' },
-  { id: 'burgers', name: 'Burgers', emoji: '🍔', icon: '🍔', desc: 'Juicy, flame-grilled'  },
-  { id: 'pizzas',  name: 'Pizzas',  emoji: '🍕', icon: '🍕', desc: 'Wood-fired, Neapolitan' },
-  { id: 'pasta',   name: 'Pasta',   emoji: '🍝', icon: '🍝', desc: 'Italian comfort'        },
-  { id: 'cakes',   name: 'Cakes',   emoji: '🎂', icon: '🎂', desc: 'Patisserie & classic'   },
-  { id: 'drinks',  name: 'Drinks',  emoji: '🥤', icon: '🥤', desc: 'Fresh & fun'            },
-  { id: 'snacks',  name: 'Snacks',  emoji: '🍟', icon: '🍟', desc: 'Bite & share'           },
+  { id: 'coffee', name: 'Coffee', emoji: '☕', icon: '☕', desc: 'Single origin & blends' },
+  { id: 'burgers', name: 'Burgers', emoji: '🍔', icon: '🍔', desc: 'Juicy, flame-grilled' },
+  { id: 'pizzas', name: 'Pizzas', emoji: '🍕', icon: '🍕', desc: 'Wood-fired, Neapolitan' },
+  { id: 'pasta', name: 'Pasta', emoji: '🍝', icon: '🍝', desc: 'Italian comfort' },
+  { id: 'cakes', name: 'Cakes', emoji: '🎂', icon: '🎂', desc: 'Patisserie & classic' },
+  { id: 'drinks', name: 'Drinks', emoji: '🥤', icon: '🥤', desc: 'Fresh & fun' },
+  { id: 'snacks', name: 'Snacks', emoji: '🍟', icon: '🍟', desc: 'Bite & share' },
 ];
 
 // ── Scroll timing constants ────────────────────────────────
-const TEXT_FADE_END   = 0.32;
-const PANEL_IN_START  = 0.30;
-const PANEL_IN_END    = 0.62;
-const TITLE_IN_START  = 0.38;
-const TITLE_IN_END    = 0.72;
-const CARDS_IN_START  = 0.50;
-const CARDS_IN_END    = 0.80;
+const TEXT_FADE_END = 0.32;
+const PANEL_IN_START = 0.30;
+const PANEL_IN_END = 0.62;
+const TITLE_IN_START = 0.38;
+const TITLE_IN_END = 0.72;
+const CARDS_IN_START = 0.50;
+const CARDS_IN_END = 0.80;
 
 // Threshold below which we consider the user "back at the top"
 // and trigger the non-coffee reset.
 const RESET_THRESHOLD = 0.08;
 
 const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
-const easeOutQuad  = (t) => 1 - Math.pow(1 - t, 2);
+const easeOutQuad = (t) => 1 - Math.pow(1 - t, 2);
 const remap = (p, start, end) =>
   Math.max(0, Math.min((p - start) / (end - start), 1));
 
 export default function Hero() {
-  const rootRef      = useRef(null);
+  const rootRef = useRef(null);
   const textLayerRef = useRef(null);
-  const statsBarRef  = useRef(null);
+  const mobileCupRef = useRef(null);
+  const mobileFadeTopRef = useRef(null);
+  const mobileDishesRef = useRef(null);
+  const mobileFadeBottomRef = useRef(null);
+  const statsBarRef = useRef(null);
   const menuPanelRef = useRef(null);
-  const hintRef      = useRef(null);
-  const mouse        = useMouseParallax(rootRef);
+  const hintRef = useRef(null);
+  const mouse = useMouseParallax(rootRef);
 
   // Shared ref read by HeroCanvas → Scene → MainCupImage / ActiveCupImage
   const scrollProgress = useRef(0);
@@ -155,41 +161,41 @@ export default function Hero() {
 
     // ── DOM refs ──────────────────────────────────────────
     const titleLetters = root.querySelectorAll('.oh4-menu-title .oh4-split-outer');
-    const eyebrow    = root.querySelector('.oh4-eyebrow');
+    const eyebrow = root.querySelector('.oh4-eyebrow');
     const headlineL1 = root.querySelector('.oh4-hl-line1');
     const headlineL2 = root.querySelector('.oh4-hl-line2');
     const headlineL3 = root.querySelector('.oh4-hl-line3');
-    const para       = root.querySelector('.oh4-hero-para');
-    const ctas       = root.querySelector('.oh4-hero-ctas');
+    const para = root.querySelector('.oh4-hero-para');
+    const ctas = root.querySelector('.oh4-hero-ctas');
     // Ensure both <html> and <body> carry the `has-hero` marker while
     // the hero is mounted so overscroll/viewport bounce reveals the
     // correct dark background instead of white.
     document.documentElement.classList.add('has-hero');
     document.body.classList.add('has-hero');
-    const catBar     = root.querySelector('.oh4-cat-bar');
-    const stamp      = root.querySelector('.oh4-stamp');
-    const flourish   = root.querySelector('.oh4-flourish');
-    const hint       = hintRef.current;
-    const panel      = menuPanelRef.current;
-    const statsBar   = statsBarRef.current;
-    const textLayer  = textLayerRef.current;
-    const catCards   = panel?.querySelectorAll('.oh4-menu-cat') ?? [];
+    const catBar = root.querySelector('.oh4-cat-bar');
+    const stamp = root.querySelector('.oh4-stamp');
+    const flourish = root.querySelector('.oh4-flourish');
+    const hint = hintRef.current;
+    const panel = menuPanelRef.current;
+    const statsBar = statsBarRef.current;
+    const textLayer = textLayerRef.current;
+    const catCards = panel?.querySelectorAll('.oh4-menu-cat') ?? [];
 
     const titleLetterEls = Array.from(titleLetters).map((el) => ({
       el,
       span: el.querySelector('.oh4-split-inner'),
     }));
 
-    const setTextOpacity  = textLayer ? gsap.quickSetter(textLayer, 'opacity') : null;
+    const setTextOpacity = textLayer ? gsap.quickSetter(textLayer, 'opacity') : null;
     const setPanelOpacity = panel ? gsap.quickSetter(panel, 'opacity') : null;
-    const setPanelX       = panel ? gsap.quickSetter(panel, 'x', 'px') : null;
-    const setHintOpacity  = hint ? gsap.quickSetter(hint, 'opacity') : null;
-    const setBgOpacity    = gsap.quickSetter(root, '--oh5-bg-opacity');
+    const setPanelX = panel ? gsap.quickSetter(panel, 'x', 'px') : null;
+    const setHintOpacity = hint ? gsap.quickSetter(hint, 'opacity') : null;
+    const setBgOpacity = gsap.quickSetter(root, '--oh5-bg-opacity');
 
     // ── Entrance animation (page load) ───────────────────
     gsap.set(
       [eyebrow, headlineL1, headlineL2, headlineL3, para, ctas, catBar,
-       stamp, flourish, hint].filter(Boolean),
+        stamp, flourish, hint].filter(Boolean),
       { opacity: 0, y: 18 }
     );
     gsap.set(statsBar, { opacity: 0, y: 8 });
@@ -198,17 +204,17 @@ export default function Hero() {
     gsap.set(catCards, { opacity: 0, y: 20 });
 
     gsap.timeline({ defaults: { ease: 'expo.out' }, delay: 0.1 })
-      .to(eyebrow,    { opacity: 1, y: 0, duration: 0.65 }, 0.00)
+      .to(eyebrow, { opacity: 1, y: 0, duration: 0.65 }, 0.00)
       .to(headlineL1, { opacity: 1, y: 0, duration: 0.85 }, 0.12)
       .to(headlineL2, { opacity: 1, y: 0, duration: 0.85 }, 0.22)
       .to(headlineL3, { opacity: 1, y: 0, duration: 0.85 }, 0.30)
-      .to(stamp,      { opacity: 1, y: 0, duration: 0.75 }, 0.28)
-      .to(flourish,   { opacity: 1, y: 0, duration: 0.75 }, 0.34)
-      .to(para,       { opacity: 1, y: 0, duration: 0.65 }, 0.44)
-      .to(ctas,       { opacity: 1, y: 0, duration: 0.65 }, 0.52)
-      .to(catBar,     { opacity: 1, y: 0, duration: 0.60 }, 0.58)
-      .to(statsBar,   { opacity: 1, y: 0, duration: 0.60 }, 0.62)
-      .to(hint,       { opacity: 1, y: 0, duration: 0.50 }, 0.66);
+      .to(stamp, { opacity: 1, y: 0, duration: 0.75 }, 0.28)
+      .to(flourish, { opacity: 1, y: 0, duration: 0.75 }, 0.34)
+      .to(para, { opacity: 1, y: 0, duration: 0.65 }, 0.44)
+      .to(ctas, { opacity: 1, y: 0, duration: 0.65 }, 0.52)
+      .to(catBar, { opacity: 1, y: 0, duration: 0.60 }, 0.58)
+      .to(statsBar, { opacity: 1, y: 0, duration: 0.60 }, 0.62)
+      .to(hint, { opacity: 1, y: 0, duration: 0.50 }, 0.66);
 
     // ── Scroll-driven animation ────────────────────────────
     // Pure scrub: NO programmatic jumps, NO snap zones.
@@ -248,6 +254,19 @@ export default function Hero() {
         // BackgroundComposition.jsx / Hero.css's .oh5-bg-composition.
         setBgOpacity(textOpacity);
 
+        // ── 1c. Mobile cup animation ──────────────────────
+        // Rises up and scales down slightly on scroll (matches main cup)
+        if (mobileCupRef.current) {
+          const riseY = p * -180; // Adjust max rise px
+          const scale = 2 + (0.15 * p); // Scales from 1 to 0.85
+          mobileCupRef.current.style.transform = `translate(0px, ${riseY}px) scale(${scale})`;
+        }
+
+        // ── 1d. Mobile layers fade out ────────────────────
+        if (mobileFadeTopRef.current) mobileFadeTopRef.current.style.opacity = textOpacity;
+        if (mobileDishesRef.current) mobileDishesRef.current.style.opacity = textOpacity;
+        if (mobileFadeBottomRef.current) mobileFadeBottomRef.current.style.opacity = textOpacity;
+
         // ── 2. Stats bar fades with text layer ───────────
         if (statsBar) {
           gsap.set(statsBar, { opacity: textOpacity });
@@ -265,7 +284,7 @@ export default function Hero() {
         const titleT = easeOutCubic(remap(p, TITLE_IN_START, TITLE_IN_END));
         titleLetterEls.forEach(({ el, span }, i) => {
           const stagger = (i / Math.max(titleLetterEls.length - 1, 1)) * 0.28;
-          const localT  = Math.max(0, Math.min((titleT - stagger) / (1 - stagger), 1));
+          const localT = Math.max(0, Math.min((titleT - stagger) / (1 - stagger), 1));
           el.style.opacity = String(localT);
           if (span) {
             span.style.transform = `translateY(${(1 - localT) * 55}%) translateZ(${(1 - localT) * -28}px)`;
@@ -275,9 +294,9 @@ export default function Hero() {
         // ── 5. Category cards stagger in ─────────────────
         const cardsWindow = CARDS_IN_END - CARDS_IN_START;
         catCards.forEach((card, i) => {
-          const delay  = (i / catCards.length) * (cardsWindow * 0.45);
-          const ct     = easeOutQuad(remap(p, CARDS_IN_START + delay, CARDS_IN_END));
-          card.style.opacity   = String(ct);
+          const delay = (i / catCards.length) * (cardsWindow * 0.45);
+          const ct = easeOutQuad(remap(p, CARDS_IN_START + delay, CARDS_IN_END));
+          card.style.opacity = String(ct);
           card.style.transform = `translateY(${14 * (1 - ct)}px)`;
         });
 
@@ -307,11 +326,11 @@ export default function Hero() {
     <section ref={rootRef} className="oh4-hero" aria-label="Ohana Cafe Hero">
 
       {/* ── ATMOSPHERE ── */}
-      <div className="oh4-fog"       aria-hidden="true" />
-      <div className="oh4-bg-glow"   aria-hidden="true" />
+      <div className="oh4-fog" aria-hidden="true" />
+      <div className="oh4-bg-glow" aria-hidden="true" />
       <div className="oh4-bg-circle" aria-hidden="true" />
-      <div className="oh4-grain"     aria-hidden="true" />
-      <div className="oh4-vignette"  aria-hidden="true" />
+      <div className="oh4-grain" aria-hidden="true" />
+      <div className="oh4-vignette" aria-hidden="true" />
 
       {/* ── 3D CANVAS (coffee cup only — see HeroCanvas/Scene v21) ── */}
       <div className="oh4-canvas-wrap">
@@ -329,6 +348,55 @@ export default function Hero() {
           fries + 12 atmosphere particles as plain CSS-positioned
           images, not Three.js. See BackgroundComposition.jsx header. ── */}
       <BackgroundComposition />
+
+      {/* ── MOBILE REDESIGN LAYER (< 700px) ── */}
+      <div className="oh4-mobile-redesign-layer mobile-only-block" aria-hidden="true">
+        <div ref={mobileFadeTopRef} className="oh4-mobile-headline">
+          <div className="oh4-mobile-hl-top">
+            <span className="oh4-mobile-hl-eat">Eat</span>
+            <span className="oh4-mobile-hl-like">like</span>
+          </div>
+          <div className="oh4-mobile-hl-bottom">family.</div>
+        </div>
+        <div className="oh4-mobile-dishes-wrap" style={{ position: 'relative', width: 'min(100%, 45vh)', maxWidth: '500px', margin: 'clamp(10px, 5vh, 50px) auto 0' }}>
+          {/* Tweak dishes transform here if needed */}
+          <img
+            ref={mobileDishesRef}
+            src={dishesImg}
+            alt="Dishes"
+            className="oh4-mobile-dishes"
+            style={{ width: '100%', transform: 'translate(0px, 0px) scale(1.2)', marginTop: 0 }}
+          />
+          {/* Tweak top/left/width here to position the cup over the dishes */}
+          <img
+            ref={mobileCupRef}
+            src={cupImg}
+            alt="Main Cup"
+            className="oh4-mobile-main-cup"
+            style={{
+              position: 'absolute',
+              width: '40%',
+              top: '35%',
+              left: '35.5%',
+              transformOrigin: 'center center',
+              zIndex: 10
+            }}
+          />
+        </div>
+
+        <div ref={mobileFadeBottomRef} className="oh4-mobile-buttons">
+          <Link to="/menu" className="oh4-btn-explore">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" style={{ width: '18px', height: '18px' }} className="oh4-btn-icon">
+              <circle cx="12" cy="12" r="10" />
+              <polygon points="15 9 13.5 13.5 9 15 10.5 10.5 15 9" />
+            </svg>
+            EXPLORE MENU
+          </Link>
+          <Link to="/reservations" className="oh4-btn-reserve">
+            RESERVE TABLE
+          </Link>
+        </div>
+      </div>
 
       {/* ── HERO TEXT LAYER ── */}
       <div ref={textLayerRef} className="oh4-text-layer">
@@ -425,7 +493,7 @@ export default function Hero() {
           <div>
             <span className="oh4-stat-label">Guest Rating</span>
             <div className="oh4-stars">
-              {[1,2,3,4,5].map(s => (
+              {[1, 2, 3, 4, 5].map(s => (
                 <Star key={s} size={11} fill={s <= 4 ? '#C89B45' : 'none'} stroke="#C89B45" strokeWidth={1.5} />
               ))}
               <span className="oh4-stars-num">4.8/5</span>

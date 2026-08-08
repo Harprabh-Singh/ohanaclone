@@ -1,0 +1,1514 @@
+﻿diff --git a/src/components/Hero/Hero.css b/src/components/Hero/Hero.css
+index 1fc5a30..140ddfe 100644
+--- a/src/components/Hero/Hero.css
++++ b/src/components/Hero/Hero.css
+@@ -28,6 +28,20 @@
+   --fc: 'Cormorant Garamond', Georgia, serif;
+   --fb: 'DM Sans', system-ui, sans-serif;
+ 
++  /* Easy mobile-only hero text controls (edit these for <700px) */
++  --mobile-hero-top-offset: 24px;
++  --mobile-headline-left-offset: -8px;
++  --mobile-para-left-offset: 6px;
++  --mobile-ctas-top-offset: 8px;
++
++  --mobile-headline-font: 'Playfair Display', serif;
++  --mobile-body-font: 'DM Sans', system-ui, sans-serif;
++
++  --mobile-headline-size: clamp(28px, calc(1.6vh + 6vw), 56px);
++  --mobile-headline-line2-size: clamp(22px, calc(1.2vh + 4.5vw), 44px);
++  --mobile-headline-line3-size: clamp(34px, calc(2vh + 8vw), 76px);
++  --mobile-para-size: clamp(12px, calc(0.8vh + 1.4vw), 16px);
++
+   /* Glass system ΓÇö legacy light-glass (kept; no longer used by the
+      menu panel cards as of v15, but left defined in case anything
+      else still references these names) */
+@@ -59,13 +73,8 @@
+   height: 100svh;
+   min-height: clamp(620px, 100svh, 920px);
+   overflow: clip;
+-  background: radial-gradient(
+-    ellipse 120% 90% at 62% 42%,
+-    #2A1C08 0%,
+-    #1A1008 28%,
+-    #0D0B08 60%,
+-    #090706 100%
+-  );
++  background-color: #000;
++  background-image: none;
+   font-family: var(--fb);
+   perspective: 1400px;
+ }
+@@ -135,6 +144,45 @@
+   .oh4-flourish {
+     color: var(--white) !important;
+   }
++}
++/* Additional mobile tweaks appended: only affect <=700px */
++@media (max-width: 700px) {
++  /* bring cup slightly higher and a touch larger for visual weight */
++  .oh4-canvas-wrap {
++    top: 20% !important;
++    width: clamp(180px, 30vw, 260px) !important;
++    height: clamp(180px, 30vw, 260px) !important;
++  }
++
++  /* ring larger and centered on cup */
++  .oh4-cup-ring {
++    top: 50% !important;
++    width: clamp(220px, 34vw, 280px) !important;
++    transform: translate(-50%, -50%) !important;
++    box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 22px 48px rgba(237,176,78,0.22) !important;
++  }
++
++  /* ticket attached to cup top-right */
++  .oh4-order-ticket {
++    right: 10% !important;
++    top: 12% !important;
++    bottom: auto !important;
++    width: 106px !important;
++    min-height: 96px !important;
++    padding: 10px 10px !important;
++  }
++
++  /* tighten headline/left-col spacing */
++  .oh4-left-col { padding-top: 28px !important; }
++  .oh4-headline { margin-top: 4px !important; }
++  .oh4-text-layer { transform: translateY(24px) !important; }
++
++  /* nudge food circles outward to frame cup without colliding */
++  .oh5-bg-item-wrap[data-id="cup1"] { --oh4-edit-image-cup1-left: 10%; --oh4-edit-image-cup1-top: 14%; --oh4-edit-image-cup1-width: clamp(96px,14vw,128px); --oh4-edit-image-cup1-height: clamp(96px,14vw,128px); }
++  .oh5-bg-item-wrap[data-id="cup2"] { --oh4-edit-image-cup2-left: 90%; --oh4-edit-image-cup2-top: 14%; --oh4-edit-image-cup2-width: clamp(96px,14vw,128px); --oh4-edit-image-cup2-height: clamp(96px,14vw,128px); }
++  .oh5-bg-item-wrap[data-id="cup3"] { --oh4-edit-image-cup3-left: 10%; --oh4-edit-image-cup3-top: 86%; --oh4-edit-image-cup3-width: clamp(96px,15vw,132px); --oh4-edit-image-cup3-height: clamp(96px,15vw,132px); }
++  .oh5-bg-item-wrap[data-id="cup4"] { --oh4-edit-image-cup4-left: 90%; --oh4-edit-image-cup4-top: 86%; --oh4-edit-image-cup4-width: clamp(96px,15vw,132px); --oh4-edit-image-cup4-height: clamp(96px,15vw,132px); }
++}
+ 
+   .oh4-headline .oh4-hl-line1,
+   .oh4-headline .oh4-hl-line2,
+@@ -146,6 +194,10 @@
+       0 4px 12px rgba(255,255,255,0.07);
+   }
+ 
++  .oh4-headline .oh4-hl-line3 {
++    color: #b69230 !important;
++  }
++
+   .oh4-eyebrow {
+     color: var(--white) !important;
+     text-shadow: 0 10px 28px rgba(0,0,0,0.68);
+@@ -190,7 +242,6 @@
+     position: relative;
+     z-index: 4;
+   }
+-}
+ .oh4-bg-glow {
+   position: absolute;
+   width: 130vmin;
+@@ -229,21 +280,81 @@
+   inset: 0;
+   z-index: 2;
+   pointer-events: none;
++  background: linear-gradient(180deg, rgba(13,11,8,0.10) 0%, rgba(13,11,8,0.35) 100%);
+   opacity: var(--oh5-bg-opacity, 1);
+   transition: opacity 0.2s linear;
+ }
+ 
++.oh5-bg-item-wrap {
++  position: absolute;
++  border-radius: 28px;
++  overflow: hidden;
++  background: rgba(11, 8, 5, 0.32);
++  border: 1px solid rgba(255, 255, 255, 0.08);
++  box-shadow: 0 26px 68px rgba(0, 0, 0, 0.30);
++}
++
+ .oh5-bg-item {
+   position: absolute;
+-  transform: translate(-50%, -50%);
+-  object-fit: contain;
++  inset: 0;
++  width: 100%;
++  height: 100%;
++  object-fit: cover;
++  display: block;
+   pointer-events: none;
+   user-select: none;
+   -webkit-user-drag: none;
+ }
+ 
++.oh5-bg-item-tag {
++  position: absolute;
++  bottom: 12px;
++  left: 12px;
++  display: inline-flex;
++  align-items: center;
++  justify-content: center;
++  padding: 5px 10px;
++  border-radius: 10px;
++  border: 1px solid rgba(200, 155, 69, 0.35);
++  background: rgba(12, 8, 5, 0.92);
++  color: var(--gold-lt);
++  font-family: var(--fb);
++  font-size: 10px;
++  letter-spacing: 0.24em;
++  text-transform: uppercase;
++  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.22);
++  transform: rotate(-3deg);
++  transform-origin: left bottom;
++}
++
++.oh5-bg-item-wrap[data-id="cup2"] .oh5-bg-item-tag,
++.oh5-bg-item-wrap[data-id="cup4"] .oh5-bg-item-tag {
++  left: auto;
++  right: 12px;
++  transform: rotate(3deg);
++  transform-origin: right bottom;
++}
++
++.oh5-bg-item-wrap[data-id="cup3"] .oh5-bg-item-tag {
++  transform: rotate(-4deg);
++}
++
++.oh5-doodle {
++  position: absolute;
++  transform: translate(-50%, -50%);
++  color: var(--gold-lt);
++  opacity: 0.92;
++  pointer-events: none;
++}
++
++.oh5-doodle svg {
++  width: 100%;
++  height: 100%;
++  display: block;
++}
++
+ @media (max-width: 700px) {
+-  .oh5-bg-composition { display: block; }
++  .oh5-bg-composition { display: block; pointer-events: none; z-index: 2 !important; opacity: var(--oh5-bg-opacity, 1) !important; }
+ 
+   .oh4-hero {
+     --oh4-catbar-top-offset: 0px;
+@@ -396,6 +507,19 @@
+   margin: 0;
+   gap: 0;
+ }
++.desktop-only { display: block; }
++.mobile-only { display: none; }
++
++@media (max-width: 700px) {
++  .desktop-only { display: none !important; }
++  .mobile-only { display: block !important; }
++}
++
++.oh4-hl-topline {
++  display: inline-flex;
++  gap: 0.35em;
++  align-items: baseline;
++}
+ .oh4-hl-line1,
+ .oh4-hl-line2 {
+   font-family: var(--fp);
+@@ -406,16 +530,7 @@
+   color: var(--white);
+   letter-spacing: -0.01em;
+ }
+-/* "Loved by All." ΓÇö Cormorant italic gold, larger */
+-.oh4-hl-line3 {
+-  font-family: var(--fc);
+-  font-style: italic;
+-  font-weight: 400;
+-  font-size: clamp(46px, 6.4vw, 84px);
+-  line-height: 1.08;
+-  color: var(--gold-lt);
+-  margin-top: 2px;
+-}
++
+ 
+ /* Gold underline accent below headline */
+ .oh4-headline::after {
+@@ -965,6 +1080,413 @@
+   }
+ }
+ 
++@media (max-width: 700px) {
++  .oh4-hero {
++    text-align: center;
++    min-height: 100svh;
++  }
++
++  /* TEXT LAYER sits above canvas, controlling all text/buttons positioning */
++  .oh4-text-layer {
++    z-index: 20 !important;
++    position: absolute !important;
++    inset: 0 !important;
++    display: flex !important;
++    flex-direction: column !important;
++    align-items: center !important;
++    pointer-events: none !important;
++  }
++
++  .oh4-text-layer > * {
++    position: relative !important;
++    pointer-events: auto !important;
++  }
++
++  /* LEFT COL = logo + headline section, positioned at top */
++  .oh4-left-col {
++    position: relative !important;
++    top: auto !important;
++    left: auto !important;
++    right: auto !important;
++    transform: translateX(var(--mobile-hero-left-offset)) !important;
++    width: 100% !important;
++    height: auto !important;
++    padding: 40px 20px 0 !important;
++    margin-top: var(--mobile-hero-top-offset) !important;
++    flex-shrink: 0 !important;
++  }
++
++  .oh4-eyebrow {
++    flex-direction: column !important;
++    align-items: center !important;
++    justify-content: center !important;
++    gap: 10px !important;
++    margin-bottom: 12px !important;
++    font-family: var(--mobile-eyebrow-font) !important;
++  }
++
++  .oh4-eyebrow-rule {
++    width: 36px !important;
++    height: 2px !important;
++    background: linear-gradient(90deg, rgba(255,255,255,0.95), rgba(255,255,255,0.16)) !important;
++    margin: 0 auto !important;
++  }
++
++  .oh4-logo-sprig {
++    width: 32px !important;
++    height: 32px !important;
++    display: inline-flex !important;
++    align-items: center !important;
++    justify-content: center !important;
++    color: var(--gold) !important;
++  }
++
++  .oh4-logo-wordmark {
++    font-family: var(--mobile-logo-font) !important;
++    font-size: clamp(0px, 6vw, 56px) !important;
++    font-weight: 700 !important;
++    letter-spacing: -0.04em !important;
++    color: #E7602B !important;
++    line-height: 0.4 !important;
++    transform: translateY(-40px) !important;
++    text-transform: none !important;
++  }
++
++  .oh4-logo-tagline {
++    font-family: var(--mobile-body-font) !important;
++    font-size: clamp(11px, 2vw, 13px) !important;
++    letter-spacing: 0.42em !important;
++    text-transform: uppercase !important;
++    color: rgba(255,215,135,0.95) !important;
++    display: inline-flex !important;
++    align-items: center !important;
++    justify-content: center !important;
++    margin-top: 4px !important;
++    transform: translateY(-40px) !important;
++  }
++
++  .oh4-logo-subtitle {
++    display: none !important;
++  }
++
++  .oh4-headline {
++    display: flex !important;
++    flex-direction: column !important;
++    align-items: center !important;
++    margin: 8px 0 0 0 !important;
++    gap: 0 !important;
++    line-height: 0.9 !important;
++    text-transform: none !important;
++    margin-top: var(--mobile-headline-top-offset) !important;
++    transform: translateX(var(--mobile-headline-left-offset)) !important;
++  }
++
++  .oh4-hl-topline {
++    display: inline-flex !important;
++    gap: 1.0em !important;
++    align-items: baseline !important;
++  }
++
++  .oh4-hl-line1,
++  .oh4-hl-line2 {
++    font-family: var(--mobile-headline-font) !important;
++    font-size: clamp(154px, 8vw, 84px) !important;
++    line-height: 0.4 !important;
++    letter-spacing: -0.01em !important;
++    font-weight: 800 !important;
++  }
++
++  .oh4-hl-line1 {
++    color: var(--white) !important;
++  }
++
++  .oh4-hl-line2 {
++    color: transparent !important;
++    -webkit-text-fill-color: transparent !important;
++    -webkit-text-stroke: 1.8px #E7602B !important;
++    white-space: nowrap !important;
++    display: inline-block !important;
++    margin-top: -6px !important;
++  }
++
++  .oh4-hl-line3 {
++    font-family: var(--mobile-headline-italic-font) !important;
++    font-size: var(--mobile-headline-line3-size) !important;
++    color: #F2C24D !important;
++    font-style: italic !important;
++    letter-spacing: -0.03em !important;
++    margin-top: -8px !important;
++    line-height: 0.92 !important;
++  }
++
++
++  .oh4-headline::after {
++    display: none !important;
++  }
++
++  /* PARAGRAPH positioned below headline, before buttons */
++  .oh4-hero-para {
++    position: relative !important;
++    top: auto !important;
++    left: auto !important;
++    right: auto !important;
++    transform: translateX(var(--mobile-para-left-offset)) !important;
++    max-width: min(38ch, 86vw) !important;
++    margin: 28px auto 0 !important;
++    font-family: var(--mobile-body-font) !important;
++    font-size: var(--mobile-para-size) !important;
++    line-height: 1.7 !important;
++    color: rgba(247,243,236,0.94) !important;
++    flex-shrink: 0 !important;
++    margin-top: var(--mobile-para-top-offset) !important;
++  }
++
++  /* BUTTONS positioned below paragraph */
++  .oh4-hero-ctas {
++    position: relative !important;
++    top: auto !important;
++    left: auto !important;
++    right: auto !important;
++    transform: translateX(var(--mobile-ctas-left-offset)) !important;
++    flex-wrap: wrap !important;
++    justify-content: center !important;
++    gap: var(--mobile-hero-cta-gap) !important;
++    margin-top: var(--mobile-ctas-top-offset) !important;
++    width: auto !important;
++    flex-shrink: 0 !important;
++  }
++
++  .oh4-cta-gold,
++  .oh4-cta-outline {
++    font-family: var(--mobile-body-font) !important;
++    font-size: 11px !important;
++    padding: 11px 24px !important;
++  }
++
++  .oh4-cat-bar,
++  .oh4-stamp,
++  .oh4-flourish {
++    display: none !important;
++  }
++
++  /* CANVAS = cup, positioned in middle-upper area */
++  .oh4-canvas-wrap {
++    position: absolute !important;
++    top: 22% !important;
++    left: 50% !important;
++    right: auto !important;
++    transform: translateX(-50%) !important;
++    width: clamp(180px, 28vw, 240px) !important;
++    height: clamp(180px, 28vw, 240px) !important;
++    z-index: 11 !important;
++    bottom: auto !important;
++  }
++
++  .oh4-canvas-wrap canvas {
++    width: 100% !important;
++    height: 100% !important;
++    display: block !important;
++  }
++
++  /* CUP DECORATIONS = ring + ticket */
++  .oh4-cup-decorations {
++    display: block !important;
++    position: absolute !important;
++    inset: 0 !important;
++    pointer-events: none !important;
++    z-index: 10 !important;
++  }
++
++  .oh4-cup-ring {
++    position: absolute !important;
++    left: 50% !important;
++    top: 50% !important;
++    width: clamp(200px, 30vw, 260px) !important;
++    aspect-ratio: 1 !important;
++    transform: translate(-50%, -50%) !important;
++    border-radius: 50% !important;
++    border: 1px dashed rgba(255, 255, 255, 0.20) !important;
++    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 16px 40px rgba(237, 176, 78, 0.20) !important;
++    background: radial-gradient(circle at 32% 32%, rgba(255, 255, 255, 0.10), transparent 52%) !important;
++  }
++
++  .oh4-order-ticket {
++    position: absolute !important;
++    right: -6% !important;
++    top: 8% !important;
++    width: 102px !important;
++    min-height: 96px !important;
++    padding: 12px 11px 12px !important;
++    border-radius: 20px !important;
++    border: 1px solid rgba(255, 255, 255, 0.12) !important;
++    background: rgba(16, 10, 6, 0.94) !important;
++    box-shadow: 0 20px 56px rgba(0, 0, 0, 0.24) !important;
++    display: flex !important;
++    flex-direction: column !important;
++    align-items: center !important;
++    justify-content: center !important;
++    gap: 4px !important;
++  }
++
++  .oh4-order-ticket::before {
++    display: none !important;
++  }
++
++  .oh4-ticket-connector {
++    width: 32px !important;
++    height: 1.5px !important;
++    background: linear-gradient(90deg, rgba(255,255,255,0.68), rgba(255,255,255,0.18)) !important;
++    margin: 0 !important;
++    border-radius: 2px !important;
++    display: block !important;
++  }
++
++  .oh4-ticket-title {
++    font-size: 10px !important;
++    font-weight: 700 !important;
++    letter-spacing: 0.16em !important;
++    color: var(--white) !important;
++  }
++
++  .oh4-ticket-sub {
++    font-size: 8px !important;
++    letter-spacing: 0.3em !important;
++    color: rgba(255,255,255,0.62) !important;
++  }
++
++  /* FOOD CIRCLES positioned around cup */
++  .oh5-bg-composition {
++    display: block !important;
++    position: absolute !important;
++    inset: 0 !important;
++    z-index: 9 !important;
++  }
++
++  .oh5-bg-item-wrap {
++    border-radius: 50% !important;
++    overflow: hidden !important;
++    background: rgba(14, 9, 5, 0.48) !important;
++    border: 1px solid rgba(255, 255, 255, 0.12) !important;
++    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.28) !important;
++  }
++
++  .oh5-bg-item {
++    width: 100% !important;
++    height: 100% !important;
++    object-fit: cover !important;
++    border-radius: 50% !important;
++  }
++
++  .oh5-bg-item-wrap[data-id="cup1"] {
++    --oh4-edit-image-cup1-left: 13%;
++    --oh4-edit-image-cup1-top: 18%;
++    --oh4-edit-image-cup1-width: clamp(110px, 16vw, 140px);
++    --oh4-edit-image-cup1-height: clamp(110px, 16vw, 140px);
++  }
++
++  .oh5-bg-item-wrap[data-id="cup2"] {
++    --oh4-edit-image-cup2-left: 87%;
++    --oh4-edit-image-cup2-top: 18%;
++    --oh4-edit-image-cup2-width: clamp(110px, 16vw, 140px);
++    --oh4-edit-image-cup2-height: clamp(110px, 16vw, 140px);
++  }
++
++  .oh5-bg-item-wrap[data-id="cup3"] {
++    --oh4-edit-image-cup3-left: 13%;
++    --oh4-edit-image-cup3-top: 80%;
++    --oh4-edit-image-cup3-width: clamp(112px, 16.5vw, 144px);
++    --oh4-edit-image-cup3-height: clamp(112px, 16.5vw, 144px);
++  }
++
++  .oh5-bg-item-wrap[data-id="cup4"] {
++    --oh4-edit-image-cup4-left: 90%;
++    --oh4-edit-image-cup4-top: 80%;
++    --oh4-edit-image-cup4-width: clamp(112px, 16.5vw, 144px);
++    --oh4-edit-image-cup4-height: clamp(112px, 16.5vw, 144px);
++  }
++
++  .oh5-bg-item-tag {
++    bottom: 10px !important;
++    left: 10px !important;
++    right: auto !important;
++    padding: 5px 9px !important;
++    border-radius: 999px !important;
++    background: rgba(0, 0, 0, 0.68) !important;
++    border: 1px solid rgba(255, 255, 255, 0.10) !important;
++    color: var(--gold-lt) !important;
++    font-size: 8px !important;
++    letter-spacing: 0.22em !important;
++    text-transform: uppercase !important;
++    white-space: nowrap !important;
++  }
++
++  .oh5-doodle {
++    opacity: 0.85 !important;
++  }
++
++  .oh5-doodle--sparkle { left: 12% !important; top: 10% !important; }
++  .oh5-doodle--heart { left: 24% !important; top: 36% !important; }
++  .oh5-doodle--beans { left: 79% !important; top: 16% !important; }
++  .oh5-doodle--star { left: 88% !important; top: 74% !important; }
++  .oh5-doodle--sparkle-small { left: 62% !important; top: 30% !important; }
++
++  /* STATS BAR at absolute bottom */
++  .oh4-stats-bar {
++    position: absolute !important;
++    bottom: 14px !important;
++    left: 50% !important;
++    right: auto !important;
++    top: auto !important;
++    transform: translateX(-50%) !important;
++    width: min(94vw, 720px) !important;
++    height: auto !important;
++    padding: 14px 16px !important;
++    display: flex !important;
++    flex-wrap: wrap !important;
++    justify-content: center !important;
++    gap: 10px !important;
++    background: rgba(10, 6, 3, 0.90) !important;
++    border: 1px solid rgba(255, 255, 255, 0.10) !important;
++    border-radius: 26px !important;
++    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.32) !important;
++    z-index: 20 !important;
++  }
++
++  .oh4-stat-item {
++    display: flex !important;
++    flex-direction: column !important;
++    align-items: center !important;
++    justify-content: center !important;
++    min-width: 120px !important;
++    flex: 0 1 120px !important;
++    padding: 10px 12px !important;
++    background: rgba(255, 255, 255, 0.02) !important;
++    border-radius: 16px !important;
++    gap: 6px !important;
++  }
++
++  .oh4-stat-ico {
++    color: var(--gold) !important;
++    flex-shrink: 0 !important;
++  }
++
++  .oh4-stat-label {
++    font-size: 10px !important;
++    font-weight: 600 !important;
++    letter-spacing: 0.08em !important;
++    color: var(--white) !important;
++    line-height: 1 !important;
++  }
++
++  .oh4-stat-sub {
++    display: none !important;
++  }
++
++  .oh4-stat-divider {
++    display: none !important;
++  }
++}
++
+ @media (max-width: 600px) {
+   .oh4-stat-divider:nth-child(6),
+   .oh4-stat-item:nth-child(7) { display: none; } /* hide last stat on mobile */
+@@ -1064,8 +1586,8 @@
+        when viewport height is tight. Prefer the smaller of vw/vh but cap
+        at reasonable max sizes. */
+     /* Headlines slightly larger at this breakpoint to match reference */
+-    --oh4-edit-headline1-size: min(6.6vw, 8vh, 52px);
+-    --oh4-edit-headline3-size: min(6.6vw, 7.6vh, 48px);
++    --oh4-edit-headline1-size: var(--mobile-headline-size);
++    --oh4-edit-headline3-size: var(--mobile-headline-line3-size);
+     --oh4-edit-eyebrow-size: 10px;
+     --oh4-edit-eyebrow-gap: 10px;
+     --oh4-edit-eyebrow-margin-bottom: clamp(10px, 1.6vh, 16px);
+@@ -1077,7 +1599,7 @@
+     --oh4-edit-paragraph-max-width: min(32ch, 88vw);
+     /* Paragraph size tuned to viewport height to avoid overflow */
+     /* Slightly larger paragraph text for readability on tall phones */
+-    --oh4-edit-paragraph-font-size: clamp(15px, 2.2vh, 17px);
++    --oh4-edit-paragraph-font-size: var(--mobile-para-size);
+     --oh4-edit-paragraph-padding-x: clamp(20px, 6vw, 36px);
+     --oh4-edit-cta-top-offset: clamp(180px, 2.2vh, 20px);
+     --oh4-edit-cta-left: clamp(0px, 3vw, 30px);
+@@ -1238,6 +1760,9 @@
+   .oh4-cta-icon {
+     display: none;
+   }
++  .oh4-stamp {
++    display: none;
++  }
+ 
+   .oh4-stats-bar {
+     display: none;
+@@ -1251,6 +1776,87 @@
+     transform: translateY(38px);
+   }
+ 
++  .oh4-cup-decorations {
++    display: none;
++    position: absolute;
++    inset: 0;
++    pointer-events: none;
++    z-index: 1;
++  }
++
++  .oh4-cup-ring {
++    position: absolute;
++    left: 50%;
++    top: 24%;
++    width: min(22vh, 170px);
++    aspect-ratio: 1;
++    transform: translate(-50%, -50%);
++    border-radius: 50%;
++    border: 1px solid rgba(255, 255, 255, 0.18);
++    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 18px 42px rgba(237, 176, 78, 0.18);
++    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.24), transparent 42%);
++  }
++
++  .oh4-order-ticket {
++    position: absolute;
++    right: 8%;
++    bottom: 10%;
++    width: 98px;
++    min-height: 98px;
++    padding: 12px 12px 14px;
++    border-radius: 22px;
++    background: rgba(16, 10, 6, 0.92);
++    border: 1px solid rgba(255, 255, 255, 0.08);
++    box-shadow: 0 26px 56px rgba(0, 0, 0, 0.24);
++    display: flex;
++    flex-direction: column;
++    justify-content: center;
++    gap: 4px;
++    color: var(--cream);
++    font-family: var(--fb);
++    font-size: 10px;
++    letter-spacing: 0.2em;
++    text-transform: uppercase;
++  }
++
++  .oh4-order-ticket::before {
++    content: "";
++    position: absolute;
++    left: 12px;
++    right: 12px;
++    top: 18px;
++    height: 1px;
++    background: rgba(255, 255, 255, 0.08);
++  }
++
++  .oh4-ticket-connector {
++    width: 36px;
++    height: 2px;
++    background: linear-gradient(90deg, rgba(255,255,255,0.72), rgba(255,255,255,0.16));
++    margin-bottom: 4px;
++    border-radius: 1px;
++  }
++
++  .oh4-ticket-title,
++  .oh4-ticket-sub {
++    margin: 0;
++    display: inline-block;
++    width: 100%;
++    text-align: left;
++  }
++
++  .oh4-ticket-title {
++    font-size: 12px;
++    font-weight: 700;
++    letter-spacing: 0.22em;
++  }
++
++  .oh4-ticket-sub {
++    font-size: 9px;
++    color: rgba(255, 255, 255, 0.72);
++    letter-spacing: 0.3em;
++  }
++
+   .oh4-canvas-wrap {
+     top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) - 220px) !important;
+   }
+@@ -1298,8 +1904,8 @@
+     /* --oh4-edit-headline-padding-top: clamp(34px, 8vh, 60px); */
+     --oh4-edit-headline-padding-x: clamp(20px, 6vw, 30px);
+     /* Keep the headline sizing from shrinking as the width enters the 500px range */
+-    --oh4-edit-headline1-size: clamp(39px, 6.6vw, 52px);
+-    --oh4-edit-headline3-size: clamp(38px, 6.6vw, 48px);
++    --oh4-edit-headline1-size: var(--mobile-headline-size);
++    --oh4-edit-headline3-size: var(--mobile-headline-line3-size);
+     --oh4-edit-eyebrow-size: 10px;
+     --oh4-edit-eyebrow-gap: 10px;
+     --oh4-edit-eyebrow-margin-bottom: clamp(10px, 1.6vh, 16px);
+@@ -1311,7 +1917,7 @@
+     --oh4-edit-paragraph-max-width: min(32ch, 88vw);
+     /* Paragraph size tuned to viewport height to avoid overflow */
+     /* Slightly larger paragraph text for readability on tall phones */
+-    --oh4-edit-paragraph-font-size: clamp(15px, 2.2vh, 17px);
++    --oh4-edit-paragraph-font-size: var(--mobile-para-size);
+     --oh4-edit-paragraph-padding-x: clamp(20px, 6vw, 36px);
+     --oh4-edit-cta-top-offset: clamp(180px, 2.2vh, 20px);
+     --oh4-edit-cta-left: clamp(0px, 3vw, 30px);
+@@ -1479,6 +2085,197 @@
+     display: none;
+   }
+ 
++/* ============================
++   MOBILE REBUILD (FINAL OVERRIDE)
++   This block intentionally comes last and enforces a predictable,
++   mobile-first stacked layout for widths <=700px. It resets any
++   conflicting per-tier calc() placements and restores a simple
++   vertical flow: logo/eyebrow ΓåÆ headline ΓåÆ cup (centered) ΓåÆ para ΓåÆ CTAs
++   Food circles are placed in the four corners and the ring/ticket
++   decorate the cup without overlapping text. Only applies at <=700px.
++   ============================ */
++@media (max-width: 700px) {
++  .oh4-hero { min-height: 100svh; }
++
++  /* Text layer becomes a vertical flex stack */
++  .oh4-text-layer {
++    position: relative !important;
++    inset: auto !important;
++    display: flex !important;
++    flex-direction: column !important;
++    align-items: center !important;
++    justify-content: flex-start !important;
++    padding: 28px 16px 140px !important;
++    gap: 10px !important;
++    z-index: 9999 !important;
++    pointer-events: none !important;
++    background: transparent !important;
++    transform: none !important;
++  }
++
++  /* Make direct children flow naturally */
++  .oh4-text-layer > * {
++    position: static !important;
++    width: 100% !important;
++    max-width: 92vw !important;
++    margin: 0 auto !important;
++    pointer-events: auto !important;
++  }
++
++  /* Left column becomes the top stack area */
++  .oh4-left-col {
++    position: static !important;
++    width: 100% !important;
++    padding: 6px 16px 6px !important;
++    display: flex !important;
++    flex-direction: column !important;
++    align-items: center !important;
++    text-align: center !important;
++  }
++
++  /* Headline sits above cup and has high stacking context */
++  .oh4-headline { z-index: 32 !important; }
++  .oh4-headline { position: relative !important; z-index: 10000 !important; }
++  .oh4-hl-line1, .oh4-hl-line2, .oh4-hl-line3 { line-height: 1 !important; }
++
++  /* Cup wrapper: centered, above the fold, absolute so it doesn't
++     affect the flow height but visually sits between headline and para */
++  .oh4-canvas-wrap {
++    position: absolute !important;
++    left: 50% !important;
++    top: 36% !important;
++    transform: translateX(-50%) !important;
++    width: clamp(180px, 30vw, 260px) !important;
++    height: clamp(180px, 30vw, 260px) !important;
++    z-index: 50 !important;
++    pointer-events: none !important;
++  }
++
++  /* Ensure the canvas element fills the wrapper */
++  .oh4-canvas-wrap canvas { width: 100% !important; height: 100% !important; }
++
++  /* Cup decorations ΓÇö ring and ticket ΓÇö placed relative to canvas
++     wrapper using absolute coordinates inside the wrapper to avoid
++     overlapping headline text. */
++  .oh4-cup-decorations { position: absolute !important; inset: 0 !important; z-index: 60 !important; pointer-events: none !important; }
++
++  .oh4-cup-ring {
++    position: absolute !important;
++    left: 50% !important;
++    top: 68% !important;
++    transform: translate(-50%, -50%) !important;
++    width: clamp(240px, 36vw, 320px) !important;
++    aspect-ratio: 1 !important;
++    border-radius: 50% !important;
++    z-index: 40 !important;
++    pointer-events: none !important;
++    border: 2px dashed rgba(255,255,255,0.8) !important;
++  }
++  .oh4-order-ticket {
++    display: none !important; /* hide ticket on mobile to avoid overlap */
++  }
++
++  /* Paragraph and CTAs flow below cup (in normal document order) */
++  .oh4-hero-para { margin-top: calc(28px + 26vh) !important; padding: 0 10px !important; }
++  .oh4-hero-ctas { margin-top: 18px !important; }
++
++  /* Food circles: explicit corner framing values for mobile */
++  .oh5-bg-composition { display: block !important; position: absolute !important; inset: 0 !important; z-index: 20 !important; pointer-events: none !important; }
++  .oh5-bg-item-wrap[data-id="cup1"] { --oh4-edit-image-cup1-left: 10%; --oh4-edit-image-cup1-top: 14%; --oh4-edit-image-cup1-width: clamp(96px,14vw,128px); --oh4-edit-image-cup1-height: clamp(96px,14vw,128px); }
++  .oh5-bg-item-wrap[data-id="cup2"] { --oh4-edit-image-cup2-left: 90%; --oh4-edit-image-cup2-top: 14%; --oh4-edit-image-cup2-width: clamp(96px,14vw,128px); --oh4-edit-image-cup2-height: clamp(96px,14vw,128px); }
++  .oh5-bg-item-wrap[data-id="cup3"] { --oh4-edit-image-cup3-left: 10%; --oh4-edit-image-cup3-top: 88%; --oh4-edit-image-cup3-width: clamp(96px,15vw,132px); --oh4-edit-image-cup3-height: clamp(96px,15vw,132px); }
++  .oh5-bg-item-wrap[data-id="cup4"] { --oh4-edit-image-cup4-left: 90%; --oh4-edit-image-cup4-top: 88%; --oh4-edit-image-cup4-width: clamp(96px,15vw,132px); --oh4-edit-image-cup4-height: clamp(96px,15vw,132px); }
++
++  /* Stats bar ΓÇö bottom centered pill */
++  .oh4-stats-bar { position: fixed !important; bottom: 14px !important; left: 50% !important; transform: translateX(-50%) !important; width: min(94vw, 720px) !important; z-index: 35 !important; border-radius: 26px !important; }
++
++  /* Hide desktop-only accents */
++  .oh4-stamp, .oh4-flourish, .oh4-cat-bar { display: none !important; }
++}
++
++/* ==========================================================================
++   Mobile structural override (final safety net)
++   Ensures the hero text zones participate in a vertical flex flow and
++   neutralizes any remaining `top`/`calc()` positioning coming from
++   the per-tier blocks above. Placed last to ensure it wins specificity.
++   ========================================================================== */
++
++@media (max-width: 700px) {
++  .oh4-text-layer {
++    display: flex !important;
++    flex-direction: column !important;
++    align-items: center !important;
++    justify-content: flex-start !important;
++    gap: 12px !important;
++    padding-top: 36px !important;
++    padding-bottom: 120px !important;
++    pointer-events: none !important;
++    background: transparent !important;
++    transform: none !important;
++  }
++
++  .oh4-text-layer > * {
++    position: static !important;
++    top: auto !important;
++    left: auto !important;
++    right: auto !important;
++    transform: none !important;
++    margin: 0 auto !important;
++    width: 100% !important;
++    pointer-events: auto !important;
++  }
++
++  /* Ensure left column flows within the flex column rather than
++     being absolutely positioned (this was the root cause of overlap). */
++  .oh4-left-col {
++    position: static !important;
++    height: auto !important;
++    width: 100% !important;
++    padding: 40px 20px 0 !important;
++    margin: 0 !important;
++    transform: none !important;
++  }
++
++  /* Neutralize any per-tier calc() `top` placements that appear later
++     in the stylesheet so paragraph/CTAs stay in flow under the cup. */
++  .oh4-hero-para,
++  .oh4-hero-ctas,
++  .oh4-cat-bar {
++    position: static !important;
++    top: auto !important;
++    left: auto !important;
++    right: auto !important;
++    transform: none !important;
++    margin: 0 auto !important;
++    width: 100% !important;
++    max-width: 86vw !important;
++  }
++
++  /* Keep the cup absolutely centered but limited in size so it sits
++     visually between the headline and paragraph without overlapping. */
++  .oh4-canvas-wrap {
++    position: absolute !important;
++    top: 22% !important;
++    left: 50% !important;
++    transform: translateX(-50%) !important;
++    width: clamp(170px, 26vw, 220px) !important;
++    height: clamp(170px, 26vw, 220px) !important;
++    z-index: 11 !important;
++  }
++
++  .oh4-cup-decorations {
++    pointer-events: none !important;
++  }
++
++  /* Slightly tighten food-circle sizes so they frame the cup without
++     intruding on the stacked content. These vars are read by
++     BackgroundComposition.jsx via inline style hooks. */
++  .oh5-bg-item-wrap[data-id="cup1"] { --oh4-edit-image-cup1-left: 12%; --oh4-edit-image-cup1-top: 16%; --oh4-edit-image-cup1-width: clamp(100px,14.5vw,132px); --oh4-edit-image-cup1-height: clamp(100px,14.5vw,132px); }
++  .oh5-bg-item-wrap[data-id="cup2"] { --oh4-edit-image-cup2-left: 88%; --oh4-edit-image-cup2-top: 16%; --oh4-edit-image-cup2-width: clamp(100px,14.5vw,132px); --oh4-edit-image-cup2-height: clamp(100px,14.5vw,132px); }
++  .oh5-bg-item-wrap[data-id="cup3"] { --oh4-edit-image-cup3-left: 12%; --oh4-edit-image-cup3-top: 82%; --oh4-edit-image-cup3-width: clamp(100px,15vw,136px); --oh4-edit-image-cup3-height: clamp(100px,15vw,136px); }
++  .oh5-bg-item-wrap[data-id="cup4"] { --oh4-edit-image-cup4-left: 88%; --oh4-edit-image-cup4-top: 82%; --oh4-edit-image-cup4-width: clamp(100px,15vw,136px); --oh4-edit-image-cup4-height: clamp(100px,15vw,136px); }
++}
++
+   .oh4-canvas-wrap {
+     top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) - 20px) !important;
+   }
+@@ -1493,6 +2290,16 @@
+ 
+ }
+ 
++/* Final safety net: force mobile ring/ticket tweaks and nudge food circles */
++@media (max-width: 700px) {
++  .oh4-order-ticket { display: none !important; }
++  .oh4-cup-ring { opacity: 0.92 !important; transform: translate(-50%, -48%) scale(0.98) !important; }
++  .oh5-bg-item-wrap[data-id="cup1"] { --oh4-edit-image-cup1-left: 8% !important; --oh4-edit-image-cup1-top: 12% !important; }
++  .oh5-bg-item-wrap[data-id="cup2"] { --oh4-edit-image-cup2-left: 92% !important; --oh4-edit-image-cup2-top: 12% !important; }
++  .oh5-bg-item-wrap[data-id="cup3"] { --oh4-edit-image-cup3-left: 8% !important; --oh4-edit-image-cup3-top: 92% !important; }
++  .oh5-bg-item-wrap[data-id="cup4"] { --oh4-edit-image-cup4-left: 92% !important; --oh4-edit-image-cup4-top: 92% !important; }
++}
++
+ /* duplicate temporary override removed; values are in the main 500ΓÇô600 block above */
+ 
+ /* ΓöÇΓöÇ 400ΓÇô500px ΓöÇΓöÇ */
+@@ -1521,6 +2328,7 @@
+   }
+ 
+   .oh4-hero {
++    min-height: 100svh;
+     --oh4-head-h: clamp(48px, 38vh, 420px);
+     --oh4-cup-h: clamp(140px, 22vh, 260px);
+     --oh4-para-h: clamp(92px, 18vh, 180px);
+@@ -1532,8 +2340,8 @@
+     /* --oh4-edit-headline-padding-top: clamp(34px, 8vh, 60px); */
+     --oh4-edit-headline-padding-x: clamp(20px, 6vw, 30px);
+     /* Keep the headline sizing from shrinking as the width enters the 500px range */
+-    --oh4-edit-headline1-size: clamp(39px, 6.6vw, 52px);
+-    --oh4-edit-headline3-size: clamp(38px, 6.6vw, 48px);
++    --oh4-edit-headline1-size: var(--mobile-headline-size);
++    --oh4-edit-headline3-size: var(--mobile-headline-line3-size);
+     --oh4-edit-eyebrow-size: 10px;
+     --oh4-edit-eyebrow-gap: 10px;
+     --oh4-edit-eyebrow-margin-bottom: clamp(10px, 1.6vh, 16px);
+@@ -1545,7 +2353,7 @@
+     --oh4-edit-paragraph-max-width: min(32ch, 88vw);
+     /* Paragraph size tuned to viewport height to avoid overflow */
+     /* Slightly larger paragraph text for readability on tall phones */
+-    --oh4-edit-paragraph-font-size: clamp(15px, 2.2vh, 17px);
++    --oh4-edit-paragraph-font-size: var(--mobile-para-size);
+     --oh4-edit-paragraph-padding-x: clamp(20px, 6vw, 36px);
+     --oh4-edit-cta-top-offset: clamp(180px, 2.2vh, 20px);
+     --oh4-edit-cta-left: clamp(0px, 3vw, 30px);
+@@ -1589,27 +2397,26 @@
+        untouched; this only magnifies the already-rendered pixels. */
+     --oh4-cup-top-offset: clamp(-170px, 2.2vh, -150px);
+     --oh4-cup-visual-scale: 0.93;
+-
+-    /* PARAGRAPH ΓÇö keep clear spacing between the headline, cup, and CTAs */
++    
++    /* PARAGRAPH ΓÇö pushed down slightly to keep clear of the now-larger,
++       higher-sitting cup, and to open up breathing room before CTAs */
+     --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
+     --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
+     --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
+     --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
+     --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
+-
+-    /* CTAs ΓÇö fixed spacing for the narrow 500ΓÇô600px band */
++    
++    /* CTAs ΓÇö extra top offset + bottom padding so the button pair no
++       longer crowds the paragraph above or the category bar below */
+     --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
+     --oh4-cta-left-offset: var(--oh4-edit-cta-left);
+     --oh4-cta-gap: var(--oh4-edit-cta-gap);
+     --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
+     --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
+-    --oh4-cta-h: 96px;
+-
+-    /* Slightly larger CTA text and padding for this band */
+-    --oh4-cta-font-size: 14px;
+-    --oh4-cta-padding-vertical: 14px;
++    --oh4-cta-h: clamp(96px, 15vh, 128px);
+ 
+-    /* CATEGORY BAR */
++    /* CATEGORY BAR (Zone 5) ΓÇö extra top offset opens a clear gap below
++       the CTAs instead of sitting right underneath them */
+     --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
+     --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
+ 
+@@ -1627,238 +2434,14 @@
+     --oh4-edit-image-cup3-left: 17%;
+     --oh4-edit-image-cup3-top: 80%;
+     --oh4-edit-image-cup3-width: 31vh;
+-    --oh4-edit-image-cup3-height: 36vh;
++    --oh4-edit-image-cup3-height: 36vh; 
+ 
+     --oh4-edit-image-cup4-left: 81%;
+     --oh4-edit-image-cup4-top: 80%;
+     --oh4-edit-image-cup4-width: 36vh;
+     --oh4-edit-image-cup4-height: 40vh;
+   }
+-
+-  .oh4-left-col {
+-    top: var(--oh4-head-top-offset);
+-    left: 50%;
+-    transform: translateX(-50%);
+-    padding-top: var(--oh4-head-padding-top);
+-    padding-left: var(--oh4-head-padding-x);
+-    padding-right: var(--oh4-head-padding-x);
+-    align-items: center;
+-    text-align: center;
+-  }
+-
+-  .oh4-text-layer {
+-    transform: translateY(38px);
+-  }
+-
+-  .oh4-cat-bar {
+-    display: none;
+-  }
+-
+-  .oh4-canvas-wrap {
+-    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) - 160px) !important;
+-    height: calc(100% - var(--oh4-head-h) - var(--oh4-cup-top-offset));
+-  }
+-
+-  /* Visual-only ~20% zoom on the cup, applied to the canvas element
+-     itself so it scales from center without shifting the wrapper's
+-     own top/height box math above (which everything below still
+-     stacks against). transform-origin centers the zoom on the
+-     canvas's own box, keeping the cup horizontally centered ΓÇö same
+-     centering MainCupImage.jsx's group already guarantees. */
+-  .oh4-canvas-wrap canvas {
+-    transform: scale(var(--oh4-cup-visual-scale));
+-    transform-origin: 50% 50%;
+-  }
+-
+-  .oh4-hl-line1, .oh4-hl-line2 { font-size: var(--oh4-hl-line1-size); }
+-  .oh4-hl-line3 { font-size: var(--oh4-hl-line3-size); }
+-  .oh4-eyebrow {
+-    font-size: var(--oh4-eyebrow-size);
+-    margin-bottom: var(--oh4-eyebrow-margin-bottom);
+-  }
+-  .oh4-hl-line2 {
+-    white-space: nowrap;
+-    display: inline-block;
+-  }
+-
+-  .oh4-hero-para {
+-    top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-top-offset));
+-    left: 50%;
+-    right: auto;
+-    transform: translateX(-50%);
+-    max-width: var(--oh4-para-max-width);
+-    font-size: var(--oh4-para-font-size);
+-    padding: 0 var(--oh4-para-padding-x);
+-    text-align: center;
+-  }
+-
+-  .oh4-hero-ctas {
+-    top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-h) + var(--oh4-cta-top-offset));
+-    left: 50%;
+-    right: auto;
+-    transform: translateX(-50%);
+-    gap: var(--oh4-cta-gap);
+-    max-width: var(--oh4-cta-max-width);
+-    padding-bottom: var(--oh4-cta-padding-bottom);
+-    justify-content: center;
+-  }
+-
+-  .oh4-cta-gold, .oh4-cta-outline {
+-    font-size: 11px;
+-    padding: 10px 18px;
+-    white-space: nowrap;
+-    gap: 0;
+-  }
+-  .oh4-cta-icon {
+-    display: none;
+-  }
+-
+-  .oh4-canvas-wrap {
+-    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) + 35px) !important;
+-  }
+-}
+-
+-/* ΓöÇΓöÇ 360ΓÇô400px ΓöÇΓöÇ */
+-@media (max-width: 400px) {
+-  .oh4-canvas-wrap canvas {
+-    transform: scale(var(--oh4-cup-visual-scale));
+-    transform-origin: 50% 50%;
+-    position: relative !important;
+-    z-index: 9999 !important;
+-  }
+-  .oh4-canvas-wrap {
+-    top: 0;
+-    height: 100%;
+-    z-index: 9999 !important;
+-  }
+-  .oh4-text-layer {
+-    z-index: 10 !important;
+-  }
+-
+-  .oh4-para-break {
+-    display: block;
+-  }
+-
+-  .oh4-hero-para .oh4-para-split {
+-    display: block;
+-  }
+-
+-  .oh4-hero {
+-    min-height: 100svh;
+-    --oh4-head-h: clamp(48px, 38vh, 420px);
+-    --oh4-cup-h: clamp(140px, 22vh, 260px);
+-    --oh4-para-h: clamp(92px, 18vh, 180px);
+-    text-align: center;
+-
+-    /* EASY EDIT SECTION ΓÇö change only these values for text layout */
+-    --oh4-edit-headline-top: clamp(-190px, -22vh, -170px);
+-    --oh4-edit-headline-left: clamp(180px, 16vw, 175px);
+-    /* --oh4-edit-headline-padding-top: clamp(34px, 8vh, 60px); */
+-    --oh4-edit-headline-padding-x: clamp(20px, 6vw, 30px);
+-    /* Keep the headline sizing from shrinking as the width enters the 500px range */
+-    --oh4-edit-headline1-size: clamp(39px, 6.6vw, 52px);
+-    --oh4-edit-headline3-size: clamp(38px, 6.6vw, 48px);
+-    --oh4-edit-eyebrow-size: 10px;
+-    --oh4-edit-eyebrow-gap: 10px;
+-    --oh4-edit-eyebrow-margin-bottom: clamp(10px, 1.6vh, 16px);
+-    --oh4-edit-eyebrow-margin-left: clamp(200px, 1.6vh, 16px);
+-    --oh4-edit-eyebrow-margin-right: 100px;
+-    /* Push paragraph down to create more vertical weight in the layout */
+-    --oh4-edit-paragraph-top-offset: clamp(180px, 6vh, 220px);
+-    --oh4-edit-paragraph-left: clamp(0px, 1vw, 5px);
+-    --oh4-edit-paragraph-max-width: min(32ch, 88vw);
+-    /* Paragraph size tuned to viewport height to avoid overflow */
+-    /* Slightly larger paragraph text for readability on tall phones */
+-    --oh4-edit-paragraph-font-size: clamp(15px, 2.2vh, 17px);
+-    --oh4-edit-paragraph-padding-x: clamp(20px, 6vw, 36px);
+-    --oh4-edit-cta-top-offset: clamp(180px, 2.2vh, 20px);
+-    --oh4-edit-cta-left: clamp(0px, 3vw, 30px);
+-    --oh4-edit-cta-gap: clamp(8px, 1.5vh, 10px);
+-    --oh4-edit-cta-max-width: min(250px, 82vw);
+-    --oh4-edit-cta-padding-bottom: clamp(22px, 4vh, 32px);
+-    --oh4-edit-catbar-top-offset: clamp(1000px, 2vh, 18px);
+-    --oh4-edit-catbar-padding-bottom: clamp(18px, 3.6vh, 30px);
+-
+-    /* internal layout variables ΓÇö keep these unless you want to change the structure */
+-    --oh4-head-top-offset: var(--oh4-edit-headline-top);
+-    --oh4-head-left-offset: var(--oh4-edit-headline-left);
+-    --oh4-head-padding-top: var(--oh4-edit-headline-padding-top);
+-    --oh4-head-padding-x: var(--oh4-edit-headline-padding-x);
+-    --oh4-hl-line1-size: var(--oh4-edit-headline1-size);
+-    --oh4-hl-line3-size: var(--oh4-edit-headline3-size);
+-    --oh4-eyebrow-size: var(--oh4-edit-eyebrow-size);
+-    --oh4-eyebrow-gap: var(--oh4-edit-eyebrow-gap);
+-    --oh4-eyebrow-margin-bottom: var(--oh4-edit-eyebrow-margin-bottom);
+-    --oh4-eyebrow-margin-left: var(--oh4-edit-eyebrow-margin-left);
+-    --oh4-eyebrow-margin-right: var(--oh4-edit-eyebrow-margin-right);
+-    --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
+-    --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
+-    --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
+-    --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
+-    --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
+-    --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
+-    --oh4-cta-left-offset: var(--oh4-edit-cta-left);
+-    --oh4-cta-gap: var(--oh4-edit-cta-gap);
+-    --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
+-    --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
+-    --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
+-    --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
+-
+-    /* CANVAS/CUP ΓÇö pulled further up than the base <700px block so the
+-       cup sits closer to the headline (was reading as too low/floating
+-       in the middle of a tall gap). --oh4-cup-visual-scale below zooms
+-       the cup ~20% larger purely as a CSS transform on the canvas
+-       WRAPPER (not the Three.js group/scale in MainCupImage.jsx) ΓÇö the
+-       GSAP rise/dock animation and its own internal scale math are
+-       untouched; this only magnifies the already-rendered pixels. */
+-    --oh4-cup-top-offset: clamp(-170px, 2.2vh, -150px);
+-    --oh4-cup-visual-scale: 0.93;
+-
+-    /* PARAGRAPH ΓÇö keep clear spacing between the headline, cup, and CTAs */
+-    --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
+-    --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
+-    --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
+-    --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
+-    --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
+-
+-    /* CTAs ΓÇö fixed spacing for the narrow 500ΓÇô600px band */
+-    --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
+-    --oh4-cta-left-offset: var(--oh4-edit-cta-left);
+-    --oh4-cta-gap: var(--oh4-edit-cta-gap);
+-    --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
+-    --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
+-    --oh4-cta-h: 96px;
+-
+-    /* Slightly larger CTA text and padding for this band */
+-    --oh4-cta-font-size: 14px;
+-    --oh4-cta-padding-vertical: 14px;
+-
+-    /* CATEGORY BAR */
+-    --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
+-    --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
+-
+-    /* EASY EDIT SECTION ΓÇö change only these values for the background images */
+-    --oh4-edit-image-cup1-left: 15%;
+-    --oh4-edit-image-cup1-top: 20%;
+-    --oh4-edit-image-cup1-width: 34vh;
+-    --oh4-edit-image-cup1-height: 46vh;
+-
+-    --oh4-edit-image-cup2-left: 83%;
+-    --oh4-edit-image-cup2-top: 27%;
+-    --oh4-edit-image-cup2-width: 25vh;
+-    --oh4-edit-image-cup2-height: 31vh;
+-
+-    --oh4-edit-image-cup3-left: 17%;
+-    --oh4-edit-image-cup3-top: 80%;
+-    --oh4-edit-image-cup3-width: 31vh;
+-    --oh4-edit-image-cup3-height: 36vh;
+-
+-    --oh4-edit-image-cup4-left: 81%;
+-    --oh4-edit-image-cup4-top: 80%;
+-    --oh4-edit-image-cup4-width: 36vh;
+-    --oh4-edit-image-cup4-height: 40vh;
+-  }
+-
++  
+   .oh4-left-col {
+     top: var(--oh4-head-top-offset);
+     left: 50%;
+@@ -1869,211 +2452,6 @@
+     align-items: center;
+     text-align: center;
+   }
+-
+-  .oh4-text-layer {
+-    transform: translateY(38px);
+-  }
+-
+-  .oh4-cat-bar {
+-    display: none;
+-  }
+-
+-  .oh4-canvas-wrap {
+-    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) - 160px) !important;
+-    height: calc(100% - var(--oh4-head-h) - var(--oh4-cup-top-offset));
+-  }
+-
+-  /* Visual-only ~20% zoom on the cup, applied to the canvas element
+-     itself so it scales from center without shifting the wrapper's
+-     own top/height box math above (which everything below still
+-     stacks against). transform-origin centers the zoom on the
+-     canvas's own box, keeping the cup horizontally centered ΓÇö same
+-     centering MainCupImage.jsx's group already guarantees. */
+-  .oh4-canvas-wrap canvas {
+-    transform: scale(var(--oh4-cup-visual-scale));
+-    transform-origin: 50% 50%;
+-  }
+-
+-  .oh4-hl-line1, .oh4-hl-line2 { font-size: var(--oh4-hl-line1-size); }
+-  .oh4-hl-line3 { font-size: var(--oh4-hl-line3-size); }
+-  .oh4-eyebrow {
+-    font-size: var(--oh4-eyebrow-size);
+-    margin-bottom: var(--oh4-eyebrow-margin-bottom);
+-  }
+-  .oh4-hl-line2 {
+-    white-space: nowrap;
+-    display: inline-block;
+-  }
+-
+-  .oh4-hero-para {
+-    top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-top-offset));
+-    left: 50%;
+-    right: auto;
+-    transform: translateX(-50%);
+-    max-width: var(--oh4-para-max-width);
+-    font-size: var(--oh4-para-font-size);
+-    padding: 0 var(--oh4-para-padding-x);
+-    text-align: center;
+-  }
+-
+-  .oh4-hero-ctas {
+-    top: calc(var(--oh4-head-h) + var(--oh4-cup-h) + var(--oh4-para-h) + var(--oh4-cta-top-offset));
+-    left: 50%;
+-    right: auto;
+-    transform: translateX(-50%);
+-    gap: var(--oh4-cta-gap);
+-    max-width: var(--oh4-cta-max-width);
+-    padding-bottom: var(--oh4-cta-padding-bottom);
+-    justify-content: center;
+-  }
+-
+-  .oh4-cta-gold, .oh4-cta-outline {
+-    font-size: 11px;
+-    padding: 10px 18px;
+-    white-space: nowrap;
+-    gap: 0;
+-  }
+-  .oh4-cta-icon {
+-    display: none;
+-  }
+-
+-  .oh4-canvas-wrap {
+-    top: calc(var(--oh4-head-h) + var(--oh4-cup-top-offset) + 35px) !important;
+-  }
+-}
+-
+-/* ΓöÇΓöÇ Under 360px (very small phones) ΓöÇΓöÇ */
+-@media (max-width: 360px) {
+-  .oh4-para-break {
+-    display: block;
+-  }
+-
+-  .oh4-hero-para .oh4-para-split {
+-    display: block;
+-  }
+-
+-  .oh4-hero {
+-    min-height: clamp(580px, 100svh, 700px);
+-    --oh4-head-h: clamp(48px, 38vh, 420px);
+-    --oh4-cup-h: clamp(140px, 22vh, 260px);
+-    --oh4-para-h: clamp(92px, 18vh, 180px);
+-    text-align: center;
+-
+-    /* EASY EDIT SECTION ΓÇö change only these values for text layout */
+-    --oh4-edit-headline-top: clamp(-190px, -22vh, -170px);
+-    --oh4-edit-headline-left: clamp(180px, 16vw, 175px);
+-    /* --oh4-edit-headline-padding-top: clamp(34px, 8vh, 60px); */
+-    --oh4-edit-headline-padding-x: clamp(20px, 6vw, 30px);
+-    /* Keep the headline sizing from shrinking as the width enters the 500px range */
+-    --oh4-edit-headline1-size: clamp(39px, 6.6vw, 52px);
+-    --oh4-edit-headline3-size: clamp(38px, 6.6vw, 48px);
+-    --oh4-edit-eyebrow-size: 10px;
+-    --oh4-edit-eyebrow-gap: 10px;
+-    --oh4-edit-eyebrow-margin-bottom: clamp(10px, 1.6vh, 16px);
+-    --oh4-edit-eyebrow-margin-left: clamp(200px, 1.6vh, 16px);
+-    --oh4-edit-eyebrow-margin-right: 100px;
+-    /* Push paragraph down to create more vertical weight in the layout */
+-    --oh4-edit-paragraph-top-offset: clamp(180px, 6vh, 220px);
+-    --oh4-edit-paragraph-left: clamp(0px, 1vw, 5px);
+-    --oh4-edit-paragraph-max-width: min(32ch, 88vw);
+-    /* Paragraph size tuned to viewport height to avoid overflow */
+-    /* Slightly larger paragraph text for readability on tall phones */
+-    --oh4-edit-paragraph-font-size: clamp(15px, 2.2vh, 17px);
+-    --oh4-edit-paragraph-padding-x: clamp(20px, 6vw, 36px);
+-    --oh4-edit-cta-top-offset: clamp(180px, 2.2vh, 20px);
+-    --oh4-edit-cta-left: clamp(0px, 3vw, 30px);
+-    --oh4-edit-cta-gap: clamp(8px, 1.5vh, 10px);
+-    --oh4-edit-cta-max-width: min(250px, 82vw);
+-    --oh4-edit-cta-padding-bottom: clamp(22px, 4vh, 32px);
+-    --oh4-edit-catbar-top-offset: clamp(1000px, 2vh, 18px);
+-    --oh4-edit-catbar-padding-bottom: clamp(18px, 3.6vh, 30px);
+-
+-    /* internal layout variables ΓÇö keep these unless you want to change the structure */
+-    --oh4-head-top-offset: var(--oh4-edit-headline-top);
+-    --oh4-head-left-offset: var(--oh4-edit-headline-left);
+-    --oh4-head-padding-top: var(--oh4-edit-headline-padding-top);
+-    --oh4-head-padding-x: var(--oh4-edit-headline-padding-x);
+-    --oh4-hl-line1-size: var(--oh4-edit-headline1-size);
+-    --oh4-hl-line3-size: var(--oh4-edit-headline3-size);
+-    --oh4-eyebrow-size: var(--oh4-edit-eyebrow-size);
+-    --oh4-eyebrow-gap: var(--oh4-edit-eyebrow-gap);
+-    --oh4-eyebrow-margin-bottom: var(--oh4-edit-eyebrow-margin-bottom);
+-    --oh4-eyebrow-margin-left: var(--oh4-edit-eyebrow-margin-left);
+-    --oh4-eyebrow-margin-right: var(--oh4-edit-eyebrow-margin-right);
+-    --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
+-    --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
+-    --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
+-    --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
+-    --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
+-    --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
+-    --oh4-cta-left-offset: var(--oh4-edit-cta-left);
+-    --oh4-cta-gap: var(--oh4-edit-cta-gap);
+-    --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
+-    --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
+-    --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
+-    --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
+-
+-    /* CANVAS/CUP ΓÇö pulled further up than the base <700px block so the
+-       cup sits closer to the headline (was reading as too low/floating
+-       in the middle of a tall gap). --oh4-cup-visual-scale below zooms
+-       the cup ~20% larger purely as a CSS transform on the canvas
+-       WRAPPER (not the Three.js group/scale in MainCupImage.jsx) ΓÇö the
+-       GSAP rise/dock animation and its own internal scale math are
+-       untouched; this only magnifies the already-rendered pixels. */
+-    --oh4-cup-top-offset: clamp(-170px, 2.2vh, -150px);
+-    --oh4-cup-visual-scale: 0.93;
+-    
+-    /* PARAGRAPH ΓÇö pushed down slightly to keep clear of the now-larger,
+-       higher-sitting cup, and to open up breathing room before CTAs */
+-    --oh4-para-top-offset: var(--oh4-edit-paragraph-top-offset);
+-    --oh4-para-left-offset: var(--oh4-edit-paragraph-left);
+-    --oh4-para-max-width: var(--oh4-edit-paragraph-max-width);
+-    --oh4-para-font-size: var(--oh4-edit-paragraph-font-size);
+-    --oh4-para-padding-x: var(--oh4-edit-paragraph-padding-x);
+-    
+-    /* CTAs ΓÇö extra top offset + bottom padding so the button pair no
+-       longer crowds the paragraph above or the category bar below */
+-    --oh4-cta-top-offset: var(--oh4-edit-cta-top-offset);
+-    --oh4-cta-left-offset: var(--oh4-edit-cta-left);
+-    --oh4-cta-gap: var(--oh4-edit-cta-gap);
+-    --oh4-cta-max-width: var(--oh4-edit-cta-max-width);
+-    --oh4-cta-padding-bottom: var(--oh4-edit-cta-padding-bottom);
+-    --oh4-cta-h: clamp(96px, 15vh, 128px);
+-
+-    /* CATEGORY BAR (Zone 5) ΓÇö extra top offset opens a clear gap below
+-       the CTAs instead of sitting right underneath them */
+-    --oh4-catbar-top-offset: var(--oh4-edit-catbar-top-offset);
+-    --oh4-catbar-padding-bottom: var(--oh4-edit-catbar-padding-bottom);
+-
+-    /* EASY EDIT SECTION ΓÇö change only these values for the background images */
+-    --oh4-edit-image-cup1-left: 15%;
+-    --oh4-edit-image-cup1-top: 20%;
+-    --oh4-edit-image-cup1-width: 34vh;
+-    --oh4-edit-image-cup1-height: 46vh;
+-
+-    --oh4-edit-image-cup2-left: 83%;
+-    --oh4-edit-image-cup2-top: 27%;
+-    --oh4-edit-image-cup2-width: 25vh;
+-    --oh4-edit-image-cup2-height: 31vh;
+-
+-    --oh4-edit-image-cup3-left: 17%;
+-    --oh4-edit-image-cup3-top: 80%;
+-    --oh4-edit-image-cup3-width: 31vh;
+-    --oh4-edit-image-cup3-height: 36vh; 
+-
+-    --oh4-edit-image-cup4-left: 81%;
+-    --oh4-edit-image-cup4-top: 80%;
+-    --oh4-edit-image-cup4-width: 36vh;
+-    --oh4-edit-image-cup4-height: 40vh;
+-  }
+-  
+-  .oh4-left-col {
+-    padding-top: var(--oh4-head-padding-top);
+-    padding-left: var(--oh4-head-padding-x);
+-    padding-right: var(--oh4-head-padding-x);
+-    align-items: center;
+-    text-align: center;
+-  }
+   
+   .oh4-eyebrow {
+     gap: 5px;

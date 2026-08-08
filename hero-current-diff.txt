@@ -1,0 +1,50 @@
+﻿diff --git a/src/components/Hero/Hero.css b/src/components/Hero/Hero.css
+index 1fc5a30..bffedd3 100644
+--- a/src/components/Hero/Hero.css
++++ b/src/components/Hero/Hero.css
+@@ -396,6 +396,19 @@
+   margin: 0;
+   gap: 0;
+ }
++.desktop-only { display: block; }
++.mobile-only { display: none; }
++
++@media (max-width: 700px) {
++  .desktop-only { display: none !important; }
++  .mobile-only { display: block !important; }
++}
++
++.oh4-hl-topline {
++  display: inline-flex;
++  gap: 0.35em;
++  align-items: baseline;
++}
+ .oh4-hl-line1,
+ .oh4-hl-line2 {
+   font-family: var(--fp);
+diff --git a/src/components/Hero/Hero.jsx b/src/components/Hero/Hero.jsx
+index 37d1717..ed03475 100644
+--- a/src/components/Hero/Hero.jsx
++++ b/src/components/Hero/Hero.jsx
+@@ -339,12 +339,20 @@ export default function Hero() {
+             Good Food. Great Memories.
+           </p>
+ 
+-          <h1 className="oh4-headline" aria-label="Made for Every Craving. Loved by All.">
++          <h1 className="oh4-headline desktop-only" aria-label="Made for Every Craving. Loved by All.">
+             <span className="oh4-hl-line1">Made for</span>
+             <span className="oh4-hl-line2">Every Craving.</span>
+             <span className="oh4-hl-line3">Loved by All.</span>
+           </h1>
+ 
++          <h1 className="oh4-headline mobile-only" aria-label="Eat like family.">
++            <span className="oh4-hl-topline">
++              <span className="oh4-hl-line1">Eat</span>
++              <span className="oh4-hl-line2">like</span>
++            </span>
++            <span className="oh4-hl-line3">family.</span>
++          </h1>
++
+           <p className="oh4-hero-para">
+             From comforting classics to <br className="oh4-para-break" />
+             <span className="oh4-para-split">indulgent treats,</span>

@@ -1,0 +1,1 @@
+Applying CSS tweaks: move dishes off-canvas, lower cup, show stats bar on mobile, reduce headline sizes slightly.
