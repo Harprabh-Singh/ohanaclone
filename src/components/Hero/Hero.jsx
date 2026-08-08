@@ -378,6 +378,7 @@ export default function Hero() {
               width: '40%',
               top: '35%',
               left: '35.5%',
+              transform: 'translate(0px, 0px) scale(2)',
               transformOrigin: 'center center',
               zIndex: 10
             }}
