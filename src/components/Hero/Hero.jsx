@@ -120,13 +120,13 @@ const remap = (p, start, end) =>
   Math.max(0, Math.min((p - start) / (end - start), 1));
 
 const CatIcons = {
-  coffee: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/></svg>,
-  burgers: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 11a8 8 0 0 1 16 0H4z"/><path d="M4 15h16v2a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-2z"/><path d="M4 13h16"/></svg>,
-  pizzas: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2l8 18H4L12 2z"/><path d="M11 12h.01M14 16h.01M10 16h.01"/><path d="M4 20h16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg>,
-  pasta: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 14a8 8 0 0 0 16 0H4z"/><path d="M12 6s-2 3 0 5 0 3 0 3M8 6s-2 3 0 5 0 3 0 3M16 6s-2 3 0 5 0 3 0 3"/></svg>,
-  cakes: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 14v6h12v-6"/><path d="M6 14l6-6 6 6M12 4v4"/></svg>,
-  drinks: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M7 8l1 14h8l1-14"/><path d="M6 8h12"/><path d="M12 8V2"/><path d="M12 2h3"/></svg>,
-  snacks: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 12l2 10h8l2-10"/><path d="M8 12V4M12 12V3M16 12V5"/></svg>,
+  coffee: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1" /><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" /><path d="M6 1v3M10 1v3M14 1v3" /></svg>,
+  burgers: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 11a8 8 0 0 1 16 0H4z" /><path d="M4 15h16v2a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-2z" /><path d="M4 13h16" /></svg>,
+  pizzas: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2l8 18H4L12 2z" /><path d="M11 12h.01M14 16h.01M10 16h.01" /><path d="M4 20h16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" /></svg>,
+  pasta: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 14a8 8 0 0 0 16 0H4z" /><path d="M12 6s-2 3 0 5 0 3 0 3M8 6s-2 3 0 5 0 3 0 3M16 6s-2 3 0 5 0 3 0 3" /></svg>,
+  cakes: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 14v6h12v-6" /><path d="M6 14l6-6 6 6M12 4v4" /></svg>,
+  drinks: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M7 8l1 14h8l1-14" /><path d="M6 8h12" /><path d="M12 8V2" /><path d="M12 2h3" /></svg>,
+  snacks: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 12l2 10h8l2-10" /><path d="M8 12V4M12 12V3M16 12V5" /></svg>,
 };
 
 export default function Hero() {
@@ -240,14 +240,14 @@ export default function Hero() {
         scrollProgress.current = p;
 
         if (window.innerWidth <= 700 && !window.isSnapping) {
-          if (self.direction === 1 && p > 0.1 && p < 0.9) {
+          if (self.direction === 1 && p > 0.1 && p < 1) {
             window.isSnapping = true;
             window.scrollTo({
-              top: self.start + (self.end - self.start) * 0.9,
+              top: self.end,
               behavior: 'smooth'
             });
             setTimeout(() => window.isSnapping = false, 800);
-          } else if (self.direction === -1 && p < 0.8 && p > 0) {
+          } else if (self.direction === -1 && p < 0.9 && p > 0) {
             window.isSnapping = true;
             window.scrollTo({
               top: self.start,
@@ -284,7 +284,7 @@ export default function Hero() {
         // ── 1c. Mobile cup animation ──────────────────────
         if (mobileCupRef.current) {
           const cp = Math.min(p, 0.9) / 0.9;
-          const riseY = cp * -38; // -38vh
+          const riseY = cp * -35; // -30vh (lower than before)
           const scale = 2 + (0.15 * cp); // Keep it big
           mobileCupRef.current.style.transform = `translate(0px, ${riseY}vh) scale(${scale})`;
         }
