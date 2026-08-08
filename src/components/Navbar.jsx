@@ -34,19 +34,19 @@ const Navbar = () => {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-1 min-[701px]:py-1.5 md:px-8">
         <Link to="/" className="flex items-center gap-3">
           {/* Universal Logo */}
-          <div className="flex flex-col items-center gap-[0.1em]">
-            <svg className="w-[22px] h-[22px] text-[#eebb4d] -mb-[2px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <div className="flex flex-col items-center gap-[0.1em]">
+              <svg className="w-[16px] h-[16px] text-[#eebb4d] -mb-[2px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 21v-7"/>
               <path d="M12 14c-2.5-2.5-6-1.5-6 2.5 0 2.5 2.5 3.5 6 1.5"/>
               <path d="M12 14c2.5-2.5 6-1.5 6 2.5 0 2.5-2.5 3.5-6 1.5"/>
               <path d="M12 14c-1.5-3.5 0-6 2.5-6 2.5 0 3.5 2.5 1.5 6"/>
             </svg>
-            <strong className="text-[#E24F33] font-['Playfair_Display'] text-[28px] tracking-tight leading-none font-bold">Ohana.</strong>
-            <span className="flex items-center justify-center text-[#E24F33] text-[9px] tracking-[0.15em] font-medium font-['DM_Sans'] uppercase">
-              <span className="mx-1 font-light">—</span>
-              Kitchen & Café
-              <span className="mx-1 font-light">—</span>
-            </span>
+              <strong className="text-[#E24F33] font-['Playfair_Display'] text-[22px] tracking-tight leading-none font-bold">Ohana.</strong>
+              <span className="flex items-center justify-center text-[#E24F33] text-[7.5px] tracking-[0.15em] font-medium font-['DM_Sans'] uppercase">
+                <span className="mx-1 font-light">—</span>
+                Kitchen & Café
+                <span className="mx-1 font-light">—</span>
+              </span>
           </div>
         </Link>
 
@@ -91,20 +91,31 @@ const Navbar = () => {
         </button>
       </div>
 
-      {menuOpen && (
-        <div className="lg:hidden border-t border-[#E24F33]/30 bg-[#000] px-5 py-4">
-          <div className="flex flex-col gap-3">
-            {navItems.map((item) => (
-              <Link key={item.href} to={item.href} className="rounded-full bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-[#E24F33]">
-                {item.label}
+      <div 
+        className={`lg:hidden absolute top-[90%] right-4 w-[280px] bg-[#0a0500] rounded-2xl border shadow-2xl overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${menuOpen ? 'max-h-[600px] border-[#E24F33]/30 opacity-100 mt-2' : 'max-h-0 border-transparent opacity-0 mt-0'}`}
+      >
+        <div className="flex flex-col pt-4 pb-6 px-6">
+          {navItems.map((item) => {
+            const active = location.pathname === item.href;
+            return (
+              <Link 
+                key={item.href} 
+                to={item.href} 
+                className={`group flex items-center justify-between py-4 border-b border-white/5 transition-all duration-300 ${active ? 'text-[#eebb4d]' : 'text-white/70 hover:text-white'}`}
+              >
+                <span style={{ fontFamily: 'var(--fp)' }} className="text-2xl tracking-wide">{item.label}</span>
+                <span className={`text-[#E24F33] transition-all duration-300 transform ${active ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0'}`}>→</span>
               </Link>
-            ))}
-            <Link to="/reservations" className="rounded-full border border-[#eebb4d] text-[#eebb4d] px-4 py-3 text-sm font-bold tracking-widest text-center uppercase transition hover:bg-[#eebb4d] hover:text-black">
-              Reserve a Table
-            </Link>
-          </div>
+            );
+          })}
+          <Link 
+            to="/reservations" 
+            className="mt-6 rounded-full border border-[#eebb4d] text-[#eebb4d] px-6 py-3 text-xs font-bold tracking-[0.2em] text-center uppercase transition hover:bg-[#eebb4d] hover:text-black"
+          >
+            Reserve a Table
+          </Link>
         </div>
-      )}
+      </div>
 
       {location.pathname === '/' && (
         <div className="absolute inset-x-0 bottom-0 mx-auto flex max-w-7xl items-center justify-between px-5 pb-4 md:px-8">

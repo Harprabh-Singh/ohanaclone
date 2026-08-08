@@ -231,7 +231,7 @@ export default function Hero() {
     ScrollTrigger.create({
       trigger: root,
       start: 'top top',
-      end: '+=240%',
+      end: '+=140%',
       pin: true,
       pinSpacing: true,
       scrub: 0.4,
