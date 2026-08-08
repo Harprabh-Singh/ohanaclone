@@ -239,23 +239,7 @@ export default function Hero() {
         const p = self.progress;
         scrollProgress.current = p;
 
-        if (window.innerWidth <= 700 && !window.isSnapping) {
-          if (self.direction === 1 && p > 0.1 && p < 1) {
-            window.isSnapping = true;
-            window.scrollTo({
-              top: self.end,
-              behavior: 'smooth'
-            });
-            setTimeout(() => window.isSnapping = false, 800);
-          } else if (self.direction === -1 && p < 0.9 && p > 0) {
-            window.isSnapping = true;
-            window.scrollTo({
-              top: self.start,
-              behavior: 'smooth'
-            });
-            setTimeout(() => window.isSnapping = false, 800);
-          }
-        }
+
 
         // ── Non-coffee reset on scroll-back-to-top ────────
         // If the user scrolled back up past the reset threshold AND
