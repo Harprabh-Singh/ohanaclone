@@ -2123,7 +2123,13 @@
 /* ── NEW MOBILE REDESIGN (v1) ── */
 .oh4-mobile-redesign-layer { display: none; }
 @media (max-width: 700px) {
-  .oh4-hero { background: #000 !important; }
+  .oh4-hero { 
+    background: #000 !important; 
+    height: 100dvh !important;
+  }
+  .pin-spacer {
+    background: #000 !important;
+  }
   .oh4-fog, .oh4-bg-glow, .oh4-bg-circle, .oh4-grain, .oh4-vignette,
   .oh4-canvas-wrap, .oh5-bg-composition, .oh4-text-layer,
   .oh4-stats-bar, .oh4-menu-panel, .oh4-scroll-hint {
