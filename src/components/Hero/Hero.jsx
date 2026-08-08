@@ -119,6 +119,16 @@ const easeOutQuad = (t) => 1 - Math.pow(1 - t, 2);
 const remap = (p, start, end) =>
   Math.max(0, Math.min((p - start) / (end - start), 1));
 
+const CatIcons = {
+  coffee: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/></svg>,
+  burgers: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 11a8 8 0 0 1 16 0H4z"/><path d="M4 15h16v2a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-2z"/><path d="M4 13h16"/></svg>,
+  pizzas: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2l8 18H4L12 2z"/><path d="M11 12h.01M14 16h.01M10 16h.01"/><path d="M4 20h16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg>,
+  pasta: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 14a8 8 0 0 0 16 0H4z"/><path d="M12 6s-2 3 0 5 0 3 0 3M8 6s-2 3 0 5 0 3 0 3M16 6s-2 3 0 5 0 3 0 3"/></svg>,
+  cakes: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 14v6h12v-6"/><path d="M6 14l6-6 6 6M12 4v4"/></svg>,
+  drinks: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M7 8l1 14h8l1-14"/><path d="M6 8h12"/><path d="M12 8V2"/><path d="M12 2h3"/></svg>,
+  snacks: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 12l2 10h8l2-10"/><path d="M8 12V4M12 12V3M16 12V5"/></svg>,
+};
+
 export default function Hero() {
   const rootRef = useRef(null);
   const textLayerRef = useRef(null);
@@ -126,6 +136,7 @@ export default function Hero() {
   const mobileFadeTopRef = useRef(null);
   const mobileDishesRef = useRef(null);
   const mobileFadeBottomRef = useRef(null);
+  const mobileMenuRef = useRef(null);
   const statsBarRef = useRef(null);
   const menuPanelRef = useRef(null);
   const hintRef = useRef(null);
@@ -217,8 +228,6 @@ export default function Hero() {
       .to(hint, { opacity: 1, y: 0, duration: 0.50 }, 0.66);
 
     // ── Scroll-driven animation ────────────────────────────
-    // Pure scrub: NO programmatic jumps, NO snap zones.
-    // User scrolls freely in both directions; everything reverses cleanly.
     ScrollTrigger.create({
       trigger: root,
       start: 'top top',
@@ -229,6 +238,24 @@ export default function Hero() {
       onUpdate: (self) => {
         const p = self.progress;
         scrollProgress.current = p;
+
+        if (window.innerWidth <= 700 && !window.isSnapping) {
+          if (self.direction === 1 && p > 0.1 && p < 0.9) {
+            window.isSnapping = true;
+            window.scrollTo({
+              top: self.start + (self.end - self.start) * 0.9,
+              behavior: 'smooth'
+            });
+            setTimeout(() => window.isSnapping = false, 800);
+          } else if (self.direction === -1 && p < 0.8 && p > 0) {
+            window.isSnapping = true;
+            window.scrollTo({
+              top: self.start,
+              behavior: 'smooth'
+            });
+            setTimeout(() => window.isSnapping = false, 800);
+          }
+        }
 
         // ── Non-coffee reset on scroll-back-to-top ────────
         // If the user scrolled back up past the reset threshold AND
@@ -255,17 +282,25 @@ export default function Hero() {
         setBgOpacity(textOpacity);
 
         // ── 1c. Mobile cup animation ──────────────────────
-        // Rises up and scales down slightly on scroll (matches main cup)
         if (mobileCupRef.current) {
-          const riseY = p * -180; // Adjust max rise px
-          const scale = 2 + (0.15 * p); // Scales from 1 to 0.85
-          mobileCupRef.current.style.transform = `translate(0px, ${riseY}px) scale(${scale})`;
+          const cp = Math.min(p, 0.9) / 0.9;
+          const riseY = cp * -38; // -38vh
+          const scale = 2 + (0.15 * cp); // Keep it big
+          mobileCupRef.current.style.transform = `translate(0px, ${riseY}vh) scale(${scale})`;
         }
 
         // ── 1d. Mobile layers fade out ────────────────────
         if (mobileFadeTopRef.current) mobileFadeTopRef.current.style.opacity = textOpacity;
         if (mobileDishesRef.current) mobileDishesRef.current.style.opacity = textOpacity;
         if (mobileFadeBottomRef.current) mobileFadeBottomRef.current.style.opacity = textOpacity;
+
+        // ── 1e. Mobile menu layer fades in ────────────────
+        if (mobileMenuRef.current) {
+          const menuOp = Math.max(0, Math.min(1, (p - 0.4) / 0.4));
+          mobileMenuRef.current.style.opacity = menuOp;
+          mobileMenuRef.current.style.pointerEvents = menuOp > 0.5 ? 'auto' : 'none';
+          mobileMenuRef.current.style.transform = `translateY(${(1 - menuOp) * 40}px)`;
+        }
 
         // ── 2. Stats bar fades with text layer ───────────
         if (statsBar) {
@@ -395,6 +430,44 @@ export default function Hero() {
           </Link>
           <Link to="/reservations" className="oh4-btn-reserve">
             RESERVE TABLE
+          </Link>
+        </div>
+
+        {/* MOBILE MENU LAYER (< 700px) */}
+        <div ref={mobileMenuRef} className="oh4-mobile-menu-layer" aria-hidden="true" style={{ opacity: 0, pointerEvents: 'none', transform: 'translateY(40px)' }}>
+          <div className="oh4-mobile-menu-header">
+            <div className="oh4-mobile-menu-subtitle">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#eebb4d" strokeWidth="1.5">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+              </svg>
+              Fresh ingredients, daily specials.
+            </div>
+            <h2 className="oh4-mobile-menu-title">
+              Our Menu
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#eebb4d" strokeWidth="1.2" className="oh4-leaf-icon">
+                <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z" />
+              </svg>
+              <div className="oh4-mobile-menu-underline" />
+            </h2>
+          </div>
+
+          <div className="oh4-mobile-menu-grid">
+            {CATEGORIES.map((cat) => (
+              <Link to={`/menu#${cat.id}`} key={cat.id} className={`oh4-mobile-cat-card ${cat.id === 'snacks' ? 'full-width' : ''}`} style={{ textDecoration: 'none' }}>
+                <div className="oh4-mobile-cat-icon-wrap">
+                  {CatIcons[cat.id] || <span style={{ fontSize: '20px' }}>{cat.emoji}</span>}
+                </div>
+                <div className="oh4-mobile-cat-info">
+                  <h3>{cat.name}</h3>
+                  <p>{cat.desc}</p>
+                </div>
+                <ArrowRight className="oh4-mobile-cat-arrow" size={16} />
+              </Link>
+            ))}
+          </div>
+
+          <Link to="/menu" className="oh4-mobile-btn-full">
+            VIEW FULL MENU <ArrowRight size={18} />
           </Link>
         </div>
       </div>
