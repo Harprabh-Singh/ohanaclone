@@ -31,7 +31,7 @@ const Navbar = () => {
 
   return (
     <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${navBg}`}>
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 md:px-8">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-2 min-[701px]:py-4 md:px-8">
         <Link to="/" className="flex items-center gap-3">
           {/* Desktop Logo */}
           <div className="hidden min-[701px]:flex items-center gap-3">
