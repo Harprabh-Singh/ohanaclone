@@ -686,7 +686,6 @@ const ContactSection = () => {
           </div>
         ))}
       </div>
-
       {/* ── BOTTOM MARK ── */}
       <div style={{
         position: 'relative', zIndex: 2,
@@ -696,7 +695,7 @@ const ContactSection = () => {
         flexWrap: 'wrap', gap: '16px',
       }}>
         <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.15)', margin: 0, letterSpacing: '0.1em' }}>
-          © 2024 Ohana Kitchen & Café · Jorhat, Assam
+          © {new Date().getFullYear()} Ohana Kitchen & Café · Jorhat, Assam
         </p>
         <div style={{ display: 'flex', gap: '24px' }}>
           {['Menu', 'Gallery', 'About', 'Contact'].map(l => (
@@ -716,6 +715,7 @@ const ContactSection = () => {
           ))}
         </div>
       </div>
+
 
       <style>{`
         @media (max-width: 700px) {
