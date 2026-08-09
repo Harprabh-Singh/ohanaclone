@@ -3,7 +3,7 @@
  *
  * CHANGES FROM v16 — background composition moved out of Three.js:
  *
- * Renders the new <BackgroundComposition /> component (plain CSS-
+ * Renders the new  component (plain CSS-
  * positioned <img> elements for pizza/burger/cake/fries + 12 atmosphere
  * particles) as a sibling of the 3D canvas, right after it in the DOM.
  * The component is self-gating (only visible at <700px via Hero.css —
@@ -61,8 +61,6 @@ import dishesImg from './ui/dishes.png';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight, MapPin, ChefHat, Users, Heart, Star } from 'lucide-react';
-import HeroCanvas from './HeroCanvas';
-import BackgroundComposition from './BackgroundComposition';
 import useMouseParallax from './useMouseParallax';
 import SplitText from './SplitText';
 import './Hero.css';
@@ -92,13 +90,13 @@ gsap.registerPlugin(ScrollTrigger);
  * overpromise a specific dish for those two until real art exists.
  */
 const CATEGORIES = [
-  { id: 'coffee', name: 'Coffee', emoji: '☕', icon: '☕', desc: 'Single origin & blends' },
-  { id: 'burgers', name: 'Burgers', emoji: '🍔', icon: '🍔', desc: 'Juicy, flame-grilled' },
-  { id: 'pizzas', name: 'Pizzas', emoji: '🍕', icon: '🍕', desc: 'Wood-fired, Neapolitan' },
-  { id: 'pasta', name: 'Pasta', emoji: '🍝', icon: '🍝', desc: 'Italian comfort' },
-  { id: 'cakes', name: 'Cakes', emoji: '🎂', icon: '🎂', desc: 'Patisserie & classic' },
-  { id: 'drinks', name: 'Drinks', emoji: '🥤', icon: '🥤', desc: 'Fresh & fun' },
-  { id: 'snacks', name: 'Snacks', emoji: '🍟', icon: '🍟', desc: 'Bite & share' },
+  { id: 'coffee',  name: 'COFFEE',  emoji: '☕', desc: 'Single origin & blends' },
+  { id: 'burgers', name: 'BURGERS', emoji: '🍔', desc: 'Juicy, flame-grilled' },
+  { id: 'pizzas',  name: 'PIZZAS',  emoji: '🍕', desc: 'Wood-fired perfection' },
+  { id: 'pasta',   name: 'PASTA',   emoji: '🍝', desc: 'Italian classics done right' },
+  { id: 'cakes',   name: 'CAKES',   emoji: '🎂', desc: 'Handcrafted indulgence' },
+  { id: 'drinks',  name: 'DRINKS',  emoji: '🥤', desc: 'Refreshing & revitalizing' },
+  { id: 'snacks',  name: 'SNACKS',  emoji: '🍟', desc: 'Bites to keep you going' },
 ];
 
 // ── Scroll timing constants ────────────────────────────────
@@ -137,6 +135,10 @@ export default function Hero() {
   const mobileDishesRef = useRef(null);
   const mobileFadeBottomRef = useRef(null);
   const mobileMenuRef = useRef(null);
+  const desktopLeftRef = useRef(null);
+  const desktopRightRef = useRef(null);
+    const desktopCupRef = useRef(null);
+    const desktopFadeImagesRef = useRef(null);
   const statsBarRef = useRef(null);
   const menuPanelRef = useRef(null);
   const hintRef = useRef(null);
@@ -191,6 +193,7 @@ export default function Hero() {
     const statsBar = statsBarRef.current;
     const textLayer = textLayerRef.current;
     const catCards = panel?.querySelectorAll('.oh4-menu-cat') ?? [];
+    const canvasWrap = root.querySelector('.oh4-canvas-wrap');
 
     const titleLetterEls = Array.from(titleLetters).map((el) => ({
       el,
@@ -198,11 +201,12 @@ export default function Hero() {
     }));
 
     const setTextOpacity = textLayer ? gsap.quickSetter(textLayer, 'opacity') : null;
+    const setDesktopLeftOpacity = desktopLeftRef.current ? gsap.quickSetter(desktopLeftRef.current, 'opacity') : null;
     const setPanelOpacity = panel ? gsap.quickSetter(panel, 'opacity') : null;
     const setPanelX = panel ? gsap.quickSetter(panel, 'x', 'px') : null;
     const setHintOpacity = hint ? gsap.quickSetter(hint, 'opacity') : null;
     const setBgOpacity = gsap.quickSetter(root, '--oh5-bg-opacity');
-
+    
     // ── Entrance animation (page load) ───────────────────
     gsap.set(
       [eyebrow, headlineL1, headlineL2, headlineL3, para, ctas, catBar,
@@ -231,15 +235,13 @@ export default function Hero() {
     ScrollTrigger.create({
       trigger: root,
       start: 'top top',
-      end: '+=140%',
+      end: () => window.innerWidth > 700 ? '+=400%' : '+=240%',
       pin: true,
       pinSpacing: true,
-      scrub: 0.4,
+      scrub: 1,
       onUpdate: (self) => {
         const p = self.progress;
         scrollProgress.current = p;
-
-
 
         // ── Non-coffee reset on scroll-back-to-top ────────
         // If the user scrolled back up past the reset threshold AND
@@ -256,7 +258,27 @@ export default function Hero() {
 
         // ── 1. Text layer fades out ───────────────────────
         const textOpacity = Math.max(0, 1 - p / TEXT_FADE_END);
-        if (setTextOpacity) setTextOpacity(textOpacity);
+        
+        if (window.innerWidth > 700) {
+          // On desktop, only fade out the left column text
+          if (setDesktopLeftOpacity) setDesktopLeftOpacity(textOpacity);
+          if (setTextOpacity) setTextOpacity(1); // Ensure main layer stays visible
+          
+          // Animate the right column (cup & dishes) to slide leftwards
+          if (desktopFadeImagesRef.current) {
+            gsap.set(desktopFadeImagesRef.current, { opacity: textOpacity });
+          }
+          if (desktopCupRef.current) {
+            const slideProgress = Math.min(1, Math.max(0, p / 0.5));
+            // Move cup to the left using pixels to prevent vw layout thrashing
+            const scale = 1 + (0.3 * slideProgress);
+            const moveDist = window.innerWidth * 0.58; 
+            gsap.set(desktopCupRef.current, { x: -slideProgress * moveDist, scale: scale });
+          }
+        } else {
+          // On mobile, fade out the whole layer
+          if (setTextOpacity) setTextOpacity(textOpacity);
+        }
 
         // ── 1b. Background composition (mobile dishes/particles)
         // fades with the text layer — matches the old scatterMode's
@@ -351,22 +373,12 @@ export default function Hero() {
       <div className="oh4-grain" aria-hidden="true" />
       <div className="oh4-vignette" aria-hidden="true" />
 
-      {/* ── 3D CANVAS (coffee cup only — see HeroCanvas/Scene v21) ── */}
-      <div className="oh4-canvas-wrap">
-        <Suspense fallback={<div className="oh4-loading" />}>
-          <HeroCanvas
-            mouse={mouse}
-            scrollProgress={scrollProgress}
-            activeModelRef={activeModelRef}
-            freezeCupsRef={freezeCupsRef}
-          />
-        </Suspense>
-      </div>
+      
 
       {/* ── BACKGROUND COMPOSITION (mobile-only — pizza/burger/cake/
           fries + 12 atmosphere particles as plain CSS-positioned
           images, not Three.js. See BackgroundComposition.jsx header. ── */}
-      <BackgroundComposition />
+      
 
       {/* ── MOBILE REDESIGN LAYER (< 700px) ── */}
       <div className="oh4-mobile-redesign-layer mobile-only-block" aria-hidden="true">
@@ -459,145 +471,154 @@ export default function Hero() {
       {/* ── HERO TEXT LAYER ── */}
       <div ref={textLayerRef} className="oh4-text-layer">
 
-        <div className="oh4-left-col">
-          <p className="oh4-eyebrow">
-            <span className="oh4-eyebrow-rule" aria-hidden="true" />
-            Good Food. Great Memories.
-          </p>
-
-          <h1 className="oh4-headline" aria-label="Made for Every Craving. Loved by All.">
-            <span className="oh4-hl-line1">Made for</span>
-            <span className="oh4-hl-line2">Every Craving.</span>
-            <span className="oh4-hl-line3">Loved by All.</span>
-          </h1>
-
-          <p className="oh4-hero-para">
-            From comforting classics to <br className="oh4-para-break" />
-            <span className="oh4-para-split">indulgent treats,</span>
-            every dish is crafted with <em className="oh4-em-gold">love</em>,<br />
-            served with a <em className="oh4-em-gold">smile</em>.
-          </p>
-
-          <div className="oh4-hero-ctas">
-            <Link to="/menu" className="oh4-cta-gold">
-              <span className="oh4-cta-icon" aria-hidden="true">🍽</span>
-              Explore Menu
-            </Link>
-            <Link to="/reservations" className="oh4-cta-outline">
-              <span className="oh4-cta-icon" aria-hidden="true">📅</span>
-              Reserve Table
-            </Link>
+        <div ref={desktopLeftRef} className="oh4-desktop-left">
+          <div className="oh4-desktop-headline-wrap">
+            <h1 className="oh4-desktop-headline">
+              <div className="oh4-dhl-eat">Eat</div>
+              <div className="oh4-dhl-like">like</div>
+              <div className="oh4-dhl-family">family.</div>
+            </h1>
+            <p className="oh4-desktop-para">
+              Good food brings us together.<br/>
+              At Ohana, every dish is <span className="oh4-dhl-highlight">crafted with love</span><br/>
+              and served to make you feel at home.
+            </p>
+            <div className="oh4-desktop-buttons">
+              <Link to="/menu" className="oh4-dbtn-explore">
+                Explore Menu <ArrowRight size={16} style={{ marginLeft: '8px' }} />
+              </Link>
+              <Link to="/reservations" className="oh4-dbtn-reserve">
+                Reserve Table <ArrowRight size={16} style={{ marginLeft: '8px' }} />
+              </Link>
+            </div>
           </div>
-
-          <div className="oh4-cat-bar" aria-label="Menu categories">
-            {CATEGORIES.map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                className={`oh4-cat-item${activeModel === c.id ? ' active' : ''}`}
-                onClick={() => handleCatClick(c.id)}
-                aria-label={`Show ${c.name}`}
-              >
-                <span className="oh4-cat-icon" aria-hidden="true">{c.icon}</span>
-                <span className="oh4-cat-name">{c.name}</span>
-                <span className="oh4-cat-sub">{c.sub}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="oh4-stamp" aria-hidden="true">
-          <span className="oh4-stamp-word">Made</span>
-          <span className="oh4-stamp-big">Fresh</span>
-          <span className="oh4-stamp-word">Everyday</span>
-        </div>
-
-        <div className="oh4-flourish" aria-hidden="true">
-          <span className="oh4-flourish-text">Good food</span>
-          <span className="oh4-flourish-rule" />
-          <span className="oh4-flourish-text">good mood</span>
-        </div>
-
-      </div>
-
-      {/* ── STATS BAR ── */}
-      <div ref={statsBarRef} className="oh4-stats-bar" aria-label="Quick facts">
-        <div className="oh4-stat-item">
-          <MapPin size={16} strokeWidth={1.5} className="oh4-stat-ico" aria-hidden="true" />
-          <div>
-            <span className="oh4-stat-label">Jorhat, Assam</span>
-            <span className="oh4-stat-sub">Open Daily · 11 AM – 10 PM</span>
-          </div>
-        </div>
-        <div className="oh4-stat-divider" aria-hidden="true" />
-        <div className="oh4-stat-item">
-          <ChefHat size={16} strokeWidth={1.5} className="oh4-stat-ico" aria-hidden="true" />
-          <div>
-            <span className="oh4-stat-label">Our Kitchen</span>
-            <span className="oh4-stat-sub">Crafted with passion by real chefs</span>
-          </div>
-        </div>
-        <div className="oh4-stat-divider" aria-hidden="true" />
-        <div className="oh4-stat-item">
-          <Users size={16} strokeWidth={1.5} className="oh4-stat-ico" aria-hidden="true" />
-          <div>
-            <span className="oh4-stat-label">Dine · Sip · Gather</span>
-            <span className="oh4-stat-sub">The perfect place for every occasion</span>
-          </div>
-        </div>
-        <div className="oh4-stat-divider" aria-hidden="true" />
-        <div className="oh4-stat-item">
-          <Heart size={16} strokeWidth={1.5} className="oh4-stat-ico" aria-hidden="true" />
-          <div>
-            <span className="oh4-stat-label">Guest Rating</span>
-            <div className="oh4-stars">
-              {[1, 2, 3, 4, 5].map(s => (
-                <Star key={s} size={11} fill={s <= 4 ? '#C89B45' : 'none'} stroke="#C89B45" strokeWidth={1.5} />
-              ))}
-              <span className="oh4-stars-num">4.8/5</span>
+          
+          <div className="oh4-desktop-stats">
+            <div className="oh4-dstat">
+              <span className="oh4-dstat-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E24F33" strokeWidth="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </span>
+              <div className="oh4-dstat-text">
+                <strong>8+</strong>
+                <span>YEARS OPEN</span>
+              </div>
+            </div>
+            <div className="oh4-dstat-sep" />
+            <div className="oh4-dstat">
+              <span className="oh4-dstat-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E24F33" strokeWidth="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </span>
+              <div className="oh4-dstat-text">
+                <strong>4.8</strong>
+                <span>GUEST RATING</span>
+              </div>
+            </div>
+            <div className="oh4-dstat-sep" />
+            <div className="oh4-dstat">
+              <span className="oh4-dstat-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E24F33" strokeWidth="1.5"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg>
+              </span>
+              <div className="oh4-dstat-text">
+                <strong>120</strong>
+                <span>DISHES</span>
+              </div>
+            </div>
+            <div className="oh4-dstat-sep" />
+            <div className="oh4-dstat">
+              <span className="oh4-dstat-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E24F33" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </span>
+              <div className="oh4-dstat-text">
+                <strong>10K+</strong>
+                <span>HAPPY GUESTS</span>
+              </div>
             </div>
           </div>
         </div>
+        
+        <div ref={desktopRightRef} className="oh4-desktop-right">
+          <div className="oh4-desktop-image-comp">
+            <div ref={desktopFadeImagesRef} style={{position: 'absolute', inset: 0, zIndex: 1}}>
+              <img src={dishesImg} alt="Dishes" className="oh4-dimg-dishes" />
+              
+
+
+
+            </div>
+
+            <div ref={desktopCupRef} style={{position: 'absolute', inset: 0, zIndex: 2}}>
+              <img src={cupImg} alt="Coffee Cup" className="oh4-dimg-cup" style={{zIndex: 'auto'}} />
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      {/* ── MENU PANEL ── */}
-      <div ref={menuPanelRef} className="oh4-menu-panel" aria-label="Menu overview">
-        <div className="oh4-menu-inner">
-          <div className="oh4-menu-header">
-            <span className="oh4-menu-overline">Explore</span>
-            <h2 className="oh4-menu-title">
-              <SplitText text="Our" />
-              <SplitText text="Menu" />
+      {/* ── MENU PANEL (DESKTOP) ── */}
+      <div ref={menuPanelRef} className="oh4-menu-panel oh4-desktop-menu-redesign" aria-label="Menu overview">
+
+        {/* Left Side: Accommodates the translated Cup */}
+        <div className="oh4-mp-left">
+          <div className="oh4-mp-decorations">
+            {/* Dashed oval arc around cup */}
+            <svg className="oh4-mp-gold-arc" viewBox="0 0 200 300" fill="none">
+              <ellipse cx="100" cy="150" rx="88" ry="135" stroke="#eebb4d" strokeWidth="1" strokeDasharray="7 7" />
+            </svg>
+          </div>
+        </div>
+
+        {/* Right Side: Menu Grid — mirrors mobile layout */}
+        <div className="oh4-mp-right">
+          <div className="oh4-dmp-header">
+            <div className="oh4-dmp-subtitle">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#eebb4d" strokeWidth="1.5">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+              </svg>
+              Fresh ingredients, daily specials.
+            </div>
+            <h2 className="oh4-dmp-title">
+              Our Menu
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#eebb4d" strokeWidth="1.2" className="oh4-leaf-icon">
+                <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z" />
+              </svg>
+              <div className="oh4-dmp-underline" />
             </h2>
-            <p className="oh4-menu-sub">
-              Fresh ingredients, daily specials,<br />
-              and a table with your name.
-            </p>
           </div>
 
-          <div className="oh4-menu-grid">
+          <div className="oh4-dmp-grid">
             {CATEGORIES.map((cat) => (
-              <button
+              <Link
+                to={`/menu#${cat.id}`}
                 key={cat.id}
-                className={`oh4-menu-cat${activeModel === cat.id ? ' active' : ''}`}
+                className={`oh4-dmp-card${cat.id === 'snacks' ? ' full-width' : ''}${activeModel === cat.id ? ' active' : ''}`}
+                style={{ textDecoration: 'none' }}
                 onClick={() => handleCatClick(cat.id)}
-                aria-label={`Show ${cat.name} — ${cat.desc}`}
-                type="button"
               >
-                <span className="oh4-menu-cat-icon" aria-hidden="true">{cat.emoji}</span>
-                <span className="oh4-menu-cat-text">
-                  <span className="oh4-menu-cat-name">{cat.name}</span>
-                  <span className="oh4-menu-cat-desc">{cat.desc}</span>
-                </span>
-                <span className="oh4-menu-cat-arrow" aria-hidden="true">→</span>
-              </button>
+                <div className="oh4-dmp-icon-wrap">
+                  {CatIcons[cat.id] || <span style={{ fontSize: '22px' }}>{cat.emoji}</span>}
+                </div>
+                <div className="oh4-dmp-info">
+                  <h3>{cat.name}</h3>
+                  <p>{cat.desc}</p>
+                </div>
+                <ArrowRight className="oh4-dmp-arrow" size={18} />
+              </Link>
             ))}
           </div>
 
-          <Link to="/menu" className="oh4-menu-cta">
-            View Full Menu
-            <ArrowRight size={13} strokeWidth={1.8} aria-hidden="true" />
+          <Link to="/menu" className="oh4-dmp-btn-full">
+            VIEW FULL MENU <ArrowRight size={20} />
           </Link>
+
+          <div className="oh4-mp-footer-row">
+            <div className="oh4-mp-footer-center">Good food brings us together.</div>
+            <div className="oh4-mp-socials">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -609,3 +630,5 @@ export default function Hero() {
     </section>
   );
 }
+
+
