@@ -17,13 +17,27 @@
   gap: 0;
   overflow: hidden;
   padding: 9.2vh 0 6.5vh;
-  /* carousel spacing control (distance from rotation center)
+
+/* carousel spacing control (distance from rotation center)
      Set per-breakpoint with --carousel-radius to change horizontal spacing
      independently of card size. */
   --carousel-radius: 540px;
   /* Perspective on root so everything is in the same 3-D space */
   perspective: 1700px;
   perspective-origin: 50% 42%;
+}
+
+/* ── Gradient blend: Hero (#000) → PalateShowcase (#0a0500) ── */
+.ps-root::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(to bottom, #000000 0%, #0a0500 100%);
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* ─── Ambient colour wash ────────────────────────────────────────────── */

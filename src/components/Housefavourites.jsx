@@ -123,6 +123,8 @@ export default function HouseFavourites() {
   // For debounced scroll snap on mobile
   const snapTimerRef   = useRef(null);
   const lastProgressRef= useRef(0);
+  const touchStartRef  = useRef(null);
+  const touchDeltaRef  = useRef(0);
 
   const d = DISHES[active];
 
@@ -246,6 +248,47 @@ export default function HouseFavourites() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /* ─────── MOBILE SWIPE / TAP NAVIGATION ─────── */
+  useEffect(() => {
+    if (!isMobileRef.current) return;
+    const el = stickyRef.current;
+    if (!el) return;
+
+    const onTouchStart = (e) => {
+      touchStartRef.current = e.touches[0].clientX;
+      touchDeltaRef.current = 0;
+    };
+    const onTouchMove = (e) => {
+      if (touchStartRef.current === null) return;
+      touchDeltaRef.current = e.touches[0].clientX - touchStartRef.current;
+    };
+    const onTouchEnd = () => {
+      const delta = touchDeltaRef.current;
+      if (Math.abs(delta) > 40) {
+        const next = delta < 0
+          ? Math.min(activeRef.current + 1, TOTAL - 1)
+          : Math.max(activeRef.current - 1, 0);
+        triggerDishTransition(next);
+        // Update progress bar
+        if (progressRef.current) {
+          progressRef.current.style.transform = `scaleX(${next / (TOTAL - 1)})`;
+        }
+      }
+      touchStartRef.current = null;
+      touchDeltaRef.current = 0;
+    };
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove',  onTouchMove,  { passive: true });
+    el.addEventListener('touchend',   onTouchEnd,   { passive: true });
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove',  onTouchMove);
+      el.removeEventListener('touchend',   onTouchEnd);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   /* ─────── ENTRANCE ANIMATION ─────── */
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -356,6 +399,16 @@ export default function HouseFavourites() {
         display: 'flex',
         flexDirection: 'column',
       }}>
+
+        {/* Gradient blend: PalateShowcase (#0a0500) → HouseFavourites (#020D0A) */}
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0,
+          height: '100px',
+          background: 'linear-gradient(to bottom, #0a0500 0%, transparent 100%)',
+          pointerEvents: 'none',
+          zIndex: 20,
+        }} />
 
         {/* PROGRESS BAR */}
         <div style={{
@@ -572,8 +625,86 @@ export default function HouseFavourites() {
           ))}
         </nav>
 
-        {/* SCROLL HINT */}
-        <div style={{
+        {/* MOBILE: Tap-zone prev / next + swipe hint */}
+        <div className="hf-mobile-nav" style={{ pointerEvents: 'none' }}>
+          {/* Left tap zone */}
+          <button
+            className="hf-tap-zone hf-tap-prev"
+            aria-label="Previous dish"
+            onClick={() => {
+              const next = Math.max(activeRef.current - 1, 0);
+              triggerDishTransition(next);
+              if (progressRef.current) progressRef.current.style.transform = `scaleX(${next / (TOTAL - 1)})`;
+            }}
+            style={{
+              position: 'absolute', left: 0, top: '10%', bottom: '15%', width: '22%',
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'flex-start',
+              paddingLeft: '10px', zIndex: 8, pointerEvents: 'auto',
+              opacity: active === 0 ? 0 : 1, transition: 'opacity 0.3s',
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="2">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+          {/* Right tap zone */}
+          <button
+            className="hf-tap-zone hf-tap-next"
+            aria-label="Next dish"
+            onClick={() => {
+              const next = Math.min(activeRef.current + 1, TOTAL - 1);
+              triggerDishTransition(next);
+              if (progressRef.current) progressRef.current.style.transform = `scaleX(${next / (TOTAL - 1)})`;
+            }}
+            style={{
+              position: 'absolute', right: 0, top: '10%', bottom: '15%', width: '22%',
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+              paddingRight: '10px', zIndex: 8, pointerEvents: 'auto',
+              opacity: active === TOTAL - 1 ? 0 : 1, transition: 'opacity 0.3s',
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </button>
+          {/* Dot indicators */}
+          <div style={{
+            position: 'absolute', bottom: '80px', left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex', gap: '8px', alignItems: 'center', zIndex: 9, pointerEvents: 'none',
+          }}>
+            {DISHES.map((dish, idx) => (
+              <div key={dish.id} style={{
+                width: idx === active ? '20px' : '6px',
+                height: '6px',
+                borderRadius: '3px',
+                background: idx === active ? d.accent : 'rgba(255,255,255,0.2)',
+                transition: 'all 0.4s cubic-bezier(0.34,1.56,0.64,1)',
+                boxShadow: idx === active ? `0 0 8px ${d.accent}88` : 'none',
+              }} />
+            ))}
+          </div>
+          {/* Swipe hint — only shown on first load */}
+          <div style={{
+            position: 'absolute', bottom: '60px', right: 'clamp(16px, 5vw, 72px)',
+            zIndex: 10, display: 'flex', flexDirection: 'column',
+            alignItems: 'flex-end', gap: '4px', pointerEvents: 'none',
+            animation: 'hfPulse 2.4s ease-in-out infinite',
+          }}>
+            <span style={{
+              fontSize: '8px', fontWeight: '700', letterSpacing: '0.35em',
+              textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)',
+            }}>swipe</span>
+            <svg width="18" height="10" viewBox="0 0 24 14" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="2">
+              <path d="M2 7h20M15 2l7 5-7 5"/>
+            </svg>
+          </div>
+        </div>
+
+        {/* DESKTOP scroll hint */}
+        <div className="hf-desktop-only" style={{
           position: 'absolute', bottom: '20px', right: 'clamp(16px, 5vw, 72px)',
           zIndex: 10, display: 'flex', flexDirection: 'column',
           alignItems: 'flex-end', gap: '6px', pointerEvents: 'none',
@@ -624,7 +755,8 @@ export default function HouseFavourites() {
             flex-direction: column;
           }
           .hf-mobile-price { display: inline-flex !important; align-items: baseline; }
-          .hf-desktop-only { display: none !important; }
+          
+          .hf-mobile-nav { display: block; }
 
           /* ── DESKTOP ── */
           @media (min-width: 768px) {
@@ -649,7 +781,8 @@ export default function HouseFavourites() {
             .hf-text-wrap {
               width: clamp(240px, 28vw, 400px);
             }
-            .hf-mobile-price { display: none !important; }
+            
+            .hf-mobile-nav { display: none; }
             .hf-desktop-only { display: flex !important; }
           }
         `}</style>
@@ -737,3 +870,4 @@ function CTAButton({ onClick, accent }) {
     </button>
   );
 }
+
