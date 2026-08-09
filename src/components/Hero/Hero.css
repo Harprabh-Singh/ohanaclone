@@ -2045,7 +2045,7 @@
 
   /* ─ LEFT column (cup lives here) ─ */
   .oh4-mp-left {
-    flex: 0 0 28%;
+    flex: 0 0 32%;
     position: relative;
     display: flex;
     align-items: flex-end;
@@ -2127,20 +2127,16 @@
     z-index: 2;
   }
 
-  /* ─ RIGHT column (menu) ─ */
+  /* RIGHT column (menu) */
   .oh4-mp-right {
     flex: 1;
     display: flex;
     flex-direction: column;
     padding: 52px 5% 20px 4%;
+    border-left: 2px solid #E24F33;
     position: relative;
     justify-content: center;
     gap: 0;
-  }
-
-  /* Header */
-  .oh4-mp-header {
-    margin-bottom: 16px;
   }
 
   .oh4-mp-italic-sub {
@@ -2502,6 +2498,10 @@
   .oh4-mp-socials svg { cursor: pointer; transition: color 0.2s; }
   .oh4-mp-socials svg:hover { color: #eebb4d; }
 }
+
+
+
+
 
 
 
