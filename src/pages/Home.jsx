@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Clock, Phone } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import SectionReveal from '../components/SectionReveal';
 import HeroSection from '../components/HeroSection';
 import PalateShowcase from '../components/PalateShowcase';
 import HouseFavourites from '../components/Housefavourites';
@@ -108,7 +106,7 @@ const StorySection = () => {
         </div>
 
         {/* Two-column grid */}
-        <div style={{
+        <div className="story-grid" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
           gap: 'clamp(40px, 6vw, 80px)',
@@ -170,7 +168,7 @@ const StorySection = () => {
             </p>
 
             {/* Stats row */}
-            <div style={{
+            <div className="story-stats-row" style={{
               display: 'grid', gridTemplateColumns: 'repeat(3,1fr)',
               gap: '20px', marginBottom: '44px',
               paddingTop: '32px',
@@ -244,7 +242,9 @@ const StorySection = () => {
           .story-img-wrap { aspect-ratio: 4/3 !important; }
           .story-stat-badge { display: none !important; }
           .story-headline { font-size: clamp(2.2rem, 11vw, 3.5rem) !important; }
-          .story-pills { grid-template-columns: 1fr 1fr !important; gap: 10px !important; padding-top: 32px !important; }
+          .story-grid { margin-bottom: 40px !important; }
+          .story-stats-row { margin-bottom: 28px !important; }
+          .story-pills { grid-template-columns: 1fr 1fr !important; gap: 10px !important; padding-top: 24px !important; border-top: none !important; }
           .story-pill { padding: 16px 14px !important; }
           .story-body-text { margin-bottom: 24px !important; }
         }
@@ -448,28 +448,7 @@ const TestimonialsSection = () => {
         </div>
       </div>
 
-      {/* Stats row */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(3,1fr)',
-        gap: '20px', maxWidth: '900px', margin: '80px auto 0',
-        padding: '0 clamp(24px,6vw,80px)', position: 'relative', zIndex: 3,
-      }}>
-        {[
-          { num: '2K+', label: 'Happy Guests', sub: 'and growing every week' },
-          { num: '4.8★', label: 'Average Rating', sub: 'across all platforms' },
-          { num: '3yrs', label: 'Serving Jorhat', sub: 'above Gar-Ali since 2022' },
-        ].map((s, i) => (
-          <div key={i} style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: '16px', padding: '28px 20px', textAlign: 'center',
-          }}>
-            <p style={{ fontSize: 'clamp(1.4rem,3vw,2rem)', fontWeight: '900', color: '#FFFFFF', margin: '0 0 6px', letterSpacing: '-0.03em', fontFamily: "'Archivo Black', sans-serif" }}>{s.num}</p>
-            <p style={{ fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.6)', margin: '0 0 4px' }}>{s.label}</p>
-            <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.2)', margin: 0, letterSpacing: '0.04em' }}>{s.sub}</p>
-          </div>
-        ))}
-      </div>
+
 
       <style>{`
         @keyframes tr-scroll-left {
@@ -485,6 +464,268 @@ const TestimonialsSection = () => {
         @media (max-width: 700px) {
           .tr-left  { animation-duration: 28s !important; }
           .tr-right { animation-duration: 34s !important; }
+        }
+      `}</style>
+    </section>
+  );
+};
+
+// ─── CONTACT FINALE SECTION ──────────────────────────────────────
+const ContactSection = () => {
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    if (!sectionRef.current) return;
+    const ctx = gsap.context(() => {
+      const els = sectionRef.current.querySelectorAll('.cs-reveal');
+      gsap.set(els, { opacity: 0, y: 50 });
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: 'top 80%',
+        once: true,
+        onEnter: () => gsap.to(els, { opacity: 1, y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.1 }),
+      });
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
+
+  const INFO = [
+    {
+      icon: '📍',
+      label: 'Find Us',
+      value: 'Above KFC, Gar-Ali',
+      sub: 'Jorhat, Assam',
+      href: 'https://maps.google.com',
+      cta: 'Open in Maps →',
+      accent: '#B6912E',
+    },
+    {
+      icon: '🕐',
+      label: 'Hours',
+      value: '11 AM – 10 PM',
+      sub: 'Monday to Sunday',
+      href: null,
+      cta: 'Always open for you',
+      accent: '#C42D78',
+    },
+    {
+      icon: '📲',
+      label: 'Call or WhatsApp',
+      value: 'Tap to Connect',
+      sub: 'Fast replies guaranteed',
+      href: 'tel:+91',
+      cta: 'Message Us →',
+      accent: '#B6912E',
+    },
+  ];
+
+  return (
+    <section ref={sectionRef} style={{
+      position: 'relative',
+      background: '#07050A',
+      overflow: 'hidden',
+      padding: '0 0 0 0',
+    }}>
+
+      {/* Gradient blend from OhanaExperience (#0C0902) */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: '120px',
+        background: 'linear-gradient(to bottom, #0C0902 0%, transparent 100%)',
+        pointerEvents: 'none', zIndex: 5,
+      }} />
+
+      {/* Ambient glows */}
+      <div style={{
+        position: 'absolute', top: '-200px', left: '50%', transform: 'translateX(-50%)',
+        width: '900px', height: '600px', borderRadius: '50%',
+        background: 'radial-gradient(ellipse, rgba(182,145,46,0.07) 0%, transparent 65%)',
+        filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0,
+      }} />
+      <div style={{
+        position: 'absolute', bottom: '-100px', right: '-200px',
+        width: '700px', height: '500px', borderRadius: '50%',
+        background: 'radial-gradient(ellipse, rgba(196,45,120,0.06) 0%, transparent 65%)',
+        filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0,
+      }} />
+
+      {/* ── CINEMATIC CTA HERO ── */}
+      <div style={{
+        position: 'relative', zIndex: 2,
+        padding: 'clamp(120px,16vh,180px) clamp(24px,8vw,100px) clamp(80px,10vh,120px)',
+        textAlign: 'center',
+        borderBottom: '1px solid rgba(255,255,255,0.05)',
+      }}>
+        <div className="cs-reveal" style={{ opacity: 0, marginBottom: '28px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{ width: '40px', height: '1.5px', background: '#B6912E' }} />
+            <span style={{ fontSize: '9px', fontWeight: '800', letterSpacing: '0.55em', textTransform: 'uppercase', color: '#B6912E' }}>
+              Come Visit
+            </span>
+            <div style={{ width: '40px', height: '1.5px', background: '#B6912E' }} />
+          </div>
+        </div>
+
+        <h2 className="cs-reveal" style={{
+          opacity: 0,
+          fontFamily: "'Archivo Black', 'Arial Black', sans-serif",
+          fontSize: 'clamp(3rem, 11vw, 10rem)',
+          fontWeight: '900', lineHeight: 0.88,
+          letterSpacing: '-0.04em', margin: '0 0 32px',
+        }}>
+          <span style={{ color: 'transparent', WebkitTextStroke: '1.5px rgba(255,255,255,0.65)' }}>Let's</span>{' '}
+          <span style={{ color: '#FFFFFF' }}>Meet</span><br />
+          <span style={{ color: '#FFFFFF' }}>Over</span>{' '}
+          <span style={{
+            color: 'transparent',
+            WebkitTextStroke: '1.5px rgba(255,255,255,0.65)',
+            fontStyle: 'italic', fontWeight: '400',
+            fontFamily: 'Georgia, serif',
+            fontSize: '0.75em', letterSpacing: '-0.01em',
+          }}>good food.</span>
+        </h2>
+
+        <p className="cs-reveal" style={{
+          opacity: 0,
+          fontSize: 'clamp(14px, 1.6vw, 18px)',
+          color: 'rgba(255,255,255,0.38)',
+          lineHeight: 1.75, margin: '0 auto 52px',
+          maxWidth: '480px',
+        }}>
+          We're open every day. Swing by the terrace above Gar-Ali and let the food do the talking.
+        </p>
+
+        <div className="cs-reveal" style={{ opacity: 0, display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link
+            to="/reservations"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '10px',
+              background: '#B6912E', color: '#000', textDecoration: 'none',
+              padding: '16px 36px', borderRadius: '100px',
+              fontSize: '11px', fontWeight: '900', letterSpacing: '0.2em', textTransform: 'uppercase',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 12px 40px rgba(182,145,46,0.35)',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 20px 60px rgba(182,145,46,0.45)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(182,145,46,0.35)'; }}
+          >
+            Reserve a Table
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(0,0,0,0.15)', fontSize: '12px' }}>→</span>
+          </Link>
+          <Link
+            to="/contact"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '10px',
+              background: 'transparent',
+              border: '1px solid rgba(255,255,255,0.2)',
+              color: 'rgba(255,255,255,0.7)', textDecoration: 'none',
+              padding: '16px 36px', borderRadius: '100px',
+              fontSize: '11px', fontWeight: '800', letterSpacing: '0.2em', textTransform: 'uppercase',
+              transition: 'all 0.3s ease',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)'; e.currentTarget.style.color = '#fff'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; }}
+          >
+            Get Full Details
+          </Link>
+        </div>
+      </div>
+
+      {/* ── INFO STRIP ── */}
+      <div className="cs-info-grid" style={{
+        position: 'relative', zIndex: 2,
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+      }}>
+        {INFO.map((info, i) => (
+          <div
+            key={i}
+            className="cs-reveal cs-info-card"
+            style={{
+              opacity: 0,
+              padding: 'clamp(36px,5vh,56px) clamp(24px,5vw,60px)',
+              borderRight: i < 2 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+              borderTop: '1px solid rgba(255,255,255,0.05)',
+              cursor: info.href ? 'pointer' : 'default',
+              transition: 'background 0.3s ease',
+              position: 'relative', overflow: 'hidden',
+            }}
+            onClick={() => info.href && window.open(info.href, '_blank')}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.025)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+          >
+            {/* Accent top bar */}
+            <div style={{
+              position: 'absolute', top: 0, left: 'clamp(24px,5vw,60px)',
+              width: '32px', height: '2px',
+              background: info.accent, borderRadius: '2px',
+            }} />
+
+            <p style={{
+              fontSize: '9px', fontWeight: '800', letterSpacing: '0.4em',
+              textTransform: 'uppercase', color: info.accent,
+              margin: '0 0 16px',
+            }}>{info.label}</p>
+
+            <p style={{
+              fontFamily: "'Archivo Black', 'Arial Black', sans-serif",
+              fontSize: 'clamp(1.2rem, 2.5vw, 1.9rem)',
+              fontWeight: '900', color: '#FFFFFF',
+              letterSpacing: '-0.02em', margin: '0 0 4px', lineHeight: 1.1,
+            }}>{info.value}</p>
+
+            <p style={{
+              fontSize: '13px', color: 'rgba(255,255,255,0.35)',
+              margin: '0 0 24px', lineHeight: 1.5,
+            }}>{info.sub}</p>
+
+            <span style={{
+              fontSize: '10px', fontWeight: '700',
+              color: info.href ? info.accent : 'rgba(255,255,255,0.2)',
+              letterSpacing: '0.1em',
+            }}>{info.cta}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── BOTTOM MARK ── */}
+      <div style={{
+        position: 'relative', zIndex: 2,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: 'clamp(24px,4vh,40px) clamp(24px,8vw,100px)',
+        borderTop: '1px solid rgba(255,255,255,0.04)',
+        flexWrap: 'wrap', gap: '16px',
+      }}>
+        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.15)', margin: 0, letterSpacing: '0.1em' }}>
+          © 2024 Ohana Kitchen & Café · Jorhat, Assam
+        </p>
+        <div style={{ display: 'flex', gap: '24px' }}>
+          {['Menu', 'Gallery', 'About', 'Contact'].map(l => (
+            <Link
+              key={l}
+              to={`/${l.toLowerCase()}`}
+              style={{
+                fontSize: '10px', fontWeight: '700', letterSpacing: '0.15em',
+                textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)',
+                textDecoration: 'none', transition: 'color 0.2s ease',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.2)'; }}
+            >
+              {l}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <style>{`
+        @media (max-width: 700px) {
+          .cs-info-card {
+            border-right: none !important;
+            border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+          }
+          .cs-info-grid {
+            grid-template-columns: 1fr !important;
+          }
         }
       `}</style>
     </section>
@@ -520,38 +761,8 @@ const Home = () => {
       {/* 7. Ohana Experience — atmosphere / vibe section */}
       <OhanaExperience />
 
-      {/* 8. Contact strip */}
-      <SectionReveal>
-        <section className="bg-teal-mid py-20 text-white">
-          <div className="mx-auto max-w-7xl px-5 md:px-8">
-            <div className="grid gap-6 md:grid-cols-3">
-              <div className="rounded-[20px] border border-white/10 bg-[#0E3B36]/80 p-8 text-center shadow-[0_30px_80px_rgba(0,0,0,0.24)]">
-                <MapPin className="mx-auto h-8 w-8 text-magenta" />
-                <p className="mt-6 text-lg font-black">Address</p>
-                <p className="mt-3 text-sm text-white/80">Above KFC, Gar-Ali, Jorhat, Assam</p>
-              </div>
-              <div className="rounded-[20px] border border-white/10 bg-[#0E3B36]/80 p-8 text-center shadow-[0_30px_80px_rgba(0,0,0,0.24)]">
-                <Clock className="mx-auto h-8 w-8 text-magenta" />
-                <p className="mt-6 text-lg font-black">Hours</p>
-                <p className="mt-3 text-sm text-white/80">Mon–Sun · 11:00 AM – 10:00 PM</p>
-              </div>
-              <div className="rounded-[20px] border border-white/10 bg-[#0E3B36]/80 p-8 text-center shadow-[0_30px_80px_rgba(0,0,0,0.24)]">
-                <Phone className="mx-auto h-8 w-8 text-magenta" />
-                <p className="mt-6 text-lg font-black">Quick Contact</p>
-                <p className="mt-3 text-sm text-white/80">Tap to call or message us on WhatsApp</p>
-              </div>
-            </div>
-            <div className="mt-10 flex justify-center">
-              <Link
-                to="/contact"
-                className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition hover:border-magenta hover:text-magenta"
-              >
-                Get Full Details →
-              </Link>
-            </div>
-          </div>
-        </section>
-      </SectionReveal>
+      {/* 8. Contact + Info finale */}
+      <ContactSection />
     </main>
   );
 };

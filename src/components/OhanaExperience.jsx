@@ -4,426 +4,453 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const experiences = [
-  {
-    id: '01',
-    title: 'Terrace Dining',
-    tag: 'Signature Experience',
-    description: 'Open skies, warm lights, and evenings worth staying for. Our rooftop terrace is where Jorhat unwinds.',
-    stats: ['Open-air seating', 'Sunset views', 'Groups welcome'],
-    image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1600&q=80',
-  },
-  {
-    id: '02',
-    title: 'Coffee Moments',
-    tag: 'All Day',
-    description: 'Slow pours, rich aromas, and conversations that stretch past noon.',
-    stats: ['Single-origin', 'Cold brew & espresso', 'All-day menu'],
-    image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1600&q=80',
-  },
-  {
-    id: '03',
-    title: 'House Favourites',
-    tag: 'Most Ordered',
-    description: 'The dishes guests order again and again. Tandoori pizza to fiery wings — these are the ones.',
-    stats: ['120+ orders/month', 'Signature recipes', 'Chef curated'],
-    image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1600&q=80',
-  },
-  {
-    id: '04',
-    title: 'Friends & Gatherings',
-    tag: 'Celebrations',
-    description: 'The perfect backdrop for long celebrations and even longer conversations.',
-    stats: ['Group reservations', 'Private bookings', 'Custom menus'],
-    image: 'https://images.unsplash.com/photo-1529543544282-ea669407fca3?auto=format&fit=crop&w=1600&q=80',
-  },
-  {
-    id: '05',
-    title: 'Night Atmosphere',
-    tag: 'After Sunset',
-    description: 'The terrace transforms after dark. Warm lights, cooler air, city below.',
-    stats: ['Open till 10 PM', 'Evening specials', 'Mood lighting'],
-    image: 'https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?auto=format&fit=crop&w=1600&q=80',
-  },
-  {
-    id: '06',
-    title: 'Live Moments',
-    tag: 'Every Visit',
-    description: 'Every visit becomes part of the story. The food, the view, the people.',
-    stats: ['Weekend highlights', 'Guest stories', 'Memorable evenings'],
-    image: 'https://images.unsplash.com/photo-1424847651672-bf20a4b0982b?auto=format&fit=crop&w=1600&q=80',
-  },
+const EXPERIENCES = [
+  { id: '01', title: 'Terrace\nDining',      tag: 'Signature Experience', description: 'Open skies, warm lights, evenings worth staying for. Our rooftop terrace is where Jorhat unwinds.',   image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1600&q=80', accent: '#B6912E' },
+  { id: '02', title: 'Coffee\nMoments',      tag: 'All Day',              description: 'Slow pours, rich aromas, and conversations that stretch past noon.',                                   image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1600&q=80', accent: '#C42D78' },
+  { id: '03', title: 'House\nFavourites',    tag: 'Most Ordered',         description: 'Tandoori pizza to fiery wings — the dishes guests order again and again.',                            image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1600&q=80', accent: '#E8742A' },
+  { id: '04', title: 'Gatherings\n& Groups', tag: 'Celebrations',         description: 'The perfect backdrop for long celebrations and even longer conversations.',                            image: 'https://images.unsplash.com/photo-1529543544282-ea669407fca3?auto=format&fit=crop&w=1600&q=80', accent: '#B6912E' },
+  { id: '05', title: 'Night\nAtmosphere',    tag: 'After Sunset',         description: 'Warm lights, cooler air, city below. The terrace transforms after dark.',                            image: 'https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?auto=format&fit=crop&w=1600&q=80', accent: '#C42D78' },
 ];
 
-// Separate nav item component to keep hover state clean
-const NavItem = ({ item, isActive, onClick }) => {
-  const [hovered, setHovered] = useState(false);
-  const show = isActive || hovered;
+function rgb(hex) {
+  if (hex === '#B6912E') return '182,145,46';
+  if (hex === '#C42D78') return '196,45,120';
+  return '232,116,42';
+}
 
-  return (
-    <div
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        display: 'flex', alignItems: 'center',
-        padding: '20px 0',
-        paddingLeft: isActive ? '16px' : '0',
-        borderBottom: '1px solid rgba(255,255,255,0.07)',
-        cursor: 'pointer',
-        gap: '20px',
-        position: 'relative',
-        transition: 'padding-left 0.3s ease',
-      }}
-    >
-      {/* Active left bar */}
-      <div style={{
-        position: 'absolute', left: 0, top: '50%',
-        transform: 'translateY(-50%)',
-        width: isActive ? '3px' : '0px',
-        height: isActive ? '55%' : '0%',
-        background: '#C42D78',
-        borderRadius: '2px',
-        transition: 'all 0.35s ease',
-      }} />
-
-      {/* Number */}
-      <span style={{
-        fontSize: '12px', fontWeight: '700',
-        color: isActive ? '#C42D78' : 'rgba(255,255,255,0.2)',
-        width: '36px', flexShrink: 0,
-        transition: 'color 0.3s ease',
-        fontVariantNumeric: 'tabular-nums',
-        letterSpacing: '0.06em',
-      }}>
-        {item.id}
-      </span>
-
-      {/* Title */}
-      <span style={{
-        fontSize: 'clamp(1rem, 1.8vw, 1.35rem)',
-        fontWeight: '700',
-        color: isActive ? '#FFFFFF' : show ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.28)',
-        transition: 'color 0.3s ease',
-        letterSpacing: '-0.01em',
-        flex: 1,
-      }}>
-        {item.title}
-      </span>
-
-      {/* Arrow */}
-      <span style={{
-        fontSize: '15px', color: '#C42D78',
-        opacity: isActive ? 1 : 0,
-        transform: isActive ? 'translateX(0)' : 'translateX(-10px)',
-        transition: 'all 0.3s ease',
-        flexShrink: 0,
-      }}>→</span>
-    </div>
-  );
-};
-
-const OhanaExperience = () => {
+export default function OhanaExperience() {
   const [active, setActive] = useState(0);
-  const [transitioning, setTransitioning] = useState(false);
+  const sectionRef     = useRef(null);
+  const imgCurrentRef  = useRef(null);
+  const imgRevealRef   = useRef(null);
+  const titleRef       = useRef(null);
+  const descRef        = useRef(null);
+  const tagRef         = useRef(null);
+  const progressBarRef = useRef(null);
+  const isAnimating    = useRef(false);
+  const activeRef      = useRef(0);
 
-  const sectionRef = useRef(null);
-  const imgRef = useRef(null);
-  const titleRef = useRef(null);
-  const descRef = useRef(null);
-  const statsRef = useRef(null);
-  const tagRef = useRef(null);
-  const bigNumRef = useRef(null);
-  const headerRef = useRef(null);
-  const leftColRef = useRef(null);
-  const rightColRef = useRef(null);
+  /* mobile card refs */
+  const mTitleRef = useRef(null);
+  const mDescRef  = useRef(null);
+  const mTagRef   = useRef(null);
 
-  // Scroll reveal
+  const exp = EXPERIENCES[active];
+
+  /* ── scroll entrance ── */
   useEffect(() => {
     if (!sectionRef.current) return;
     const ctx = gsap.context(() => {
-      gsap.set([headerRef.current, leftColRef.current, rightColRef.current], { opacity: 0, y: 48 });
+      const els = sectionRef.current.querySelectorAll('.oe-reveal');
+      gsap.set(els, { opacity: 0, y: 40 });
       ScrollTrigger.create({
         trigger: sectionRef.current,
-        start: 'top 75%',
+        start: 'top 78%',
         once: true,
-        onEnter: () => {
-          gsap.to(headerRef.current, { opacity: 1, y: 0, duration: 1, ease: 'power3.out' });
-          gsap.to(leftColRef.current, { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out', delay: 0.15 });
-          gsap.to(rightColRef.current, { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out', delay: 0.28 });
-        },
+        onEnter: () => gsap.to(els, { opacity: 1, y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.12 }),
       });
     }, sectionRef);
     return () => ctx.revert();
   }, []);
 
-  const changeExperience = useCallback((idx) => {
-    if (idx === active || transitioning) return;
-    setTransitioning(true);
+  /* ── switch ── */
+  const switchTo = useCallback((idx) => {
+    if (idx === activeRef.current || isAnimating.current) return;
+    isAnimating.current = true;
+    activeRef.current   = idx;
+    const next = EXPERIENCES[idx];
 
-    const contentEls = [tagRef.current, titleRef.current, descRef.current, statsRef.current].filter(Boolean);
+    /* prepare wipe layer */
+    if (imgRevealRef.current) {
+      imgRevealRef.current.style.backgroundImage = `url(${next.image})`;
+      gsap.set(imgRevealRef.current, { clipPath: 'inset(0 100% 0 0)' });
+    }
 
-    gsap.to(contentEls, { opacity: 0, y: -10, duration: 0.2, ease: 'power2.in', stagger: 0.025 });
-    gsap.to(imgRef.current, { opacity: 0, scale: 1.04, duration: 0.32, ease: 'power2.in' });
-    gsap.to(bigNumRef.current, { opacity: 0, duration: 0.18 });
+    /* fade out desktop text */
+    const textEls = [titleRef.current, descRef.current, tagRef.current].filter(Boolean);
+    gsap.to(textEls, { opacity: 0, y: -12, duration: 0.25, ease: 'power2.in', stagger: 0.03 });
 
-    setTimeout(() => {
-      setActive(idx);
-      setTransitioning(false);
-      gsap.fromTo(imgRef.current, { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.65, ease: 'power3.out' });
-      gsap.fromTo(contentEls, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out', stagger: 0.06 });
-      gsap.fromTo(bigNumRef.current, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' });
-    }, 280);
-  }, [active, transitioning]);
+    /* fade out mobile card text */
+    const mEls = [mTitleRef.current, mDescRef.current, mTagRef.current].filter(Boolean);
+    gsap.to(mEls, { opacity: 0, duration: 0.2 });
 
-  const exp = experiences[active];
+    /* wipe image */
+    gsap.to(imgRevealRef.current, {
+      clipPath: 'inset(0 0% 0 0)',
+      duration: 0.9,
+      ease: 'power3.inOut',
+      delay: 0.12,
+      onComplete: () => {
+        if (imgCurrentRef.current) imgCurrentRef.current.style.backgroundImage = `url(${next.image})`;
+        gsap.set(imgRevealRef.current, { clipPath: 'inset(0 100% 0 0)' });
+        if (progressBarRef.current) {
+          gsap.to(progressBarRef.current, { scaleX: (idx + 1) / EXPERIENCES.length, duration: 0.5, ease: 'power2.out' });
+        }
+        setActive(idx);
+        gsap.fromTo([...textEls, ...mEls],
+          { opacity: 0, y: 14 },
+          { opacity: 1, y: 0, duration: 0.6, ease: 'expo.out', stagger: 0.04,
+            onComplete: () => { isAnimating.current = false; } }
+        );
+      },
+    });
+  }, []);
 
   return (
-    <section
-      ref={sectionRef}
-      style={{
-        background: '#0A2329',
-        position: 'relative',
-        overflow: 'hidden',
-        padding: '0',
-      }}
-    >
-      {/* Blurred ambient background */}
+    <section ref={sectionRef} style={{ position: 'relative', background: '#0C0902', minHeight: '100vh' }}>
+
+      {/* gradient blend from testimonials */}
       <div style={{
-        position: 'absolute', inset: 0, zIndex: 0,
-        backgroundImage: `url(${exp.image})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        filter: 'blur(70px) brightness(0.15) saturate(0.5)',
-        transform: 'scale(1.12)',
-        transition: 'background-image 0.5s ease',
+        position: 'absolute', top: 0, left: 0, right: 0, height: '120px',
+        background: 'linear-gradient(to bottom, #050407 0%, transparent 100%)',
+        pointerEvents: 'none', zIndex: 20,
       }} />
 
-      {/* Dark overlay */}
-      <div style={{
-        position: 'absolute', inset: 0, zIndex: 1,
-        background: 'linear-gradient(135deg, rgba(8,30,28,0.97) 0%, rgba(10,38,36,0.92) 100%)',
-      }} />
+      {/* mobile-only: extra dark spacer above the sticky image (shows transition zone) */}
+      <div className="oe-mobile-spacer" style={{ display: 'none' }} />
 
-      {/* Magenta glow */}
-      <div style={{
-        position: 'absolute', top: '-120px', right: '-80px', zIndex: 1,
-        width: '700px', height: '700px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(196,45,120,0.07) 0%, transparent 60%)',
-        pointerEvents: 'none',
-      }} />
-      {/* Gold glow */}
-      <div style={{
-        position: 'absolute', bottom: '0', left: '40%', zIndex: 1,
-        width: '500px', height: '500px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(182,145,46,0.05) 0%, transparent 60%)',
-        pointerEvents: 'none',
-      }} />
-
-      <div style={{ position: 'relative', zIndex: 2, maxWidth: '1360px', margin: '0 auto', padding: '100px 64px' }}>
-
-        {/* ── HEADER ── */}
-        <div ref={headerRef} style={{ marginBottom: '64px', opacity: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '22px' }}>
-            <div style={{ width: '36px', height: '1.5px', background: '#B6912E', opacity: 0.8 }} />
-            <span style={{
-              fontSize: '11px', fontWeight: '700', letterSpacing: '0.38em',
-              textTransform: 'uppercase', color: '#B6912E',
-            }}>Ohana Experience</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
-            <h2 style={{
-              fontSize: 'clamp(2.5rem, 5vw, 4.5rem)',
-              fontWeight: '900', lineHeight: 1,
-              color: '#FFFFFF',
-              letterSpacing: '-0.03em', margin: 0,
-              fontFamily: "'Archivo Black', sans-serif",
-            }}>
-              The Ohana<br />
-              <span style={{
-                color: 'rgba(255,255,255,0.28)',
-                fontStyle: 'italic', fontWeight: '300',
-                fontFamily: 'Georgia, "Times New Roman", serif',
-              }}>Experience</span>
-            </h2>
-            <p style={{
-              fontSize: '15px', color: 'rgba(255,255,255,0.4)',
-              maxWidth: '280px', lineHeight: 1.75, margin: 0, textAlign: 'right',
-            }}>
-              Good food.<br />Great company.<br />Better evenings.
-            </p>
-          </div>
+      {/* ══ LEFT — full-height image panel (desktop absolute, mobile sticky) ══ */}
+      <div className="oe-img-panel" style={{
+        position: 'absolute', top: 0, left: 0, bottom: 0, width: '58%', overflow: 'hidden',
+      }}>
+        <div ref={imgCurrentRef} style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: `url(${exp.image})`,
+          backgroundSize: 'cover', backgroundPosition: 'center',
+        }} />
+        <div ref={imgRevealRef} style={{
+          position: 'absolute', inset: 0,
+          backgroundSize: 'cover', backgroundPosition: 'center',
+          clipPath: 'inset(0 100% 0 0)',
+        }} />
+        {/* top-edge fade — blends image into section bg above it (visible on mobile) */}
+        <div className="oe-img-top-fade" style={{
+          position: 'absolute', top: 0, left: 0, right: 0,
+          height: '80px',
+          background: 'linear-gradient(to bottom, #0C0902 0%, transparent 100%)',
+          zIndex: 5, pointerEvents: 'none',
+        }} />
+        {/* scrims */}
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 2,
+          background: 'linear-gradient(to right, rgba(12,9,2,0) 38%, #0C0902 100%), linear-gradient(to top, rgba(12,9,2,0.92) 0%, rgba(12,9,2,0.05) 52%, transparent 100%)',
+        }} />
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 2, pointerEvents: 'none',
+          background: `radial-gradient(ellipse 60% 50% at 30% 80%, rgba(${rgb(exp.accent)},0.12) 0%, transparent 70%)`,
+          transition: 'background 0.8s ease',
+        }} />
+        {/* watermark */}
+        <div className="oe-watermark" style={{
+          position: 'absolute', bottom: 'clamp(80px,12vh,140px)', right: '20px',
+          fontSize: 'clamp(7rem,16vw,14rem)', fontWeight: '900',
+          fontFamily: "'Archivo Black','Arial Black',sans-serif",
+          color: 'rgba(255,255,255,0.04)', letterSpacing: '-0.08em', lineHeight: 1,
+          userSelect: 'none', pointerEvents: 'none', zIndex: 3,
+        }}>
+          {exp.id}
         </div>
-
-        {/* ── MAIN GRID ── */}
-        <div
-          className="exp-main-grid"
-          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '52px', alignItems: 'stretch' }}
-        >
-          {/* LEFT — IMAGE */}
-          <div ref={leftColRef} style={{ opacity: 0 }}>
-            <div style={{
-              position: 'relative',
-              height: '660px',
-              borderRadius: '20px',
-              overflow: 'hidden',
-              boxShadow: '0 60px 140px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.04)',
-            }}>
-              <img
-                ref={imgRef}
-                src={exp.image}
-                alt={exp.title}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                onError={e => { e.target.src = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1600'; }}
-              />
-
-              {/* Bottom gradient */}
-              <div style={{
-                position: 'absolute', inset: 0,
-                background: 'linear-gradient(to top, rgba(5,15,14,0.95) 0%, rgba(5,15,14,0.45) 48%, rgba(5,15,14,0.0) 100%)',
-                pointerEvents: 'none',
-              }} />
-
-              {/* Ghost number */}
-              <div ref={bigNumRef} style={{
-                position: 'absolute', top: '16px', right: '22px',
-                fontSize: '10rem', fontWeight: '900', lineHeight: 1,
-                color: 'rgba(255,255,255,0.04)',
-                fontFamily: "'Archivo Black', sans-serif",
-                letterSpacing: '-0.06em',
-                pointerEvents: 'none', userSelect: 'none',
-              }}>
-                {exp.id}
-              </div>
-
-              {/* Content */}
-              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '32px 32px 36px' }}>
-                {/* Tag */}
-                <div ref={tagRef} style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '6px',
-                  background: 'rgba(196,45,120,0.18)',
-                  border: '1px solid rgba(196,45,120,0.35)',
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: '100px', padding: '5px 12px',
-                  fontSize: '10px', fontWeight: '700',
-                  letterSpacing: '0.14em', color: '#f472b6',
-                  textTransform: 'uppercase', marginBottom: '14px',
-                }}>
-                  {exp.tag}
-                </div>
-
-                {/* Title */}
-                <h3 ref={titleRef} style={{
-                  fontSize: 'clamp(1.8rem, 3.5vw, 3rem)',
-                  fontWeight: '900', color: '#FFFFFF',
-                  lineHeight: 1.05, margin: '0 0 10px 0',
-                  letterSpacing: '-0.025em',
-                  fontFamily: "'Archivo Black', sans-serif",
-                }}>
-                  {exp.title}
-                </h3>
-
-                {/* Description */}
-                <p ref={descRef} style={{
-                  fontSize: '14px', color: 'rgba(255,255,255,0.65)',
-                  lineHeight: 1.65, margin: '0 0 18px 0', maxWidth: '370px',
-                }}>
-                  {exp.description}
-                </p>
-
-                {/* Stats */}
-                <div ref={statsRef} style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                  {exp.stats.map((s, i) => (
-                    <span key={i} style={{
-                      fontSize: '11px', color: 'rgba(255,255,255,0.5)',
-                      display: 'flex', alignItems: 'center', gap: '5px', fontWeight: '500',
-                    }}>
-                      <span style={{ color: '#B6912E', fontSize: '8px' }}>✦</span> {s}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
+        {/* desktop image content */}
+        <div className="oe-img-content" style={{
+          position: 'absolute', bottom: 0, left: 0, zIndex: 4,
+          padding: 'clamp(28px,5vw,60px)', maxWidth: '480px',
+        }}>
+          <div ref={tagRef} style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            background: `rgba(${rgb(exp.accent)},0.14)`,
+            border: `1px solid rgba(${rgb(exp.accent)},0.35)`,
+            backdropFilter: 'blur(10px)',
+            borderRadius: '100px', padding: '5px 14px', marginBottom: '18px',
+          }}>
+            <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: exp.accent, display: 'block' }} />
+            <span style={{ fontSize: '9px', fontWeight: '800', letterSpacing: '0.3em', textTransform: 'uppercase', color: exp.accent }}>
+              {exp.tag}
+            </span>
           </div>
-
-          {/* RIGHT — NAVIGATOR */}
-          <div ref={rightColRef} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', opacity: 0 }}>
-            {/* Progress indicator */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '36px' }}>
-              <span style={{ fontSize: '12px', color: '#C42D78', fontWeight: '700', fontVariantNumeric: 'tabular-nums' }}>
-                {String(active + 1).padStart(2, '0')}
-              </span>
-              {/* Progress bar */}
-              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)', position: 'relative' }}>
-                <div style={{
-                  position: 'absolute', left: 0, top: 0, bottom: 0,
-                  width: `${((active + 1) / experiences.length) * 100}%`,
-                  background: 'linear-gradient(90deg, #C42D78, rgba(196,45,120,0.3))',
-                  transition: 'width 0.4s ease',
-                }} />
-              </div>
-              <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.2)', fontWeight: '700', fontVariantNumeric: 'tabular-nums' }}>
-                {String(experiences.length).padStart(2, '0')}
-              </span>
-            </div>
-
-            {/* Nav list */}
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-              {experiences.map((item, idx) => (
-                <NavItem
-                  key={item.id}
-                  item={item}
-                  isActive={idx === active}
-                  onClick={() => changeExperience(idx)}
-                />
-              ))}
-            </div>
-
-            {/* CTA */}
-            <div style={{ marginTop: '40px' }}>
-              <a
-                href="/about"
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '12px',
-                  color: 'rgba(255,255,255,0.4)',
-                  textDecoration: 'none',
-                  fontSize: '11px', fontWeight: '700',
-                  letterSpacing: '0.2em', textTransform: 'uppercase',
-                  transition: 'color 0.25s ease',
-                }}
-                onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.85)'}
-                onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
-              >
-                Discover Ohana
-                <span style={{
-                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  width: '30px', height: '30px', borderRadius: '50%',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  fontSize: '13px', transition: 'border-color 0.25s ease',
-                }}>→</span>
-              </a>
-            </div>
-          </div>
+          <h3 ref={titleRef} style={{
+            fontFamily: "'Archivo Black','Arial Black',sans-serif",
+            fontSize: 'clamp(2rem,4.5vw,4rem)', fontWeight: '900', color: '#fff',
+            lineHeight: 0.92, letterSpacing: '-0.03em', margin: '0 0 16px', whiteSpace: 'pre-line',
+          }}>
+            {exp.title}
+          </h3>
+          <p ref={descRef} className="oe-img-desc" style={{
+            fontSize: 'clamp(12px,1.3vw,15px)', color: 'rgba(255,255,255,0.5)', lineHeight: 1.75, margin: 0,
+          }}>
+            {exp.description}
+          </p>
         </div>
       </div>
 
+      {/* ══ RIGHT — editorial nav panel ══ */}
+      <div className="oe-nav-panel" style={{
+        position: 'relative', zIndex: 5,
+        marginLeft: '55%', minHeight: '100vh', background: '#0C0902',
+        display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        padding: 'clamp(100px,12vh,160px) clamp(28px,5vw,68px) clamp(60px,8vh,100px)',
+        borderLeft: '1px solid rgba(255,255,255,0.05)',
+      }}>
+
+        {/* headline */}
+        <div className="oe-reveal oe-desktop-head" style={{ opacity: 0, marginBottom: '52px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '22px' }}>
+            <div style={{ width: '28px', height: '1.5px', background: '#B6912E' }} />
+            <span style={{ fontSize: '9px', fontWeight: '800', letterSpacing: '0.5em', textTransform: 'uppercase', color: '#B6912E' }}>
+              Ohana Experience
+            </span>
+          </div>
+          <h2 style={{
+            fontFamily: "'Archivo Black','Arial Black',sans-serif",
+            fontSize: 'clamp(1.8rem,3.5vw,3.2rem)', fontWeight: '900', lineHeight: 0.92,
+            letterSpacing: '-0.04em', margin: '0 0 8px',
+          }}>
+            <span style={{ color: 'transparent', WebkitTextStroke: '1px rgba(255,255,255,0.55)' }}>Every</span><br />
+            <span style={{ color: '#fff' }}>Visit</span><br />
+            <span style={{ color: 'rgba(255,255,255,0.3)', fontStyle: 'italic', fontWeight: '400', fontFamily: 'Georgia,serif', fontSize: '0.72em', letterSpacing: 0 }}>a story.</span>
+          </h2>
+        </div>
+
+        {/* progress */}
+        <div className="oe-reveal oe-progress" style={{ opacity: 0, marginBottom: '36px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '7px' }}>
+            <span style={{ fontSize: '10px', color: exp.accent, fontWeight: '700', letterSpacing: '0.1em' }}>
+              {String(active + 1).padStart(2,'0')}
+            </span>
+            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.18)', fontWeight: '700' }}>
+              {String(EXPERIENCES.length).padStart(2,'0')}
+            </span>
+          </div>
+          <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', position: 'relative' }}>
+            <div ref={progressBarRef} style={{
+              position: 'absolute', left: 0, top: 0, bottom: 0, width: '100%',
+              background: `linear-gradient(90deg, ${exp.accent}, rgba(255,255,255,0.2))`,
+              transformOrigin: 'left',
+              transform: `scaleX(${(active+1)/EXPERIENCES.length})`,
+            }} />
+          </div>
+        </div>
+
+        {/* desktop nav list */}
+        <div className="oe-reveal oe-desktop-nav" style={{ opacity: 0 }}>
+          {EXPERIENCES.map((item, idx) => (
+            <button
+              key={item.id}
+              onClick={() => switchTo(idx)}
+              style={{
+                display: 'flex', alignItems: 'center',
+                width: '100%', background: 'none', border: 'none',
+                padding: '16px 0', borderBottom: '1px solid rgba(255,255,255,0.055)',
+                cursor: 'pointer', gap: '16px', position: 'relative', textAlign: 'left',
+              }}
+            >
+              <div style={{
+                position: 'absolute', left: '-28px', top: '50%', transform: 'translateY(-50%)',
+                width: idx === active ? '18px' : '0px', height: '2px', background: item.accent,
+                transition: 'width 0.35s cubic-bezier(0.34,1.56,0.64,1)', borderRadius: '2px',
+              }} />
+              <span style={{
+                fontSize: '9px', fontWeight: '700',
+                color: idx === active ? item.accent : 'rgba(255,255,255,0.15)',
+                width: '24px', flexShrink: 0, letterSpacing: '0.12em',
+                transition: 'color 0.25s ease',
+              }}>{item.id}</span>
+              <span style={{
+                fontSize: 'clamp(0.9rem,1.5vw,1.15rem)',
+                fontWeight: idx === active ? '800' : '400',
+                fontFamily: idx === active ? "'Archivo Black',sans-serif" : 'inherit',
+                color: idx === active ? '#fff' : 'rgba(255,255,255,0.22)',
+                transition: 'all 0.25s ease', letterSpacing: idx === active ? '-0.02em' : '0', flex: 1,
+              }}>{item.title.replace('\n',' ')}</span>
+              <div style={{
+                width: idx === active ? '50px' : '0px', height: '34px', borderRadius: '6px',
+                overflow: 'hidden', flexShrink: 0,
+                transition: 'width 0.45s cubic-bezier(0.34,1.56,0.64,1)',
+                backgroundImage: `url(${item.image})`, backgroundSize: 'cover', backgroundPosition: 'center',
+                opacity: idx === active ? 1 : 0,
+                boxShadow: idx === active ? `0 4px 16px rgba(${rgb(item.accent)},0.3)` : 'none',
+              }} />
+              <span style={{
+                fontSize: '12px', color: item.accent,
+                opacity: idx === active ? 1 : 0,
+                transform: idx === active ? 'translateX(0)' : 'translateX(-8px)',
+                transition: 'all 0.25s ease', flexShrink: 0,
+              }}>→</span>
+            </button>
+          ))}
+        </div>
+
+        {/* ── MOBILE NAV (hidden on desktop, shown via CSS on mobile) ── */}
+        <div className="oe-mobile-nav" style={{ display: 'none' }}>
+
+          {/* eyebrow */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '22px' }}>
+            <div style={{ width: '24px', height: '1.5px', background: '#B6912E' }} />
+            <span style={{ fontSize: '9px', fontWeight: '800', letterSpacing: '0.45em', textTransform: 'uppercase', color: '#B6912E' }}>
+              Ohana Experience
+            </span>
+          </div>
+
+          {/* horizontal chip tabs */}
+          <div style={{
+            display: 'flex', gap: '8px', overflowX: 'auto',
+            scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
+            marginBottom: '20px', paddingBottom: '2px',
+          }}>
+            {EXPERIENCES.map((item, idx) => (
+              <button
+                key={item.id}
+                onClick={() => switchTo(idx)}
+                style={{
+                  flexShrink: 0,
+                  background: idx === active ? exp.accent : 'rgba(255,255,255,0.06)',
+                  border: `1px solid ${idx === active ? exp.accent : 'rgba(255,255,255,0.1)'}`,
+                  color: idx === active ? '#000' : 'rgba(255,255,255,0.4)',
+                  borderRadius: '100px', padding: '8px 16px',
+                  fontSize: '10px', fontWeight: '800', letterSpacing: '0.06em',
+                  cursor: 'pointer', whiteSpace: 'nowrap',
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                {item.title.replace('\n',' ')}
+              </button>
+            ))}
+          </div>
+
+          {/* active experience card */}
+          <div style={{
+            background: 'rgba(255,255,255,0.03)',
+            border: `1px solid rgba(${rgb(exp.accent)},0.22)`,
+            borderRadius: '16px', padding: '20px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: exp.accent }} />
+              <span ref={mTagRef} style={{ fontSize: '9px', fontWeight: '800', letterSpacing: '0.25em', textTransform: 'uppercase', color: exp.accent }}>
+                {exp.tag}
+              </span>
+            </div>
+            <p ref={mTitleRef} style={{
+              fontSize: '15px', fontWeight: '800', color: '#fff',
+              margin: '0 0 8px', fontFamily: "'Archivo Black',sans-serif", letterSpacing: '-0.02em',
+            }}>
+              {exp.title.replace('\n',' ')}
+            </p>
+            <p ref={mDescRef} style={{
+              fontSize: '13px', color: 'rgba(255,255,255,0.45)', lineHeight: 1.65, margin: '0 0 18px',
+            }}>
+              {exp.description}
+            </p>
+            {/* prev / next */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.1em' }}>
+                {String(active+1).padStart(2,'0')} / {String(EXPERIENCES.length).padStart(2,'0')}
+              </span>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={() => switchTo(Math.max(0, active - 1))}
+                  style={{
+                    background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '50%', width: '32px', height: '32px',
+                    color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '13px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}
+                >←</button>
+                <button
+                  onClick={() => switchTo(Math.min(EXPERIENCES.length - 1, active + 1))}
+                  style={{
+                    background: exp.accent, border: 'none',
+                    borderRadius: '50%', width: '32px', height: '32px',
+                    color: '#000', cursor: 'pointer', fontSize: '13px', fontWeight: '800',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}
+                >→</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="oe-reveal" style={{ opacity: 0, marginTop: '40px' }}>
+          <a
+            href="/about"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '10px',
+              border: '1px solid rgba(182,145,46,0.4)', color: '#B6912E',
+              textDecoration: 'none', padding: '11px 24px', borderRadius: '100px',
+              fontSize: '9px', fontWeight: '800', letterSpacing: '0.28em',
+              textTransform: 'uppercase', transition: 'all 0.3s ease',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#B6912E'; e.currentTarget.style.color = '#000'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#B6912E'; }}
+          >
+            Discover Ohana
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '50%', border: '1px solid currentColor', fontSize: '10px' }}>→</span>
+          </a>
+        </div>
+
+      </div>
+
       <style>{`
-        @media (max-width: 900px) {
-          .exp-main-grid {
-            grid-template-columns: 1fr !important;
+        /* ─── MOBILE (≤ 768px) ─── */
+        @media (max-width: 768px) {
+
+          /* image panel: sticky so it stays visible when scrolling nav */
+          .oe-img-panel {
+            position: sticky !important;
+            top: 0 !important;
+            left: 0 !important; right: 0 !important; bottom: auto !important;
+            width: 100% !important;
+            height: 56vw !important;
+            min-height: 200px !important;
+            max-height: 320px !important;
+            margin-top: 72px !important;   /* dark space above = transition zone visible */
+            z-index: 8 !important;
+            overflow: hidden !important;
           }
-          .exp-main-grid > div:first-child > div {
-            height: 480px !important;
+
+          /* dark spacer that fills the 72px gap above the sticky image */
+          .oe-mobile-spacer {
+            display: block !important;
+            height: 72px !important;
+            background: #0C0902 !important;
           }
-        }
-        @media (max-width: 520px) {
-          .exp-main-grid > div:first-child > div {
-            height: 360px !important;
+
+          /* top-fade always visible on mobile */
+          .oe-img-top-fade { display: block !important; }
+
+          /* full-bleed: remove right-edge fade, keep bottom scrim only */
+          .oe-img-panel > div:nth-child(4) {
+            background: linear-gradient(to top, rgba(12,9,2,0.9) 0%, rgba(12,9,2,0.05) 55%, transparent 100%) !important;
           }
+
+          /* image overlay text — only show tag + title, hide desc */
+          .oe-img-content { padding: 14px 18px !important; }
+          .oe-img-content h3 { font-size: 1.5rem !important; margin-bottom: 0 !important; }
+          .oe-img-desc { display: none !important; }
+
+          /* watermark hidden on mobile */
+          .oe-watermark { display: none !important; }
+
+          /* nav panel stacks below sticky image */
+          .oe-nav-panel {
+            margin-left: 0 !important;
+            min-height: unset !important;
+            border-left: none !important;
+            border-top: 1px solid rgba(255,255,255,0.06) !important;
+            padding: 28px 20px 52px !important;
+          }
+
+          /* hide desktop-only elements */
+          .oe-desktop-head { display: none !important; }
+          .oe-desktop-nav  { display: none !important; }
+          .oe-progress     { display: none !important; }
+
+          /* show mobile nav */
+          .oe-mobile-nav { display: block !important; }
+
+          /* hide scrollbar on tab strip */
+          .oe-mobile-nav > div:nth-child(2)::-webkit-scrollbar { display: none; }
         }
       `}</style>
     </section>
   );
-};
-
-export default OhanaExperience;
+}

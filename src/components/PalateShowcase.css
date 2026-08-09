@@ -88,18 +88,19 @@
   margin: 0 0 0.4rem;
   line-height: 0.9;
   font-size: clamp(3.2rem, 7vw, 6.5rem);
-  font-weight: 700;
+  font-weight: 900;
   letter-spacing: -0.05em;
   display: flex;
   align-items: baseline;
   justify-content: center;
-  gap: 0.4em;
-  font-family: var(--fp);
+  gap: 0.35em;
+  font-family: 'Archivo Black', 'Arial Black', sans-serif;
 }
 
 .ps-header__title-plain {
-  color: rgba(247, 243, 236, 0.3);
-  font-weight: 200;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(247, 243, 236, 0.55);
+  font-weight: 900;
 }
 
 .ps-header__title-accent {
@@ -218,12 +219,12 @@
 
 .ps-card__title {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 900;
   letter-spacing: -0.03em;
   color: #F7F3EC;
   margin: 0;
   line-height: 1;
-  font-family: var(--fp);
+  font-family: 'Archivo Black', 'Arial Black', sans-serif;
 }
 
 .ps-card__line {
