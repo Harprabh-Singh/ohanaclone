@@ -194,17 +194,24 @@ export default function HouseFavourites() {
     tl.to(ctaRef.current,     { opacity: 1, y: 0, duration: 0.52, ease: 'expo.out' }, '<0.04');
   }, []);
 
-  /* ─────── SCROLL TRIGGER ─────── */
+  /* ─────── SCROLL TRIGGER (desktop only) ─────── */
   useEffect(() => {
     const wrap = wrapRef.current;
     const sticky = stickyRef.current;
     if (!wrap || !sticky) return;
 
-    // Exact height: TOTAL viewports. pinSpacing:false = no injected spacer.
+    // MOBILE: just normal flow — 100vh, no pin, no scroll animation
+    if (isMobileRef.current) {
+      wrap.style.height = '100vh';
+      sticky.style.position = 'relative';
+      sticky.style.top = 'auto';
+      return; // no ScrollTrigger on mobile
+    }
+
+    // DESKTOP: sticky scroll pin across TOTAL viewports
     wrap.style.height = `${TOTAL * 100}vh`;
 
     const resolveSnap = (progress) => {
-      // Deadzone at edges so dish changes don't fire during pin engage/release
       const inner = Math.max(0, Math.min(1, (progress - 0.03) / 0.94));
       return Math.max(0, Math.min(TOTAL - 1, Math.round(inner * (TOTAL - 1))));
     };
@@ -219,25 +226,11 @@ export default function HouseFavourites() {
       onUpdate: self => {
         const p = self.progress;
         lastProgressRef.current = p;
-
-        // Progress bar always live
         if (progressRef.current) {
           progressRef.current.style.transform = `scaleX(${p})`;
         }
-
-        if (isMobileRef.current) {
-          // MOBILE: debounce — wait for scroll to settle before switching dish
-          // This prevents the mid-scroll snap jank entirely
-          clearTimeout(snapTimerRef.current);
-          snapTimerRef.current = setTimeout(() => {
-            const snap = resolveSnap(lastProgressRef.current);
-            triggerDishTransition(snap);
-          }, 120); // wait 120ms after scroll stops
-        } else {
-          // DESKTOP: immediate, feels snappy with mouse scroll
-          const snap = resolveSnap(p);
-          triggerDishTransition(snap);
-        }
+        const snap = resolveSnap(p);
+        triggerDishTransition(snap);
       },
     });
 
