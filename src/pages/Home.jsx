@@ -12,121 +12,178 @@ import { testimonials } from '../data/testimonials';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// ─── STORY SECTION ───────────────────────────────────────────────
+// ─── STORY SECTION (redesigned) ──────────────────────────────────
 const StorySection = () => {
   const sectionRef = useRef(null);
-  const imgRef = useRef(null);
-  const contentRef = useRef(null);
+  const headRef    = useRef(null);
+  const imgRef     = useRef(null);
+  const bodyRef    = useRef(null);
+  const pillsRef   = useRef(null);
 
   useEffect(() => {
     if (!sectionRef.current) return;
     const ctx = gsap.context(() => {
-      gsap.set([imgRef.current, contentRef.current], { opacity: 0, y: 40 });
+      gsap.set([headRef.current, imgRef.current, bodyRef.current, pillsRef.current], { opacity: 0, y: 48 });
       ScrollTrigger.create({
         trigger: sectionRef.current,
-        start: 'top 78%',
+        start: 'top 80%',
         once: true,
         onEnter: () => {
-          gsap.to(imgRef.current, { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out' });
-          gsap.to(contentRef.current, { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out', delay: 0.18 });
+          const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
+          tl.to(headRef.current,  { opacity: 1, y: 0, duration: 1.1 }, 0)
+            .to(imgRef.current,   { opacity: 1, y: 0, duration: 1.0 }, 0.12)
+            .to(bodyRef.current,  { opacity: 1, y: 0, duration: 0.9 }, 0.22)
+            .to(pillsRef.current, { opacity: 1, y: 0, duration: 0.8 }, 0.34);
         },
       });
     }, sectionRef);
     return () => ctx.revert();
   }, []);
 
+  const MILESTONES = [
+    { year: '2022', label: 'Founded', desc: 'Opened above Gar-Ali, Jorhat' },
+    { year: '2023', label: 'Loved', desc: '1,000+ guests. 4.8★ avg.' },
+    { year: '2024', label: 'Expanded', desc: 'New menu, bigger terrace' },
+    { year: 'Now',  label: 'Family', desc: '2K+ regulars & counting' },
+  ];
+
   return (
-    <section ref={sectionRef} style={{
-      background: '#FAF7F1',
+    <section ref={sectionRef} className="story-section" style={{
+      background: '#07060A',
       padding: '120px 0',
       position: 'relative',
       overflow: 'hidden',
     }}>
-      {/* Decorative glow */}
+      {/* Gradient blend from HouseFavourites (#020D0A) into StorySection */}
       <div style={{
-        position: 'absolute', right: '-100px', top: '50%', transform: 'translateY(-50%)',
-        width: '500px', height: '500px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(196,45,120,0.05) 0%, transparent 65%)',
+        position: 'absolute', top: 0, left: 0, right: 0,
+        height: '100px',
+        background: 'linear-gradient(to bottom, #020D0A 0%, transparent 100%)',
+        pointerEvents: 'none', zIndex: 2,
+      }} />
+
+      {/* Film grain */}
+      <div style={{
+        position: 'absolute', inset: 0, zIndex: 0, opacity: 0.035,
+        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`,
         pointerEvents: 'none',
       }} />
 
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 64px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '80px', alignItems: 'center' }} className="story-grid">
+      {/* Ambient glows */}
+      <div style={{
+        position: 'absolute', left: '-200px', top: '20%',
+        width: '600px', height: '600px', borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(182,145,46,0.07) 0%, transparent 65%)',
+        filter: 'blur(60px)', pointerEvents: 'none',
+      }} />
+      <div style={{
+        position: 'absolute', right: '-180px', bottom: '10%',
+        width: '500px', height: '500px', borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(196,45,120,0.07) 0%, transparent 65%)',
+        filter: 'blur(60px)', pointerEvents: 'none',
+      }} />
 
-          {/* LEFT — Image stack */}
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 clamp(24px, 6vw, 80px)', position: 'relative', zIndex: 1 }}>
+
+        {/* Oversize header */}
+        <div ref={headRef} style={{ marginBottom: '72px', opacity: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
+            <div style={{ width: '36px', height: '1.5px', background: '#B6912E' }} />
+            <span style={{ fontSize: '10px', fontWeight: '800', letterSpacing: '0.45em', textTransform: 'uppercase', color: '#B6912E' }}>Our Story</span>
+          </div>
+          <h2 className="story-headline" style={{
+            fontFamily: "'Archivo Black', 'Arial Black', sans-serif",
+            fontSize: 'clamp(3rem, 9vw, 8rem)',
+            fontWeight: '900', lineHeight: 0.92,
+            letterSpacing: '-0.04em', margin: 0,
+            color: 'transparent',
+            WebkitTextStroke: '1.5px rgba(255,255,255,0.85)',
+          }}>
+            More Than<br />
+            <span style={{
+              WebkitTextStroke: '0px',
+              color: '#FFFFFF',
+            }}>A Meal.</span>
+          </h2>
+        </div>
+
+        {/* Two-column grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: 'clamp(40px, 6vw, 80px)',
+          alignItems: 'start',
+          marginBottom: '80px',
+        }}>
+
+          {/* LEFT — full-bleed image with overlaid quote */}
           <div ref={imgRef} style={{ position: 'relative', opacity: 0 }}>
-            <div style={{
-              borderRadius: '24px', overflow: 'hidden', aspectRatio: '4/5',
-              boxShadow: '0 40px 100px rgba(10,46,42,0.16), 0 8px 24px rgba(10,46,42,0.08)',
+            <div className="story-img-wrap" style={{
+              borderRadius: '20px', overflow: 'hidden',
+              aspectRatio: '3/4',
+              boxShadow: '0 40px 120px rgba(0,0,0,0.7)',
               position: 'relative',
             }}>
               <img
                 src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=900&q=80"
                 alt="Ohana dining"
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'brightness(0.75) saturate(1.1)' }}
               />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,46,42,0.35) 0%, transparent 50%)' }} />
+              {/* Gradient scrim */}
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(7,6,10,0.95) 0%, rgba(7,6,10,0.3) 50%, transparent 100%)' }} />
+              {/* Overlaid italic quote */}
+              <div style={{
+                position: 'absolute', bottom: '28px', left: '28px', right: '28px',
+              }}>
+                <p style={{
+                  fontFamily: 'Georgia, serif', fontStyle: 'italic',
+                  fontSize: 'clamp(1rem, 2.5vw, 1.3rem)',
+                  color: 'rgba(255,255,255,0.9)', lineHeight: 1.55, margin: '0 0 12px',
+                }}>
+                  "Ohana means family — and every plate we serve carries that warmth."
+                </p>
+                <span style={{ fontSize: '10px', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#B6912E', fontWeight: '700' }}>
+                  — The Ohana Kitchen
+                </span>
+              </div>
             </div>
 
-            {/* Floating stat card */}
-            <div style={{
-              position: 'absolute', bottom: '-24px', right: '-28px',
-              background: '#0A2E2A', borderRadius: '18px', padding: '22px 28px',
-              boxShadow: '0 24px 60px rgba(0,0,0,0.22)', border: '1px solid rgba(255,255,255,0.06)', minWidth: '170px',
+            {/* Accent stat badge */}
+            <div className="story-stat-badge" style={{
+              position: 'absolute', top: '24px', right: '-16px',
+              background: 'rgba(182,145,46,0.12)', border: '1px solid rgba(182,145,46,0.35)',
+              backdropFilter: 'blur(12px)', borderRadius: '14px',
+              padding: '14px 20px', textAlign: 'center',
             }}>
-              <p style={{ fontSize: '2.4rem', fontWeight: '900', color: '#FFFFFF', margin: 0, lineHeight: 1, letterSpacing: '-0.03em' }}>
-                4.8<span style={{ fontSize: '1.2rem', color: '#B6912E', marginLeft: '4px' }}>★</span>
-              </p>
-              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', margin: '6px 0 0 0', letterSpacing: '0.06em', textTransform: 'uppercase', fontWeight: '600' }}>
-                200+ Happy Guests
-              </p>
-            </div>
-
-            {/* Small accent image */}
-            <div style={{
-              position: 'absolute', top: '-20px', left: '-24px',
-              width: '130px', height: '130px', borderRadius: '16px', overflow: 'hidden',
-              boxShadow: '0 16px 40px rgba(0,0,0,0.18)', border: '3px solid #FAF7F1',
-            }}>
-              <img
-                src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=300&q=80"
-                alt="Coffee"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+              <p style={{ fontSize: '1.8rem', fontWeight: '900', color: '#B6912E', margin: 0, lineHeight: 1, letterSpacing: '-0.03em' }}>4.8<span style={{ fontSize: '1rem' }}>★</span></p>
+              <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.4)', margin: '5px 0 0', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Rating</p>
             </div>
           </div>
 
-          {/* RIGHT — Content */}
-          <div ref={contentRef} style={{ opacity: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-              <div style={{ width: '32px', height: '1.5px', background: '#C42D78' }} />
-              <span style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#C42D78' }}>Our Story</span>
-            </div>
-
-            <h2 style={{
-              fontSize: 'clamp(2.2rem, 4vw, 3.6rem)', fontWeight: '900', color: '#0A2E2A',
-              lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 28px 0',
-              fontFamily: "'Archivo Black', sans-serif",
-            }}>
-              More Than A Meal.<br />
-              <span style={{ color: '#C42D78' }}>It's A Feeling.</span>
-            </h2>
-
-            <p style={{ fontSize: '16px', color: '#5A5A5A', lineHeight: 1.85, margin: '0 0 18px 0' }}>
-              Ohana means family, and every plate we send out is served with the same warmth. The terrace above Gar-Ali is designed for long evenings, conversation, and the golden-hour glow.
+          {/* RIGHT — narrative + stats */}
+          <div ref={bodyRef} style={{ opacity: 0 }}>
+            <p style={{ fontSize: 'clamp(15px, 1.8vw, 18px)', color: 'rgba(255,255,255,0.65)', lineHeight: 1.85, margin: '0 0 20px' }}>
+              We opened Ohana above Gar-Ali with one belief: good food should feel like coming home. The terrace, the golden-hour glow, the menu — all of it built for long evenings and even longer conversations.
             </p>
-            <p style={{ fontSize: '16px', color: '#5A5A5A', lineHeight: 1.85, margin: '0 0 36px 0' }}>
-              From tropical breakfasts to late-night dinner plates, our kitchen blends global comfort flavours with local ingredients — all in a space that feels intimate and elevated.
+            <p style={{ fontSize: 'clamp(14px, 1.5vw, 16px)', color: 'rgba(255,255,255,0.4)', lineHeight: 1.85, margin: '0 0 40px' }}>
+              From tropical breakfasts to late-night dinner plates, our kitchen blends global comfort flavours with local ingredients — served in a space that feels intimate and elevated.
             </p>
 
+            {/* Stats row */}
             <div style={{
-              display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px',
-              marginBottom: '40px', paddingTop: '32px', borderTop: '1px solid rgba(10,46,42,0.1)',
+              display: 'grid', gridTemplateColumns: 'repeat(3,1fr)',
+              gap: '20px', marginBottom: '44px',
+              paddingTop: '32px',
+              borderTop: '1px solid rgba(255,255,255,0.07)',
             }}>
-              {[{ num: '2K+', label: 'Guests Served' }, { num: '4.8★', label: 'Avg. Rating' }, { num: '3yr', label: 'In Jorhat' }].map((s, i) => (
+              {[
+                { num: '2K+', label: 'Guests' },
+                { num: '4.8★', label: 'Rating' },
+                { num: '3yr', label: 'In Jorhat' },
+              ].map((s, i) => (
                 <div key={i}>
-                  <p style={{ fontSize: '1.8rem', fontWeight: '900', color: '#0A2E2A', margin: 0, letterSpacing: '-0.03em' }}>{s.num}</p>
-                  <p style={{ fontSize: '12px', color: '#9A9A9A', margin: '4px 0 0 0', letterSpacing: '0.06em', textTransform: 'uppercase', fontWeight: '600' }}>{s.label}</p>
+                  <p style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: '900', color: '#FFFFFF', margin: 0, letterSpacing: '-0.03em', fontFamily: "'Archivo Black', sans-serif" }}>{s.num}</p>
+                  <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', margin: '5px 0 0', letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: '600' }}>{s.label}</p>
                 </div>
               ))}
             </div>
@@ -135,168 +192,307 @@ const StorySection = () => {
               to="/about"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '10px',
-                background: '#0A2E2A', color: '#FFFFFF', textDecoration: 'none',
-                padding: '14px 28px', borderRadius: '100px',
-                fontSize: '13px', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase',
-                transition: 'all 0.3s ease', boxShadow: '0 8px 28px rgba(10,46,42,0.2)',
+                background: 'transparent',
+                border: '1px solid rgba(182,145,46,0.55)',
+                color: '#B6912E', textDecoration: 'none',
+                padding: '14px 30px', borderRadius: '100px',
+                fontSize: '11px', fontWeight: '800', letterSpacing: '0.2em', textTransform: 'uppercase',
+                transition: 'all 0.3s ease',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#C42D78'; e.currentTarget.style.boxShadow = '0 12px 36px rgba(196,45,120,0.3)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = '#0A2E2A'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(10,46,42,0.2)'; }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#B6912E'; e.currentTarget.style.color = '#000'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#B6912E'; }}
             >
               Read Our Story <span style={{ fontSize: '16px' }}>→</span>
             </Link>
           </div>
         </div>
+
+        {/* Timeline pills */}
+        <div ref={pillsRef} className="story-pills" style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: '16px', opacity: 0,
+          borderTop: '1px solid rgba(255,255,255,0.07)',
+          paddingTop: '52px',
+        }}>
+          {MILESTONES.map((m, i) => (
+            <div key={i} className="story-pill" style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: '16px', padding: '24px 22px',
+              position: 'relative', overflow: 'hidden',
+            }}>
+              {/* Accent line top */}
+              <div style={{
+                position: 'absolute', top: 0, left: '22px',
+                width: '36px', height: '2px',
+                background: i % 2 === 0 ? '#B6912E' : '#C42D78',
+                borderRadius: '2px',
+              }} />
+              <p style={{ fontSize: '1.6rem', fontWeight: '900', color: i % 2 === 0 ? '#B6912E' : '#C42D78', margin: '8px 0 4px', letterSpacing: '-0.03em', fontFamily: "'Archivo Black', sans-serif" }}>{m.year}</p>
+              <p style={{ fontSize: '11px', fontWeight: '800', color: '#FFFFFF', margin: '0 0 4px', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{m.label}</p>
+              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)', margin: 0, lineHeight: 1.5 }}>{m.desc}</p>
+            </div>
+          ))}
+        </div>
+
       </div>
 
-      {/* <style>{`
-        @media (max-width: 900px) {
-          .story-grid { grid-template-columns: 1fr !important; gap: 60px !important; }
+      <style>{`
+        @media (max-width: 700px) {
+          .story-section { padding: 80px 0 60px !important; }
+          .story-img-wrap { aspect-ratio: 4/3 !important; }
+          .story-stat-badge { display: none !important; }
+          .story-headline { font-size: clamp(2.2rem, 11vw, 3.5rem) !important; }
+          .story-pills { grid-template-columns: 1fr 1fr !important; gap: 10px !important; padding-top: 32px !important; }
+          .story-pill { padding: 16px 14px !important; }
+          .story-body-text { margin-bottom: 24px !important; }
         }
-      `}</style> */}
+      `}</style>
     </section>
   );
 };
 
-// ─── TESTIMONIALS SECTION ─────────────────────────────────────────
-const TestimonialsSection = () => {
-  const [active, setActive] = useState(0);
-  const quoteRef = useRef(null);
-  const authorRef = useRef(null);
-  const sectionRef = useRef(null);
 
-  const items = testimonials?.length ? testimonials : [
-    { quote: "Came for lunch, stayed for the mojito. The dragon wings are not for the faint-hearted.", author: "Priya M.", visit: "Regular since 2023" },
-    { quote: "The terrace at golden hour is something else. Best date night spot in Jorhat, no contest.", author: "Rahul D.", visit: "Visited twice this month" },
-    { quote: "Tandoori pizza sounds weird until you try it. Now I can't stop thinking about it.", author: "Sneha K.", visit: "First visit → now a regular" },
-    { quote: "Ohana feels like someone's home — warm, unhurried, and the food just keeps coming.", author: "Arjun B.", visit: "Group booking" },
-    { quote: "The brownie with ice cream is criminal. I've ordered it four times in a row.", author: "Meera T.", visit: "Weekend regular" },
-  ];
+// ─── TESTIMONIALS SECTION (redesigned — dual infinite marquee) ────
+const REVIEWS = [
+  { quote: "Came for lunch, stayed for the mojito. Dragon wings are not for the faint-hearted.", author: "Priya M.", visit: "Regular since 2023", rating: 5 },
+  { quote: "The terrace at golden hour is something else. Best date spot in Jorhat, no contest.", author: "Rahul D.", visit: "Visited twice this month", rating: 5 },
+  { quote: "Tandoori pizza sounds weird until you try it. Now I can't stop thinking about it.", author: "Sneha K.", visit: "First visit → now a regular", rating: 5 },
+  { quote: "Ohana feels like someone's home — warm, unhurried, and the food just keeps coming.", author: "Arjun B.", visit: "Group booking", rating: 5 },
+  { quote: "The brownie with ice cream is criminal. I've ordered it four times in a row.", author: "Meera T.", visit: "Weekend regular", rating: 5 },
+  { quote: "Every single dish has a story. The kind of place you want to bring everyone you love.", author: "Kavya R.", visit: "Birthday dinner", rating: 5 },
+  { quote: "Staff remembered my name on my second visit. That's Ohana — family, literally.", author: "Dev S.", visit: "Monthly regular", rating: 5 },
+  { quote: "The shake alone is worth the trip. Everything else is just bonus.", author: "Nisha P.", visit: "Takeaway regular", rating: 5 },
+];
 
-  const changeSlide = (idx) => {
-    if (idx === active) return;
-    gsap.to([quoteRef.current, authorRef.current], {
-      opacity: 0, y: -12, duration: 0.22, ease: 'power2.in',
-      onComplete: () => {
-        setActive(idx);
-        gsap.fromTo([quoteRef.current, authorRef.current],
-          { opacity: 0, y: 14 },
-          { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out', stagger: 0.08 }
-        );
-      },
-    });
+function ReviewCard({ review, onMouseMove, onMouseLeave }) {
+  const cardRef = useRef(null);
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    cardRef.current.style.transform = `perspective(800px) rotateX(${-y * 14}deg) rotateY(${x * 14}deg) scale(1.04)`;
+    cardRef.current.style.boxShadow = `${-x * 20}px ${-y * 20}px 60px rgba(0,0,0,0.5), 0 0 40px rgba(182,145,46,0.08)`;
   };
+  const handleMouseLeave = () => {
+    if (!cardRef.current) return;
+    cardRef.current.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)';
+    cardRef.current.style.boxShadow = '0 8px 32px rgba(0,0,0,0.35)';
+  };
+  return (
+    <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        flexShrink: 0,
+        width: 'clamp(280px, 36vw, 420px)',
+        background: 'rgba(255,255,255,0.03)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: '20px',
+        padding: '28px 28px 24px',
+        position: 'relative',
+        cursor: 'default',
+        transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
+        willChange: 'transform',
+      }}
+    >
+      {/* Giant quote mark */}
+      <div style={{
+        position: 'absolute', top: '16px', left: '20px',
+        fontSize: '5rem', lineHeight: 1, fontFamily: 'Georgia, serif',
+        color: 'rgba(182,145,46,0.15)', fontWeight: '900',
+        pointerEvents: 'none', userSelect: 'none',
+      }}>"</div>
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActive(prev => {
-        const next = (prev + 1) % items.length;
-        if (quoteRef.current && authorRef.current) {
-          gsap.to([quoteRef.current, authorRef.current], {
-            opacity: 0, y: -10, duration: 0.2, ease: 'power2.in',
-            onComplete: () => {
-              gsap.fromTo([quoteRef.current, authorRef.current],
-                { opacity: 0, y: 12 },
-                { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out', stagger: 0.07 }
-              );
-            },
-          });
-        }
-        return next;
-      });
-    }, 4500);
-    return () => clearInterval(interval);
-  }, [items.length]);
+      {/* Stars */}
+      <div style={{ display: 'flex', gap: '3px', marginBottom: '18px', paddingTop: '8px' }}>
+        {Array.from({ length: review.rating }).map((_, i) => (
+          <span key={i} style={{ color: '#B6912E', fontSize: '13px' }}>★</span>
+        ))}
+      </div>
+
+      {/* Quote */}
+      <p style={{
+        fontSize: '14px', lineHeight: 1.75,
+        color: 'rgba(255,255,255,0.8)',
+        margin: '0 0 20px',
+        fontStyle: 'italic',
+        fontFamily: 'Georgia, serif',
+      }}>"{review.quote}"</p>
+
+      {/* Divider */}
+      <div style={{ width: '100%', height: '1px', background: 'rgba(255,255,255,0.06)', marginBottom: '16px' }} />
+
+      {/* Author */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{
+          width: '32px', height: '32px', borderRadius: '50%',
+          background: `linear-gradient(135deg, #B6912E, #C42D78)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '12px', fontWeight: '900', color: '#fff', flexShrink: 0,
+        }}>
+          {review.author[0]}
+        </div>
+        <div>
+          <p style={{ fontSize: '12px', fontWeight: '800', color: '#FFFFFF', margin: 0, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{review.author}</p>
+          <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', margin: '2px 0 0', letterSpacing: '0.04em' }}>{review.visit}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const TestimonialsSection = () => {
+  const sectionRef = useRef(null);
+  const headRef    = useRef(null);
+
+  // Double the array for seamless loop
+  const row1 = [...REVIEWS, ...REVIEWS];
+  const row2 = [...REVIEWS.slice(4), ...REVIEWS.slice(0, 4), ...REVIEWS.slice(4), ...REVIEWS.slice(0, 4)];
 
   useEffect(() => {
     if (!sectionRef.current) return;
     const ctx = gsap.context(() => {
-      gsap.set(sectionRef.current.querySelectorAll('.t-reveal'), { opacity: 0, y: 30 });
+      gsap.set(headRef.current, { opacity: 0, y: 40 });
       ScrollTrigger.create({
         trigger: sectionRef.current,
-        start: 'top 78%',
+        start: 'top 80%',
         once: true,
-        onEnter: () => {
-          gsap.to(sectionRef.current.querySelectorAll('.t-reveal'), {
-            opacity: 1, y: 0, duration: 0.9, ease: 'power3.out', stagger: 0.1,
-          });
-        },
+        onEnter: () => gsap.to(headRef.current, { opacity: 1, y: 0, duration: 1.1, ease: 'expo.out' }),
       });
     }, sectionRef);
     return () => ctx.revert();
   }, []);
 
-  const item = items[active];
-
   return (
-    <section ref={sectionRef} style={{ background: '#0A2329', padding: '120px 0', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', inset: 0, zIndex: 0, background: 'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(196,45,120,0.07) 0%, transparent 60%)', pointerEvents: 'none' }} />
+    <section ref={sectionRef} style={{
+      background: '#050407',
+      padding: '120px 0',
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      {/* Gradient blend from StorySection */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0,
+        height: '100px',
+        background: 'linear-gradient(to bottom, #07060A 0%, transparent 100%)',
+        pointerEvents: 'none', zIndex: 2,
+      }} />
 
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 64px', position: 'relative', zIndex: 1 }}>
-        <div className="t-reveal" style={{ textAlign: 'center', marginBottom: '72px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px', marginBottom: '20px' }}>
-            <div style={{ width: '36px', height: '1.5px', background: 'rgba(182,145,46,0.6)' }} />
-            <span style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.36em', textTransform: 'uppercase', color: '#B6912E' }}>Guest Reviews</span>
-            <div style={{ width: '36px', height: '1.5px', background: 'rgba(182,145,46,0.6)' }} />
+      {/* Ambient glow */}
+      <div style={{
+        position: 'absolute', left: '50%', top: '40%', transform: 'translate(-50%,-50%)',
+        width: '800px', height: '500px', borderRadius: '50%',
+        background: 'radial-gradient(ellipse, rgba(196,45,120,0.06) 0%, transparent 65%)',
+        filter: 'blur(80px)', pointerEvents: 'none',
+      }} />
+
+      {/* Header */}
+      <div ref={headRef} style={{ textAlign: 'center', padding: '0 clamp(24px,6vw,80px)', marginBottom: '72px', opacity: 0, position: 'relative', zIndex: 3 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px', marginBottom: '24px' }}>
+          <div style={{ width: '36px', height: '1.5px', background: 'rgba(182,145,46,0.6)' }} />
+          <span style={{ fontSize: '10px', fontWeight: '800', letterSpacing: '0.45em', textTransform: 'uppercase', color: '#B6912E' }}>Guest Reviews</span>
+          <div style={{ width: '36px', height: '1.5px', background: 'rgba(182,145,46,0.6)' }} />
+        </div>
+
+        <h2 style={{
+          fontFamily: "'Archivo Black', 'Arial Black', sans-serif",
+          fontSize: 'clamp(2.8rem, 8vw, 7rem)',
+          fontWeight: '900', lineHeight: 0.92,
+          letterSpacing: '-0.04em', margin: '0 0 24px',
+        }}>
+          <span style={{ color: 'transparent', WebkitTextStroke: '1.5px rgba(255,255,255,0.7)' }}>Regulars</span>{' '}
+          <span style={{ color: '#FFFFFF' }}>Say</span><br />
+          <span style={{ color: '#FFFFFF' }}>It Best.</span>
+        </h2>
+
+        <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', marginBottom: '8px' }}>
+          {[1,2,3,4,5].map(i => <span key={i} style={{ color: '#B6912E', fontSize: '18px' }}>★</span>)}
+        </div>
+        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.2em', textTransform: 'uppercase', margin: 0 }}>
+          4.8 out of 5 · 200+ verified visits
+        </p>
+      </div>
+
+      {/* MARQUEE ROWS */}
+      <div style={{ position: 'relative', zIndex: 3 }}>
+
+        {/* Edge fade masks */}
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 4, pointerEvents: 'none',
+          background: 'linear-gradient(to right, #050407 0%, transparent 8%, transparent 92%, #050407 100%)',
+        }} />
+
+        {/* Row 1 — scrolls left */}
+        <div style={{ overflow: 'hidden', marginBottom: '20px' }}>
+          <div className="tr-row tr-left" style={{
+            display: 'flex', gap: '20px', width: 'max-content',
+            animation: 'tr-scroll-left 40s linear infinite',
+          }}>
+            {row1.map((r, i) => <ReviewCard key={i} review={r} />)}
           </div>
-          <h2 style={{ fontSize: 'clamp(2.4rem, 5vw, 4rem)', fontWeight: '900', color: '#FFFFFF', lineHeight: 1, margin: '0 0 16px 0', letterSpacing: '-0.03em', fontFamily: "'Archivo Black', sans-serif" }}>
-            Regulars Say It Best.
-          </h2>
-          <div style={{ display: 'flex', gap: '5px', justifyContent: 'center', marginTop: '16px' }}>
-            {[1,2,3,4,5].map(i => <span key={i} style={{ color: '#B6912E', fontSize: '20px' }}>★</span>)}
+        </div>
+
+        {/* Row 2 — scrolls right */}
+        <div style={{ overflow: 'hidden' }}>
+          <div className="tr-row tr-right" style={{
+            display: 'flex', gap: '20px', width: 'max-content',
+            animation: 'tr-scroll-right 48s linear infinite',
+          }}>
+            {row2.map((r, i) => <ReviewCard key={i} review={r} />)}
           </div>
-          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.3)', marginTop: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: '600' }}>
-            4.8 out of 5 · 200+ visits
-          </p>
-        </div>
-
-        <div className="t-reveal" style={{ position: 'relative', marginBottom: '56px' }}>
-          <div style={{ position: 'absolute', top: '-40px', left: '-20px', fontSize: '10rem', fontWeight: '900', color: 'rgba(196,45,120,0.1)', lineHeight: 1, fontFamily: 'Georgia, serif', pointerEvents: 'none', userSelect: 'none' }}>"</div>
-          <blockquote ref={quoteRef} style={{ fontSize: 'clamp(1.2rem, 2.5vw, 1.75rem)', fontStyle: 'italic', color: 'rgba(255,255,255,0.88)', lineHeight: 1.6, textAlign: 'center', margin: '0', fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: '400', padding: '0 40px', position: 'relative', zIndex: 1 }}>
-            "{item.quote}"
-          </blockquote>
-        </div>
-
-        <div ref={authorRef} style={{ textAlign: 'center', marginBottom: '56px' }}>
-          <div style={{ width: '40px', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(196,45,120,0.6), transparent)', margin: '0 auto 20px' }} />
-          <p style={{ fontSize: '14px', fontWeight: '800', color: '#FFFFFF', margin: '0 0 4px 0', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{item.author}</p>
-          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', margin: 0, letterSpacing: '0.08em' }}>{item.visit || 'Verified Guest'}</p>
-        </div>
-
-        <div className="t-reveal" style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-          {items.map((_, i) => (
-            <button key={i} onClick={() => changeSlide(i)} style={{ width: i === active ? '28px' : '8px', height: '8px', borderRadius: '100px', background: i === active ? '#C42D78' : 'rgba(255,255,255,0.18)', border: 'none', padding: 0, cursor: 'pointer', transition: 'all 0.35s ease' }} />
-          ))}
-        </div>
-
-        <div className="t-reveal" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginTop: '72px' }}>
-          {[
-            { num: '200+', label: 'Happy Guests', sub: 'and growing every week' },
-            { num: '4.8★', label: 'Average Rating', sub: 'across all platforms' },
-            { num: '3yrs', label: 'Serving Jorhat', sub: 'above Gar-Ali since 2022' },
-          ].map((s, i) => (
-            <div key={i} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '28px 24px', textAlign: 'center' }}>
-              <p style={{ fontSize: '2rem', fontWeight: '900', color: '#FFFFFF', margin: '0 0 6px 0', letterSpacing: '-0.03em' }}>{s.num}</p>
-              <p style={{ fontSize: '13px', fontWeight: '700', color: 'rgba(255,255,255,0.7)', margin: '0 0 4px 0' }}>{s.label}</p>
-              <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.25)', margin: 0, letterSpacing: '0.04em' }}>{s.sub}</p>
-            </div>
-          ))}
         </div>
       </div>
+
+      {/* Stats row */}
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(3,1fr)',
+        gap: '20px', maxWidth: '900px', margin: '80px auto 0',
+        padding: '0 clamp(24px,6vw,80px)', position: 'relative', zIndex: 3,
+      }}>
+        {[
+          { num: '2K+', label: 'Happy Guests', sub: 'and growing every week' },
+          { num: '4.8★', label: 'Average Rating', sub: 'across all platforms' },
+          { num: '3yrs', label: 'Serving Jorhat', sub: 'above Gar-Ali since 2022' },
+        ].map((s, i) => (
+          <div key={i} style={{
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: '16px', padding: '28px 20px', textAlign: 'center',
+          }}>
+            <p style={{ fontSize: 'clamp(1.4rem,3vw,2rem)', fontWeight: '900', color: '#FFFFFF', margin: '0 0 6px', letterSpacing: '-0.03em', fontFamily: "'Archivo Black', sans-serif" }}>{s.num}</p>
+            <p style={{ fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.6)', margin: '0 0 4px' }}>{s.label}</p>
+            <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.2)', margin: 0, letterSpacing: '0.04em' }}>{s.sub}</p>
+          </div>
+        ))}
+      </div>
+
+      <style>{`
+        @keyframes tr-scroll-left {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        @keyframes tr-scroll-right {
+          0%   { transform: translateX(-50%); }
+          100% { transform: translateX(0); }
+        }
+        .tr-row:hover { animation-play-state: paused !important; }
+
+        @media (max-width: 700px) {
+          .tr-left  { animation-duration: 28s !important; }
+          .tr-right { animation-duration: 34s !important; }
+        }
+      `}</style>
     </section>
   );
 };
 
 // ─── SECTION BRIDGE — dark-to-light transition strip ─────────────
-// Placed between HouseFavourites (dark) and StorySection (light)
-// to prevent a hard colour collision.
-const DarkToLightBridge = () => (
-  <div style={{
-    height: '80px',
-    background: 'linear-gradient(to bottom, #051F1C 0%, #FAF7F1 100%)',
-    display: 'block',
-  }} />
-);
+// Bridge removed — StorySection is now dark, no light transition needed
 
 // ─── HOME ────────────────────────────────────────────────────────
 const Home = () => {
@@ -315,9 +511,7 @@ const Home = () => {
       <HouseFavourites />
 
       {/* 4. Smooth gradient bridge from dark → cream */}
-      <DarkToLightBridge />
-
-      {/* 5. Our Story — brand narrative on cream */}
+      {/* 5. Our Story — brand narrative */}
       <StorySection />
 
       {/* 6. Testimonials — social proof on near-black */}
