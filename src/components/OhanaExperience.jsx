@@ -393,7 +393,6 @@ export default function OhanaExperience() {
         /* ─── MOBILE (≤ 768px) ─── */
         @media (max-width: 768px) {
 
-          /* image panel: sticky so it stays visible when scrolling nav */
           .oe-img-panel {
             position: sticky !important;
             top: 0 !important;
@@ -402,15 +401,15 @@ export default function OhanaExperience() {
             height: 56vw !important;
             min-height: 200px !important;
             max-height: 320px !important;
-            margin-top: 72px !important;   /* dark space above = transition zone visible */
+            margin-top: 24px !important;   /* reduced gap */
             z-index: 8 !important;
             overflow: hidden !important;
           }
 
-          /* dark spacer that fills the 72px gap above the sticky image */
+          /* dark spacer that fills the gap above the sticky image */
           .oe-mobile-spacer {
             display: block !important;
-            height: 72px !important;
+            height: 24px !important;
             background: #0C0902 !important;
           }
 

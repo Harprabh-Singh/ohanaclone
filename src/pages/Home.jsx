@@ -369,9 +369,8 @@ const TestimonialsSection = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} style={{
+    <section ref={sectionRef} className="ts-section" style={{
       background: '#050407',
-      padding: '120px 0',
       position: 'relative',
       overflow: 'hidden',
     }}>
@@ -451,6 +450,8 @@ const TestimonialsSection = () => {
 
 
       <style>{`
+        .ts-section { padding: 120px 0; }
+
         @keyframes tr-scroll-left {
           0%   { transform: translateX(0); }
           100% { transform: translateX(-50%); }
@@ -462,6 +463,7 @@ const TestimonialsSection = () => {
         .tr-row:hover { animation-play-state: paused !important; }
 
         @media (max-width: 700px) {
+          .ts-section { padding: 60px 0 32px 0; }
           .tr-left  { animation-duration: 28s !important; }
           .tr-right { animation-duration: 34s !important; }
         }
