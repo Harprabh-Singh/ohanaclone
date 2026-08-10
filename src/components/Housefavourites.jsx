@@ -598,6 +598,7 @@ export default function HouseFavourites() {
           position: 'relative', zIndex: 10,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           padding: '0 0 18px',
+          flexWrap: 'wrap', gap: '4px',
         }}>
           {DISHES.map((dish, idx) => (
             <DishTab
@@ -606,6 +607,11 @@ export default function HouseFavourites() {
               isActive={idx === active}
               accent={dish.accent}
               onClick={() => {
+                if (isMobileRef.current) {
+                  triggerDishTransition(idx);
+                  if (progressRef.current) progressRef.current.style.transform = `scaleX(${idx / (TOTAL - 1)})`;
+                  return;
+                }
                 const wrap = wrapRef.current;
                 if (!wrap) return;
                 const rect = wrap.getBoundingClientRect();
