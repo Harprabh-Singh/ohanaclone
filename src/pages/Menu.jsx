@@ -16,171 +16,111 @@ const accent = (i) => PALETTE[i % PALETTE.length];
    The "plate" is a circular image with a warm dark rim, simulating
    a dinner plate sitting on a dark restaurant table surface.
 ───────────────────────────────────────────────────────────────── */
-function PlateCard({ item, index, plateSize = 220, compact = false, isMobileScroll = false }) {
+function PlateCard({ item, index }) {
   const [hov, setHov] = useState(false);
   const a = accent(index);
-
-  let cardStyle = {};
-  if (compact) {
-    cardStyle = {
-      display: 'flex', flexDirection: 'column', alignItems: 'center',
-      padding: '28px 14px 24px', textDecoration: 'none',
-      position: 'relative', cursor: 'pointer', overflow: 'hidden',
-      background: hov ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.015)',
-      border: `1px solid ${hov ? `${a}50` : 'rgba(255,255,255,0.06)'}`,
-      borderRadius: '18px',
-      transition: 'background 0.4s ease, border-color 0.4s ease',
-    };
-  } else if (isMobileScroll) {
-    cardStyle = {
-      display: 'flex', flexDirection: 'column', alignItems: 'center',
-      justifyContent: 'center',
-      width: `${plateSize + 60}px`, flexShrink: 0,
-      padding: '24px 20px', textDecoration: 'none', position: 'relative',
-      cursor: 'pointer',
-      borderRight: '1px solid rgba(255,255,255,0.05)',
-    };
-  } else {
-    cardStyle = {
-      display: 'flex', flexDirection: 'column', alignItems: 'center',
-      justifyContent: 'center',
-      width: `${plateSize + 140}px`, height: '100%', flexShrink: 0,
-      padding: '0 40px', textDecoration: 'none', position: 'relative',
-      cursor: 'pointer',
-      borderRight: '1px solid rgba(255,255,255,0.035)',
-    };
-  }
 
   return (
     <Link
       to={`/menu/${item.slug}`}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
-      style={cardStyle}
+      style={{
+        display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+        // Mobile: 75vw wide, 55vh tall. Desktop: 38vw wide, 75vh tall.
+        width: 'clamp(220px, 75vw, 550px)',
+        height: 'clamp(320px, 55vh, 850px)',
+        flexShrink: 0, position: 'relative', overflow: 'hidden',
+        margin: '0 clamp(8px, 2vw, 30px)', borderRadius: '20px', textDecoration: 'none',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.06)',
+        cursor: 'pointer',
+        willChange: 'transform',
+      }}
     >
-      {/* Ghost index number — desktop only */}
-      {!compact && (
-        <div aria-hidden style={{
-          position: 'absolute', top: '50%', left: '50%',
-          transform: 'translate(-50%, -50%)',
-          fontSize: '13rem', lineHeight: 1,
-          fontFamily: "'Archivo Black', sans-serif", fontWeight: '900',
-          color: 'transparent',
-          WebkitTextStroke: '1px rgba(255,255,255,0.028)',
-          userSelect: 'none', pointerEvents: 'none', zIndex: 0, whiteSpace: 'nowrap',
-        }}>
-          {String(index + 1).padStart(2, '0')}
-        </div>
-      )}
-
-      {/* ── THE PLATE ── */}
+      {/* Background Image — no CSS filter to avoid repaint on scroll */}
       <div style={{
-        position: 'relative', zIndex: 1, marginBottom: compact ? '18px' : '30px',
-        transform: hov ? 'translateY(-14px)' : 'translateY(0)',
-        transition: 'transform 0.65s cubic-bezier(0.34,1.56,0.64,1)',
-      }}>
-        {/* Cast shadow beneath the plate */}
-        <div style={{
-          position: 'absolute',
-          bottom: hov ? '-10px' : '-18px',
-          left: '50%', transform: 'translateX(-50%)',
-          width: hov ? `${plateSize * 0.5}px` : `${plateSize * 0.72}px`,
-          height: '18px',
-          background: 'radial-gradient(ellipse, rgba(0,0,0,0.8) 0%, transparent 70%)',
-          filter: 'blur(10px)',
-          transition: 'all 0.65s cubic-bezier(0.34,1.56,0.64,1)',
-          opacity: hov ? 0.3 : 0.75,
-        }} />
+        position: 'absolute', inset: -20,
+        background: `url(${item.image}) center/cover`,
+        transform: hov ? 'scale(1.06)' : 'scale(1)',
+        transition: 'transform 1.2s cubic-bezier(0.2,0.8,0.2,1)',
+        willChange: 'transform',
+        zIndex: 0,
+      }} />
+      {/* Dark overlay — lighter so images breathe */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: '#000',
+        opacity: hov ? 0.2 : 0.38,
+        transition: 'opacity 0.8s ease',
+        zIndex: 0,
+      }} />
 
-        {/* Outer plate rim */}
-        <div style={{
-          width: `${plateSize}px`, height: `${plateSize}px`, borderRadius: '50%',
-          background: 'radial-gradient(circle at 33% 28%, #FDE48C, #B6912E 48%, #755B11 100%)',
-          boxShadow: hov
-            ? `0 0 0 2.5px ${a}, 0 0 0 5px ${a}28, 0 52px 88px rgba(0,0,0,0.95), 0 0 55px ${a}1E`
-            : `0 0 0 1px rgba(253,228,140,0.6), 0 28px 64px rgba(0,0,0,0.88), inset 0 -4px 12px rgba(0,0,0,0.3)`,
-          padding: compact ? '10px' : '13px',
-          transition: 'box-shadow 0.5s ease',
-          flexShrink: 0,
-        }}>
-          {/* Inner food image */}
-          <div style={{
-            width: '100%', height: '100%', borderRadius: '50%',
-            overflow: 'hidden',
-            boxShadow: 'inset 0 4px 14px rgba(0,0,0,0.5)',
-          }}>
-            <img
-              src={item.image}
-              alt={item.name}
-              loading="lazy"
-              style={{
-                width: '100%', height: '100%', objectFit: 'cover',
-                transform: hov ? 'scale(1.1)' : 'scale(1)',
-                filter: `brightness(${hov ? 1.05 : 0.82}) contrast(1.12) saturate(1.2)`,
-                transition: 'transform 0.65s cubic-bezier(0.34,1.56,0.64,1), filter 0.5s ease',
-              }}
-            />
-          </div>
-        </div>
+      {/* Gradient Overlay for Text legibility */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.5) 65%, rgba(0,0,0,0.88) 100%)',
+        zIndex: 1, pointerEvents: 'none',
+      }} />
+
+      {/* Huge Ghost Number */}
+      <div aria-hidden style={{
+        position: 'absolute', top: '30px', right: '30px',
+        fontSize: 'clamp(6rem, 15vw, 14rem)', lineHeight: 0.8,
+        fontFamily: "'Archivo Black', sans-serif", fontWeight: '900',
+        color: 'transparent', WebkitTextStroke: `1.5px ${hov ? a : 'rgba(255,255,255,0.1)'}`,
+        transition: 'all 0.6s ease', zIndex: 1, pointerEvents: 'none',
+      }}>
+        {String(index + 1).padStart(2, '0')}
       </div>
 
-      {/* ── TEXT ── */}
-      <div style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
-        {/* Accent rule + number */}
+      {/* Content */}
+      <div style={{
+        position: 'relative', zIndex: 2, padding: 'clamp(24px, 4vw, 56px)',
+        transform: hov ? 'translateY(-10px)' : 'translateY(0)',
+        transition: 'transform 0.6s cubic-bezier(0.34,1.56,0.64,1)',
+      }}>
         <div style={{
-          display: 'flex', alignItems: 'center', gap: '8px',
-          justifyContent: 'center', marginBottom: '10px',
+          display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px',
         }}>
-          <div style={{ width: '20px', height: '1px', background: `${a}70` }} />
+          <div style={{ width: '32px', height: '2px', background: a, transition: 'background 0.4s ease' }} />
           <span style={{
-            fontSize: '8px', fontWeight: '800', letterSpacing: '0.4em',
-            textTransform: 'uppercase', color: a,
+            fontSize: '10px', fontWeight: '800', letterSpacing: '0.4em',
+            textTransform: 'uppercase', color: a, transition: 'color 0.4s ease',
           }}>
-            {String(index + 1).padStart(2, '0')}
+            Category
           </span>
-          <div style={{ width: '20px', height: '1px', background: `${a}70` }} />
         </div>
 
         <h3 style={{
           fontFamily: "'Archivo Black', 'Arial Black', sans-serif",
-          fontSize: compact ? 'clamp(0.9rem,4vw,1.1rem)' : 'clamp(1.1rem,2vw,1.6rem)',
+          fontSize: 'clamp(2.4rem, 5vw, 4.5rem)',
           fontWeight: '900', color: '#FFFFFF',
-          letterSpacing: '-0.03em', lineHeight: 1.05,
-          margin: '0 0 7px',
+          letterSpacing: '-0.04em', lineHeight: 0.9,
+          margin: '0 0 20px', textShadow: '0 10px 40px rgba(0,0,0,0.8)',
         }}>
           {item.name}
         </h3>
 
         <p style={{
-          fontSize: compact ? '9px' : '10px',
-          color: 'rgba(255,255,255,0.28)',
-          fontStyle: 'italic', lineHeight: 1.55,
-          margin: '0',
+          fontSize: 'clamp(14px, 1.4vw, 18px)',
+          color: 'rgba(255,255,255,0.55)',
+          fontFamily: 'Georgia, serif', fontStyle: 'italic', lineHeight: 1.6,
+          margin: '0 0 32px', maxWidth: '90%',
         }}>
           {item.tagline}
         </p>
 
-        {/* Explore CTA — desktop only */}
-        {!compact && (
-          <div style={{
-            marginTop: '16px',
-            display: 'inline-flex', alignItems: 'center', gap: '6px',
-            fontSize: '8px', fontWeight: '800', letterSpacing: '0.3em',
-            textTransform: 'uppercase',
-            color: hov ? a : 'rgba(255,255,255,0.18)',
-            transition: 'color 0.35s ease',
-          }}>
-            Explore
-            <span style={{
-              width: '16px', height: '16px', borderRadius: '50%',
-              border: `1px solid ${hov ? a : 'rgba(255,255,255,0.14)'}`,
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '9px',
-              transform: hov ? 'translateX(4px)' : 'translateX(0)',
-              transition: 'all 0.35s cubic-bezier(0.34,1.56,0.64,1)',
-            }}>→</span>
-          </div>
-        )}
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: '10px',
+          padding: '16px 32px', borderRadius: '100px',
+          background: hov ? a : 'rgba(255,255,255,0.06)',
+          color: hov ? '#000' : '#FFF', border: `1px solid ${hov ? a : 'rgba(255,255,255,0.1)'}`,
+          fontSize: '10px', fontWeight: '900', letterSpacing: '0.2em', textTransform: 'uppercase',
+          transition: 'all 0.4s ease',
+        }}>
+          View Menu
+          <span style={{ transform: hov ? 'translateX(6px)' : 'translateX(0)', transition: 'transform 0.4s ease' }}>→</span>
+        </div>
       </div>
     </Link>
   );
@@ -197,14 +137,6 @@ export default function Menu() {
   const heroRef     = useRef(null);
 
   /* Set page bg to dark so no white flash */
-  const [plateSize, setPlateSize] = useState(280);
-
-  useEffect(() => {
-    const handleResize = () => setPlateSize(window.innerWidth <= 768 ? 180 : 280);
-    handleResize(); // init
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   useEffect(() => {
     document.body.style.backgroundColor = '#0A0800';
@@ -220,9 +152,30 @@ export default function Menu() {
     if (!heroRef.current) return;
     const ctx = gsap.context(() => {
       const els = heroRef.current.querySelectorAll('.mr');
+      const imgs = heroRef.current.querySelectorAll('.mr-img');
+
       gsap.set(els, { opacity: 0, y: 44 });
+      gsap.set(imgs, { opacity: 0, scale: 1.15, y: 40 });
+
       gsap.to(els, {
-        opacity: 1, y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.1, delay: 0.25,
+        opacity: 1, y: 0, duration: 1.2, ease: 'expo.out', stagger: 0.1, delay: 0.3,
+      });
+      gsap.to(imgs, {
+        opacity: 1, scale: 1, y: 0, duration: 1.8, ease: 'expo.out', stagger: 0.15,
+      });
+
+      // Subtle parallax on scroll for hero images
+      imgs.forEach((img, i) => {
+        gsap.to(img, {
+          y: -100 * (i + 1),
+          ease: 'none',
+          scrollTrigger: {
+            trigger: heroRef.current,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: true,
+          }
+        });
       });
     }, heroRef);
     return () => ctx.revert();
@@ -234,18 +187,24 @@ export default function Menu() {
     const strip   = stripRef.current;
     if (!trigger || !strip) return;
 
+    const getScrollAmount = () => {
+      // Calculate scroll distance using the wrapper width instead of window.innerWidth
+      // to avoid scrollbar width discrepancies.
+      const wrapperWidth = strip.parentElement.offsetWidth;
+      return strip.scrollWidth - wrapperWidth + 40; // Add 40px buffer for the end padding
+    };
+
     const ctx = gsap.context(() => {
       gsap.to(strip, {
-        x: () => -(strip.scrollWidth - window.innerWidth),
+        x: () => -getScrollAmount(),
         ease: 'none',
         scrollTrigger: {
           trigger,
           start: 'top top',
-          end: () => `+=${strip.scrollWidth - window.innerWidth}`,
-          scrub: 0.8,
+          end: () => `+=${getScrollAmount()}`,
+          scrub: 1, // smoothed scrub
           pin: true,
           pinSpacing: true,
-          anticipatePin: 1,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
             if (progressRef.current)
@@ -262,10 +221,18 @@ export default function Menu() {
   }, []);
 
   return (
-    <main style={{ background: '#0A0800', color: '#FAF7F1', overflowX: 'hidden' }}>
+    <main style={{ background: '#0A0800', color: '#FAF7F1', overflowX: 'hidden', position: 'relative' }}>
+      
+      {/* Global Film Grain Overlay */}
+      <svg style={{ display: 'none' }}>
+        <filter id="noiseFilter">
+          <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch"/>
+        </filter>
+      </svg>
+      {/* Film grain is removed — it triggers per-frame filter repaint */}
 
       {/* ══════════════════════════════════════════════
-          HERO
+          HERO (MAXIMALIST)
       ══════════════════════════════════════════════ */}
       <section ref={heroRef} style={{
         position: 'relative', overflow: 'hidden',
@@ -280,74 +247,79 @@ export default function Menu() {
           background: 'radial-gradient(ellipse, rgba(182,145,46,0.2) 0%, transparent 60%)',
           filter: 'blur(100px)', pointerEvents: 'none',
         }} />
-        <div style={{
-          position: 'absolute', bottom: '-15%', left: '-5%',
-          width: '700px', height: '700px', borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(196,45,120,0.15) 0%, transparent 60%)',
-          filter: 'blur(100px)', pointerEvents: 'none',
-        }} />
-        <div style={{
-          position: 'absolute', top: '40%', left: '40%',
-          width: '800px', height: '600px', borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(182,145,46,0.15) 0%, transparent 70%)',
-          filter: 'blur(120px)', pointerEvents: 'none', transform: 'translate(-50%,-50%)',
-        }} />
 
-        {/* Ghost BG "MENU" */}
+        {/* Floating Culinary Layers — filter removed for scroll perf */}
+        <div className="mr-img" style={{
+          position: 'absolute', top: '15%', right: '-8%', width: 'clamp(300px, 45vw, 700px)', height: '70vh',
+          background: 'url(https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=1200) center/cover',
+          borderRadius: '32px', boxShadow: '0 40px 120px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.1)',
+          zIndex: 1, willChange: 'transform',
+        }}>
+          {/* Dark overlay instead of brightness filter */}
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', borderRadius: '32px' }} />
+        </div>
+        <div className="mr-img" style={{
+          position: 'absolute', bottom: '-15%', left: '-2%', width: 'clamp(250px, 35vw, 600px)', height: '55vh',
+          background: 'url(https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1200) center/cover',
+          borderRadius: '32px', boxShadow: '0 40px 120px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.1)',
+          zIndex: 1, willChange: 'transform',
+        }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.65)', borderRadius: '32px' }} />
+        </div>
+
+        {/* Ghost BG "MENU" - Scaled up for maximalism */}
         <div aria-hidden style={{
-          position: 'absolute', bottom: '-4%', left: '50%',
-          transform: 'translateX(-50%)',
-          fontSize: 'clamp(7rem, 28vw, 24rem)',
+          position: 'absolute', top: '45%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          fontSize: 'clamp(10rem, 35vw, 32rem)',
           fontFamily: "'Archivo Black', sans-serif", fontWeight: '900',
-          color: 'transparent', WebkitTextStroke: '1px rgba(255,255,255,0.025)',
+          color: 'transparent', WebkitTextStroke: '2px rgba(255,255,255,0.04)',
           letterSpacing: '-0.06em', lineHeight: 0.85,
-          userSelect: 'none', pointerEvents: 'none', whiteSpace: 'nowrap',
+          userSelect: 'none', pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 0,
         }}>MENU</div>
 
         {/* Content */}
         <div style={{
           position: 'relative', zIndex: 2,
           maxWidth: '1400px', margin: '0 auto', width: '100%',
-          padding: 'clamp(60px,10vh,120px) clamp(24px,8vw,100px) clamp(80px,12vh,140px)',
+          padding: '40px clamp(24px,8vw,100px) clamp(80px,15vh,160px)',
         }}>
           {/* Eyebrow */}
           <div className="mr" style={{
             opacity: 0, display: 'flex', alignItems: 'center',
             gap: '14px', marginBottom: '36px',
           }}>
-            <div style={{ width: '36px', height: '1.5px', background: '#B6912E' }} />
+            <div style={{ width: '48px', height: '2px', background: '#B6912E' }} />
             <span style={{
-              fontSize: '9px', fontWeight: '800', letterSpacing: '0.55em',
+              fontSize: '11px', fontWeight: '800', letterSpacing: '0.6em',
               textTransform: 'uppercase', color: '#B6912E',
-            }}>
-              Ohana Kitchen &amp; Café
-            </span>
+            }}>The Complete Menu</span>
           </div>
 
-          {/* Headline */}
+          {/* Huge typography */}
           <h1 className="mr" style={{
             opacity: 0,
             fontFamily: "'Archivo Black', 'Arial Black', sans-serif",
-            fontSize: 'clamp(3rem, 10vw, 9rem)',
-            textShadow: '0 0 80px rgba(182,145,46,0.15)',
-            fontWeight: '900', lineHeight: 0.88,
-            letterSpacing: '-0.04em', margin: '0 0 32px',
+            fontSize: 'clamp(4rem, 13vw, 11rem)',
+            textShadow: '0 0 120px rgba(182,145,46,0.3)',
+            fontWeight: '900', lineHeight: 0.82,
+            letterSpacing: '-0.05em', margin: '0 0 48px',
           }}>
-            <span style={{ color: 'transparent', WebkitTextStroke: '1.5px rgba(255,255,255,0.85)' }}>What Are</span><br />
+            <span style={{ color: 'transparent', WebkitTextStroke: '2px rgba(255,255,255,0.9)' }}>What Are</span><br />
             <span style={{ color: '#FFFFFF' }}>You Feeling</span><br />
             <span style={{
               color: 'transparent',
-              WebkitTextStroke: '1.5px rgba(182,145,46,0.95)',
+              WebkitTextStroke: '2px rgba(182,145,46,1)',
               fontStyle: 'italic', fontFamily: 'Georgia, serif',
-              fontWeight: '400', fontSize: '0.72em', letterSpacing: '-0.01em',
+              fontWeight: '400', fontSize: '0.8em', letterSpacing: '-0.01em',
             }}>today?</span>
           </h1>
 
-          {/* Subline */}
           <p className="mr" style={{
-            opacity: 0, fontSize: 'clamp(14px, 1.5vw, 17px)',
-            color: 'rgba(255,255,255,0.55)', lineHeight: 1.8,
-            maxWidth: '520px', margin: '0 0 48px',
+            opacity: 0, fontSize: 'clamp(16px, 1.8vw, 22px)',
+            color: 'rgba(255,255,255,0.6)', lineHeight: 1.6,
+            maxWidth: '640px', margin: '0 0 64px',
+            fontFamily: 'Georgia, serif', fontStyle: 'italic',
           }}>
             17 categories. Everything from sunrise eggs to midnight desserts —
             served above Gar-Ali with the warmth Ohana is known for.
@@ -355,27 +327,13 @@ export default function Menu() {
 
           {/* CTAs */}
           <div className="mr" style={{ opacity: 0, display: 'flex', gap: '14px', flexWrap: 'wrap', marginBottom: '52px' }}>
-            <Link to="/reservations" style={{
-              display: 'inline-flex', alignItems: 'center', gap: '10px',
-              background: '#B6912E', color: '#000', textDecoration: 'none',
-              padding: '14px 32px', borderRadius: '100px',
+            <a href="#menu-gallery" style={{
+              display: 'inline-flex', alignItems: 'center', gap: '8px',
+              background: '#B6912E', color: '#000',
+              textDecoration: 'none', padding: '14px 32px', borderRadius: '100px',
               fontSize: '10px', fontWeight: '900', letterSpacing: '0.22em',
               textTransform: 'uppercase',
               boxShadow: '0 12px 40px rgba(182,145,46,0.35)',
-            }}>
-              Reserve a Table
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                width: '20px', height: '20px', borderRadius: '50%',
-                background: 'rgba(0,0,0,0.15)', fontSize: '11px',
-              }}>→</span>
-            </Link>
-            <a href="#menu-gallery" style={{
-              display: 'inline-flex', alignItems: 'center', gap: '8px',
-              border: '1px solid rgba(255,255,255,0.18)', color: '#FFFFFF',
-              textDecoration: 'none', padding: '14px 32px', borderRadius: '100px',
-              fontSize: '10px', fontWeight: '800', letterSpacing: '0.22em',
-              textTransform: 'uppercase',
             }}>
               Browse Menu ↓
             </a>
@@ -487,14 +445,14 @@ export default function Menu() {
             </div>
           </div>
 
-          {/* Scrolling strip */}
-          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+          {/* Scrolling strip — GPU-isolated with translateZ */}
+          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', alignItems: 'center', position: 'relative', zIndex: 1, transform: 'translateZ(0)' }}>
             <div ref={stripRef} style={{
               display: 'flex', height: '100%', alignItems: 'center',
               willChange: 'transform',
             }}>
               {categoryData.map((item, i) => (
-                <PlateCard key={item.slug} item={item} index={i} plateSize={plateSize} />
+                <PlateCard key={item.slug} item={item} index={i} />
               ))}
             </div>
           </div>
@@ -518,72 +476,82 @@ export default function Menu() {
           BOTTOM CTA
       ══════════════════════════════════════════════ */}
       <section style={{
-        background: '#07050A',
-        padding: 'clamp(80px,12vh,140px) clamp(24px,8vw,100px)',
-        textAlign: 'center',
         position: 'relative', overflow: 'hidden',
+        minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 'clamp(80px,12vh,140px) clamp(24px,8vw,100px)',
         borderTop: '1px solid rgba(255,255,255,0.05)',
       }}>
+        {/* Background Image */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'url(https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1600) center/cover',
+          filter: 'brightness(0.3) contrast(1.2) saturate(1.2)',
+          zIndex: 0,
+        }} />
+        
+        {/* Gradient overlays to blend with the dark page */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(to bottom, #0A0800 0%, transparent 20%, transparent 80%, #0A0800 100%)',
+          zIndex: 1, pointerEvents: 'none',
+        }} />
         <div style={{
           position: 'absolute', top: '50%', left: '50%',
           transform: 'translate(-50%,-50%)',
-          width: '700px', height: '500px', borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(182,145,46,0.06) 0%, transparent 65%)',
-          filter: 'blur(80px)', pointerEvents: 'none',
+          width: '800px', height: '600px', borderRadius: '50%',
+          background: 'radial-gradient(ellipse, rgba(182,145,46,0.25) 0%, transparent 70%)',
+          // no filter:blur — static glow via background gradient only
+          pointerEvents: 'none', zIndex: 1,
         }} />
-        <div style={{ position: 'relative', zIndex: 2, maxWidth: '680px', margin: '0 auto' }}>
+
+        <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', width: '100%' }}>
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            gap: '14px', marginBottom: '28px',
+            gap: '14px', marginBottom: '36px',
           }}>
-            <div style={{ width: '36px', height: '1.5px', background: 'rgba(182,145,46,0.5)' }} />
+            <div style={{ width: '48px', height: '2px', background: '#B6912E' }} />
             <span style={{
-              fontSize: '9px', fontWeight: '800', letterSpacing: '0.5em',
+              fontSize: '11px', fontWeight: '800', letterSpacing: '0.6em',
               textTransform: 'uppercase', color: '#B6912E',
-            }}>Come Experience It</span>
-            <div style={{ width: '36px', height: '1.5px', background: 'rgba(182,145,46,0.5)' }} />
+            }}>The Experience Awaits</span>
+            <div style={{ width: '48px', height: '2px', background: '#B6912E' }} />
           </div>
+
           <h2 style={{
             fontFamily: "'Archivo Black', 'Arial Black', sans-serif",
-            fontSize: 'clamp(2.4rem, 7vw, 6rem)', fontWeight: '900',
-            lineHeight: 0.9, letterSpacing: '-0.04em',
-            color: '#FFFFFF', margin: '0 0 24px',
+            fontSize: 'clamp(4rem, 12vw, 10rem)', fontWeight: '900',
+            lineHeight: 0.85, letterSpacing: '-0.05em',
+            margin: '0 0 40px',
           }}>
-            <span style={{ color: 'transparent', WebkitTextStroke: '1.5px rgba(255,255,255,0.65)' }}>Above KFC,</span><br />
-            <span style={{ color: '#FFFFFF' }}>Gar-Ali.</span>
+            <span style={{ color: 'transparent', WebkitTextStroke: '2px rgba(255,255,255,0.7)' }}>Above KFC,</span><br />
+            <span style={{ color: '#FFFFFF', textShadow: '0 20px 80px rgba(0,0,0,0.9)' }}>Gar-Ali.</span>
           </h2>
+
           <p style={{
-            fontSize: 'clamp(13px, 1.4vw, 16px)',
-            color: 'rgba(255,255,255,0.35)', lineHeight: 1.8,
-            margin: '0 auto 44px', maxWidth: '440px',
+            fontSize: 'clamp(15px, 1.6vw, 20px)',
+            color: 'rgba(255,255,255,0.7)', lineHeight: 1.6,
+            fontFamily: 'Georgia, serif', fontStyle: 'italic',
+            margin: '0 auto 56px', maxWidth: '540px', textShadow: '0 4px 20px rgba(0,0,0,0.8)',
           }}>
             Open every day, 11 AM to 10 PM. Walk in or reserve ahead for the terrace seats.
           </p>
-          <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+
+          <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link to="/reservations" style={{
-              display: 'inline-flex', alignItems: 'center', gap: '10px',
+              display: 'inline-flex', alignItems: 'center', gap: '12px',
               background: '#B6912E', color: '#000', textDecoration: 'none',
-              padding: '16px 36px', borderRadius: '100px',
-              fontSize: '10px', fontWeight: '900', letterSpacing: '0.22em',
+              padding: '20px 48px', borderRadius: '100px',
+              fontSize: '11px', fontWeight: '900', letterSpacing: '0.25em',
               textTransform: 'uppercase',
-              boxShadow: '0 14px 44px rgba(182,145,46,0.35)',
+              boxShadow: '0 20px 60px rgba(182,145,46,0.4)',
+              transition: 'transform 0.3s ease, box-shadow 0.3s ease',
             }}>
               Reserve a Table
               <span style={{
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                width: '22px', height: '22px', borderRadius: '50%',
-                background: 'rgba(0,0,0,0.15)', fontSize: '12px',
+                width: '28px', height: '28px', borderRadius: '50%',
+                background: 'rgba(0,0,0,0.15)', fontSize: '14px',
               }}>→</span>
-            </Link>
-            <Link to="/contact" style={{
-              display: 'inline-flex', alignItems: 'center', gap: '8px',
-              border: '1px solid rgba(255,255,255,0.2)',
-              color: 'rgba(255,255,255,0.75)', textDecoration: 'none',
-              padding: '16px 36px', borderRadius: '100px',
-              fontSize: '10px', fontWeight: '800', letterSpacing: '0.22em',
-              textTransform: 'uppercase',
-            }}>
-              Get Directions
             </Link>
           </div>
         </div>

@@ -45,7 +45,7 @@ function App() {
           <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
         </Routes>
       </AnimatePresence>
-      <Footer />
+      {location.pathname !== '/menu' && <Footer />}
     </div>
   );
 }
