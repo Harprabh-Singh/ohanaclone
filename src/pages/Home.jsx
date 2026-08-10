@@ -723,12 +723,31 @@ const ContactSection = () => {
 
         @media (max-width: 700px) {
           .cs-hero-wrap { padding: 48px 20px 60px 20px; }
-          .cs-info-card {
-            border-right: none !important;
-            border-bottom: 1px solid rgba(255,255,255,0.05) !important;
-          }
           .cs-info-grid {
-            grid-template-columns: 1fr !important;
+            grid-template-columns: 1fr 1fr !important;
+          }
+          .cs-info-card {
+            padding: 28px 16px !important;
+            border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+            text-align: center !important;
+          }
+          /* Center the accent bar for all cards */
+          .cs-info-card > div:first-child {
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+          }
+          .cs-info-card:nth-child(1) {
+            border-right: 1px solid rgba(255,255,255,0.05) !important;
+          }
+          .cs-info-card:nth-child(2) {
+            border-right: none !important;
+          }
+          .cs-info-card:nth-child(3) {
+            grid-column: 1 / -1;
+            border-right: none !important;
+          }
+          .cs-info-card p:nth-of-type(3) {
+            margin-bottom: 12px !important;
           }
         }
       `}</style>
