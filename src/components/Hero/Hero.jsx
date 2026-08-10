@@ -172,6 +172,22 @@ export default function Hero() {
     const root = rootRef.current;
     if (!root) return;
 
+    // ── Mobile scroll normalization ────────────────────────
+    // On mobile, the browser's native scroll can fire BEFORE GSAP has
+    // finished establishing the pin, causing the hero to visually jump
+    // upward then snap back. normalizeScroll takes over scroll handling
+    // from the browser on touch devices so GSAP is always in control.
+    const isMobileDevice = window.innerWidth <= 700;
+    let normalizer = null;
+    if (isMobileDevice) {
+      // Kill rubber-band / elastic overscroll — prevents the whole page
+      // from bouncing up before the pin registers
+      document.documentElement.style.overscrollBehavior = 'none';
+      document.body.style.overscrollBehavior = 'none';
+      // GSAP takes ownership of the scroll axis on touch
+      normalizer = ScrollTrigger.normalizeScroll({ allowNestedScroll: true, lockAxis: false });
+    }
+
     // ── DOM refs ──────────────────────────────────────────
     const titleLetters = root.querySelectorAll('.oh4-menu-title .oh4-split-outer');
     const eyebrow = root.querySelector('.oh4-eyebrow');
@@ -360,6 +376,9 @@ export default function Hero() {
 
     return () => {
       ScrollTrigger.getAll().forEach(st => st.kill());
+      if (normalizer) normalizer.kill();
+      document.documentElement.style.overscrollBehavior = '';
+      document.body.style.overscrollBehavior = '';
       document.body.classList.remove('has-hero');
       document.documentElement.classList.remove('has-hero');
     };
