@@ -232,13 +232,15 @@ export default function Hero() {
       .to(hint, { opacity: 1, y: 0, duration: 0.50 }, 0.66);
 
     // ── Scroll-driven animation ────────────────────────────
+    const isMobile = window.innerWidth <= 700;
     ScrollTrigger.create({
       trigger: root,
       start: 'top top',
-      end: () => window.innerWidth > 700 ? '+=400%' : '+=240%',
+      end: () => window.innerWidth > 700 ? '+=400%' : '+=160%',
       pin: true,
       pinSpacing: true,
-      scrub: 1,
+      scrub: isMobile ? 0.4 : 1,  // tighter on mobile = silky, no perceptible lag
+      anticipatePin: 1,           // prevents a flash/jump when the pin fires
       onUpdate: (self) => {
         const p = self.progress;
         scrollProgress.current = p;
