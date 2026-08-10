@@ -66,7 +66,6 @@ import SplitText from './SplitText';
 import './Hero.css';
 
 gsap.registerPlugin(ScrollTrigger);
-ScrollTrigger.config({ ignoreMobileResize: true });
 
 /*
  * CATEGORIES — single shared source for BOTH the desktop/scroll menu-
@@ -196,6 +195,16 @@ export default function Hero() {
     // correct dark background instead of white.
     document.documentElement.classList.add('has-hero');
     document.body.classList.add('has-hero');
+    let normalizer = null;
+    if (isMobileDevice) {
+      // Kill rubber-band / elastic overscroll — prevents the whole page
+      // from bouncing up before the pin registers
+      document.documentElement.style.overscrollBehavior = 'none';
+      document.body.style.overscrollBehavior = 'none';
+      // GSAP takes ownership of the scroll axis on touch
+      normalizer = ScrollTrigger.normalizeScroll({ allowNestedScroll: true, lockAxis: false });
+    }
+    
     const catBar = root.querySelector('.oh4-cat-bar');
     const stamp = root.querySelector('.oh4-stamp');
     const flourish = root.querySelector('.oh4-flourish');
@@ -249,7 +258,6 @@ export default function Hero() {
       start: 'top top',
       end: () => window.innerWidth > 700 ? '+=400%' : '+=160%',
       pin: true,
-      pinReparent: true,
       pinSpacing: true,
       scrub: isMobile ? 0.4 : 1,  // tighter on mobile = silky, no perceptible lag
       anticipatePin: 1,           // prevents a flash/jump when the pin fires
@@ -306,7 +314,7 @@ export default function Hero() {
           const cp = Math.min(p, 0.9) / 0.9;
           const riseY = cp * -35; // -30vh (lower than before)
           const scale = 2 + (0.15 * cp); // Keep it big
-          mobileCupRef.current.style.transform = `translate3d(0, ${riseY}vh, 0) scale(${scale})`;
+          mobileCupRef.current.style.transform = `translate(0px, ${riseY}vh) scale(${scale})`;
         }
 
         // ── 1d. Mobile layers fade out ────────────────────
@@ -372,6 +380,9 @@ export default function Hero() {
 
     return () => {
       ScrollTrigger.getAll().forEach(st => st.kill());
+      if (normalizer) normalizer.kill();
+      document.documentElement.style.overscrollBehavior = '';
+      document.body.style.overscrollBehavior = '';
       document.body.classList.remove('has-hero');
       document.documentElement.classList.remove('has-hero');
     };
