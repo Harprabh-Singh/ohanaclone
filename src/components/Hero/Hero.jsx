@@ -178,15 +178,9 @@ export default function Hero() {
     // upward then snap back. normalizeScroll takes over scroll handling
     // from the browser on touch devices so GSAP is always in control.
     const isMobileDevice = window.innerWidth <= 700;
-    let normalizer = null;
-    if (isMobileDevice) {
-      // Kill rubber-band / elastic overscroll — prevents the whole page
-      // from bouncing up before the pin registers
-      document.documentElement.style.overscrollBehavior = 'none';
-      document.body.style.overscrollBehavior = 'none';
-      // GSAP takes ownership of the scroll axis on touch
-      normalizer = ScrollTrigger.normalizeScroll({ allowNestedScroll: true, lockAxis: false });
-    }
+    // We explicitly DO NOT use GSAP normalizeScroll here.
+    // Hijacking native touch scrolling into the main JS thread is the #1 cause
+    // of scroll lag on mobile devices. We rely on native scrolling and CSS pinning.
 
     // ── DOM refs ──────────────────────────────────────────
     const titleLetters = root.querySelectorAll('.oh4-menu-title .oh4-split-outer');
@@ -310,7 +304,7 @@ export default function Hero() {
           const cp = Math.min(p, 0.9) / 0.9;
           const riseY = cp * -35; // -30vh (lower than before)
           const scale = 2 + (0.15 * cp); // Keep it big
-          mobileCupRef.current.style.transform = `translate(0px, ${riseY}vh) scale(${scale})`;
+          mobileCupRef.current.style.transform = `translate3d(0, ${riseY}vh, 0) scale(${scale})`;
         }
 
         // ── 1d. Mobile layers fade out ────────────────────
@@ -376,9 +370,6 @@ export default function Hero() {
 
     return () => {
       ScrollTrigger.getAll().forEach(st => st.kill());
-      if (normalizer) normalizer.kill();
-      document.documentElement.style.overscrollBehavior = '';
-      document.body.style.overscrollBehavior = '';
       document.body.classList.remove('has-hero');
       document.documentElement.classList.remove('has-hero');
     };

@@ -379,7 +379,7 @@ const TestimonialsSection = () => {
       }} />
 
       {/* Ambient glow */}
-      <div style={{
+      <div className="oh4-bg-glow" style={{
         position: 'absolute', left: '50%', top: '40%', transform: 'translate(-50%,-50%)',
         width: '800px', height: '500px', borderRadius: '50%',
         background: 'radial-gradient(ellipse, rgba(196,45,120,0.06) 0%, transparent 65%)',
@@ -533,13 +533,13 @@ const ContactSection = () => {
       }} />
 
       {/* Ambient glows */}
-      <div style={{
+      <div className="oh4-bg-glow" style={{
         position: 'absolute', top: '-200px', left: '50%', transform: 'translateX(-50%)',
         width: '900px', height: '600px', borderRadius: '50%',
         background: 'radial-gradient(ellipse, rgba(182,145,46,0.07) 0%, transparent 65%)',
         filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0,
       }} />
-      <div style={{
+      <div className="oh4-bg-glow" style={{
         position: 'absolute', bottom: '-100px', right: '-200px',
         width: '700px', height: '500px', borderRadius: '50%',
         background: 'radial-gradient(ellipse, rgba(196,45,120,0.06) 0%, transparent 65%)',

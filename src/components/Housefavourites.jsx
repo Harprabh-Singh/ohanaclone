@@ -336,12 +336,16 @@ export default function HouseFavourites() {
 
   /* ─────── MOUSE PARALLAX (desktop only) ─────── */
   useEffect(() => {
+    // Disable completely on mobile to prevent empty rAF drain
+    if (window.innerWidth <= 768 || window.matchMedia('(pointer: coarse)').matches) {
+      return undefined;
+    }
+    
     const sticky = stickyRef.current;
     if (!sticky) return;
     const LERP = 0.055;
 
     const onMove = e => {
-      if (isMobileRef.current) return;
       const r = sticky.getBoundingClientRect();
       mouseRef.current.tx = ((e.clientX - r.left) / r.width - 0.5) * 2;
       mouseRef.current.ty = ((e.clientY - r.top) / r.height - 0.5) * 2;
@@ -354,15 +358,13 @@ export default function HouseFavourites() {
       const m = mouseRef.current;
       m.cx += (m.tx - m.cx) * LERP;
       m.cy += (m.ty - m.cy) * LERP;
-      if (!isMobileRef.current) {
-        if (imgRef.current) {
-          imgRef.current.style.transform =
-            `perspective(1800px) rotateX(${-m.cy * 5}deg) rotateY(${m.cx * 8}deg) translateX(${m.cx * 10}px) translateY(${m.cy * 6}px)`;
-        }
-        if (bgWordRef.current) {
-          bgWordRef.current.style.transform =
-            `translateX(${m.cx * -18}px) translateY(${m.cy * -8}px)`;
-        }
+      if (imgRef.current) {
+        imgRef.current.style.transform =
+          `perspective(1800px) rotateX(${-m.cy * 5}deg) rotateY(${m.cx * 8}deg) translateX(${m.cx * 10}px) translateY(${m.cy * 6}px)`;
+      }
+      if (bgWordRef.current) {
+        bgWordRef.current.style.transform =
+          `translateX(${m.cx * -18}px) translateY(${m.cy * -8}px)`;
       }
       rafRef.current = requestAnimationFrame(tick);
     };

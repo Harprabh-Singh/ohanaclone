@@ -1689,10 +1689,10 @@
     margin-bottom: clamp(12px, 2vh, 24px);
   }
   .oh4-mobile-cat-card {
-    background: #0a0500;
-    border: 1px solid rgba(238, 187, 77, 0.3);
-    border-radius: 12px;
-    padding: clamp(8px, 1.5vh, 16px);
+    background: #1a1005;
+    border: 1px solid rgba(238, 187, 77, 0.35);
+    border-radius: 10px;
+    padding: clamp(6px, 1vh, 12px);
     display: flex;
     align-items: center;
     gap: clamp(6px, 1vh, 12px);
@@ -1704,10 +1704,10 @@
   }
   
   .oh4-mobile-cat-icon-wrap {
-    width: clamp(24px, min(8vw, 4vh), 40px);
-    height: clamp(24px, min(8vw, 4vh), 40px);
+    width: clamp(20px, min(7vw, 3.5vh), 34px);
+    height: clamp(20px, min(7vw, 3.5vh), 34px);
     border-radius: 50%;
-    border: 1.5px dashed #E24F33;
+    border: 1px dashed #E24F33;
     display: flex;
     align-items: center;
     justify-content: center;

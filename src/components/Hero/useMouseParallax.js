@@ -6,6 +6,11 @@ export default function useMouseParallax(rootRef) {
   const raf    = useRef(null);
 
   useEffect(() => {
+    // Disable completely on mobile/touch devices to save performance
+    if (window.innerWidth <= 768 || window.matchMedia('(pointer: coarse)').matches) {
+      return undefined;
+    }
+
     const root = rootRef.current;
     if (!root) return undefined;
 
