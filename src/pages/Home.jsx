@@ -551,9 +551,8 @@ const ContactSection = () => {
       }} />
 
       {/* ── CINEMATIC CTA HERO ── */}
-      <div style={{
+      <div className="cs-hero-wrap" style={{
         position: 'relative', zIndex: 2,
-        padding: 'clamp(120px,16vh,180px) clamp(24px,8vw,100px) clamp(80px,10vh,120px)',
         textAlign: 'center',
         borderBottom: '1px solid rgba(255,255,255,0.05)',
       }}>
@@ -720,7 +719,10 @@ const ContactSection = () => {
 
 
       <style>{`
+        .cs-hero-wrap { padding: clamp(120px,16vh,180px) clamp(24px,8vw,100px) clamp(80px,10vh,120px); }
+
         @media (max-width: 700px) {
+          .cs-hero-wrap { padding: 48px 20px 60px 20px; }
           .cs-info-card {
             border-right: none !important;
             border-bottom: 1px solid rgba(255,255,255,0.05) !important;
