@@ -60,25 +60,20 @@ const StorySection = () => {
         pointerEvents: 'none', zIndex: 2,
       }} />
 
-      {/* Film grain */}
-      <div style={{
-        position: 'absolute', inset: 0, zIndex: 0, opacity: 0.035,
-        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`,
-        pointerEvents: 'none',
-      }} />
 
-      {/* Ambient glows */}
+
+      {/* Ambient glows — no filter:blur, radial-gradient alone is performant */}
       <div style={{
         position: 'absolute', left: '-200px', top: '20%',
         width: '600px', height: '600px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(182,145,46,0.07) 0%, transparent 65%)',
-        filter: 'blur(60px)', pointerEvents: 'none',
+        background: 'radial-gradient(circle, rgba(182,145,46,0.09) 0%, transparent 60%)',
+        pointerEvents: 'none',
       }} />
       <div style={{
         position: 'absolute', right: '-180px', bottom: '10%',
         width: '500px', height: '500px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(196,45,120,0.07) 0%, transparent 65%)',
-        filter: 'blur(60px)', pointerEvents: 'none',
+        background: 'radial-gradient(circle, rgba(196,45,120,0.09) 0%, transparent 60%)',
+        pointerEvents: 'none',
       }} />
 
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 clamp(24px, 6vw, 80px)', position: 'relative', zIndex: 1 }}>
@@ -125,7 +120,7 @@ const StorySection = () => {
               <img
                 src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=900&q=80"
                 alt="Ohana dining"
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'brightness(0.75) saturate(1.1)' }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
               />
               {/* Gradient scrim */}
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(7,6,10,0.95) 0%, rgba(7,6,10,0.3) 50%, transparent 100%)' }} />
@@ -149,8 +144,9 @@ const StorySection = () => {
             {/* Accent stat badge */}
             <div className="story-stat-badge" style={{
               position: 'absolute', top: '24px', right: '-16px',
-              background: 'rgba(182,145,46,0.12)', border: '1px solid rgba(182,145,46,0.35)',
-              backdropFilter: 'blur(12px)', borderRadius: '14px',
+              background: 'rgba(182,145,46,0.18)', border: '1px solid rgba(182,145,46,0.35)',
+              // No backdropFilter — solid background is GPU-free
+              borderRadius: '14px',
               padding: '14px 20px', textAlign: 'center',
             }}>
               <p style={{ fontSize: '1.8rem', fontWeight: '900', color: '#B6912E', margin: 0, lineHeight: 1, letterSpacing: '-0.03em' }}>4.8<span style={{ fontSize: '1rem' }}>★</span></p>

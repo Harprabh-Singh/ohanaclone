@@ -175,12 +175,12 @@ export default function HouseFavourites() {
       x: isMobile ? 0 : (dish.imgPos === 'right' ? '28px' : '-28px'),
       y: isMobile ? '14px' : '0px',
       scale: 0.97,
-      filter: 'blur(10px)',
+      // No filter:blur — use scale+opacity instead (GPU-only)
     });
 
     // Image in
     tl.to(imgRef.current, {
-      opacity: 1, x: 0, y: 0, scale: 1, filter: 'blur(0px)',
+      opacity: 1, x: 0, y: 0, scale: 1,
       duration: 0.82, ease: 'expo.out',
     });
 
@@ -296,7 +296,7 @@ export default function HouseFavourites() {
     gsap.set(allEls, { opacity: 0 });
     gsap.set([nameRef.current, tagRef.current, taglineRef.current,
               subRef.current, ctaRef.current, mobilePriceRef.current], { y: 24 });
-    gsap.set(imgRef.current, { y: 16, scale: 0.97, filter: 'blur(8px)' });
+    gsap.set(imgRef.current, { y: 16, scale: 0.97 }); // No filter:blur — GPU-only props only
     gsap.set(bgWordRef.current, { x: 26 });
 
     const ctx = gsap.context(() => {
@@ -309,7 +309,7 @@ export default function HouseFavourites() {
           hasEnteredRef.current = true;
           const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
           tl.to(bgWordRef.current,      { opacity: 1, x: 0, duration: 1.3 }, 0)
-            .to(imgRef.current,         { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 1.05 }, 0.08)
+            .to(imgRef.current,         { opacity: 1, y: 0, scale: 1, duration: 1.05 }, 0.08)
             .to(nameRef.current,        { opacity: 1, y: 0, duration: 0.88 }, 0.16)
             .to(tagRef.current,         { opacity: 1, y: 0, duration: 0.68 }, 0.24)
             .to(taglineRef.current,     { opacity: 1, y: 0, duration: 0.78 }, 0.30)
@@ -418,13 +418,13 @@ export default function HouseFavourites() {
           }} />
         </div>
 
-        {/* AMBIENT GLOW */}
+        {/* AMBIENT GLOW — no filter:blur, use gradient background directly */}
         <div style={{
           position: 'absolute', left: '50%', top: '30%',
           width: 'min(80vw, 600px)', height: 'min(80vw, 600px)',
           transform: 'translateX(-50%)', borderRadius: '50%',
-          background: `radial-gradient(ellipse, rgba(${hexToRgb(d.accent)},0.12) 0%, transparent 70%)`,
-          filter: 'blur(70px)', pointerEvents: 'none', zIndex: 1,
+          background: `radial-gradient(ellipse, rgba(${hexToRgb(d.accent)},0.1) 0%, transparent 65%)`,
+          pointerEvents: 'none', zIndex: 1,
           transition: 'background 1s ease',
         }} />
 
@@ -484,13 +484,13 @@ export default function HouseFavourites() {
                 onError={e => { e.target.src = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1400'; }}
                 style={{
                   display: 'block', width: '100%', objectFit: 'cover', borderRadius: '8px',
-                  filter: 'brightness(0.93) contrast(1.07) saturate(1.12)',
+                  // No filter — use a semi-transparent overlay div instead
                   WebkitMaskImage: 'linear-gradient(to bottom, black 65%, rgba(0,0,0,0.5) 88%, transparent 100%)',
                   maskImage: 'linear-gradient(to bottom, black 65%, rgba(0,0,0,0.5) 88%, transparent 100%)',
                   userSelect: 'none', opacity: 0,
                   boxShadow: `0 0 0 1px rgba(255,255,255,0.04), 0 32px 100px rgba(0,0,0,0.75), 0 0 60px ${d.accent}1A`,
                   transition: 'box-shadow 0.9s ease',
-                  willChange: 'transform, opacity, filter',
+                  willChange: 'transform, opacity',
                 }}
               />
               <div style={{
@@ -499,10 +499,11 @@ export default function HouseFavourites() {
                 WebkitMaskImage: 'linear-gradient(to bottom, black 65%, transparent 100%)',
                 maskImage: 'linear-gradient(to bottom, black 65%, transparent 100%)',
               }} />
+              {/* Colour glow shadow — no filter:blur, radial-gradient is enough */}
               <div style={{
                 position: 'absolute', bottom: '-24px', left: '15%', right: '15%', height: '50px',
-                background: `radial-gradient(ellipse, ${d.accent}44 0%, transparent 72%)`,
-                filter: 'blur(20px)', pointerEvents: 'none', transition: 'background 0.7s ease',
+                background: `radial-gradient(ellipse, ${d.accent}55 0%, transparent 72%)`,
+                pointerEvents: 'none', transition: 'background 0.7s ease',
               }} />
             </div>
           </div>

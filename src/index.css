@@ -18,8 +18,8 @@
 }
 
 html {
-  /* Removed scroll-behavior: smooth — conflicts with GSAP ScrollTrigger on mobile
-     and causes double-scroll jank. GSAP handles its own easing. */
+  /* scroll-behavior: smooth removed — conflicts with GSAP ScrollTrigger
+     and causes double-scroll jank on mobile. GSAP handles easing. */
 }
 
 body {
@@ -134,55 +134,73 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: radial-gradient(circle at top left, rgba(255, 255, 255, 0.04), transparent 18%), radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.03), transparent 16%);
+  background-image:
+    radial-gradient(circle at top left, rgba(255,255,255,0.04), transparent 18%),
+    radial-gradient(circle at bottom right, rgba(255,255,255,0.03), transparent 16%);
   pointer-events: none;
 }
 
 /* ════════════════════════════════════════════════════════════
    MOBILE GPU PERFORMANCE — ≤ 768px
+   Strategy: Only transform + opacity are GPU-composited.
+   Everything else (filter, backdrop-filter, box-shadow transitions)
+   triggers a full software rasterisation pass every frame → jank.
    ════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
 
-  /* 1. Remove fixed body::before overlay — forces a compositing
-        layer across the ENTIRE page on every frame */
+  /* 1. Kill the fixed body overlay — creates a compositing context
+        across the entire page, forcing a repaint on every scroll tick */
   body::before { display: none !important; }
 
-  /* 2. Kill all backdrop-filter blurs — the #1 GPU killer on mobile.
-        Each element needs its own compositor layer + reads pixels
-        behind it every frame. Replace visual with solid bg instead. */
+  /* 2. Kill every backdrop-filter globally — the #1 GPU killer.
+        Each element needs its own compositor layer + samples pixels
+        behind it every frame. ~5ms/frame penalty on mobile. */
   * {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
 
-  /* 3. Kill filter:blur() on purely decorative ambient glow divs */
+  /* 3. Hide decorative elements with expensive CSS filters */
   .oh4-fog,
   .oh4-bg-glow,
   .oh4-bg-circle,
   .oh4-grain,
   .ps-grain,
-  .ps-ambient {
+  .ps-ambient,
+  .oh4-stamp {
     display: none !important;
   }
 
-  /* 4. content-visibility: auto — skip layout/paint for off-screen
-        sections. Saves 40-60ms per section on initial load. */
+  /* 4. content-visibility: auto — skip layout + paint for off-screen
+        sections. Saves 40-80ms per section on first scroll. */
   .ps-root,
   .story-section,
-  .oe-section {
+  .oe-section,
+  .hf-wrap,
+  .tr-row-wrap {
     content-visibility: auto;
     contain-intrinsic-size: auto 100vh;
   }
 
-  /* 5. Promote marquee rows to compositor thread so infinite
-        CSS translation never touches the main thread */
+  /* 5. Pre-promote key animated elements to compositor layers
+        so GSAP doesn't cause a jank spike when it starts animating */
+  .oh4-text-layer,
+  .oh4-menu-panel,
+  .oh4-stats-bar,
+  .oh4-cat-bar {
+    transform: translateZ(0);
+  }
+
+  /* 6. Promote infinite marquee rows to compositor thread */
   .tr-row {
     will-change: transform;
     transform: translateZ(0);
   }
 
-  /* 6. Promote 3D carousel to its own layer */
-  .ps-carousel {
-    will-change: transform;
+  /* 7. Enable native momentum scroll on iOS for clipped containers */
+  .oh4-hero,
+  .hf-wrap,
+  .ps-root {
+    -webkit-overflow-scrolling: touch;
   }
 }

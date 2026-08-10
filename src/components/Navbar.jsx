@@ -17,20 +17,30 @@ const Navbar = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => setSolid(window.scrollY > 80 || location.pathname !== '/');
+    let rafId = null;
+    const handleScroll = () => {
+      if (rafId) return; // throttle to one update per animation frame
+      rafId = requestAnimationFrame(() => {
+        setSolid(window.scrollY > 80 || location.pathname !== '/');
+        rafId = null;
+      });
+    };
     handleScroll();
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [location.pathname]);
 
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname]);
 
-  const navBg = 'bg-[#000] border-b border-[#E24F33]/30 shadow-black/10 transition-all duration-500';
+  const navBg = 'bg-[#000] border-b border-[#E24F33]/30 shadow-black/10';
 
   return (
-    <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${navBg}`}>
+    <header className={`fixed inset-x-0 top-0 z-50 transition-colors duration-500 ${navBg}`}>
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-1 min-[701px]:py-1.5 md:px-8">
         <Link to="/" className="flex items-center gap-3">
           {/* Universal Logo */}

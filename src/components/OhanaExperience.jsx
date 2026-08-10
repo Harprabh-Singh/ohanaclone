@@ -157,9 +157,9 @@ export default function OhanaExperience() {
         }}>
           <div ref={tagRef} style={{
             display: 'inline-flex', alignItems: 'center', gap: '8px',
-            background: `rgba(${rgb(exp.accent)},0.14)`,
+            background: `rgba(${rgb(exp.accent)},0.22)`,
             border: `1px solid rgba(${rgb(exp.accent)},0.35)`,
-            backdropFilter: 'blur(10px)',
+            // No backdropFilter — solid bg is just as legible and GPU-free
             borderRadius: '100px', padding: '5px 14px', marginBottom: '18px',
           }}>
             <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: exp.accent, display: 'block' }} />

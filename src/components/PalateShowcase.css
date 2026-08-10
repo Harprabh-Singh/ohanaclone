@@ -161,13 +161,12 @@
   transform-style: preserve-3d;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  transition: filter 0.5s ease;
-  /* Non-active cards are darker */
-  filter: brightness(0.45) saturate(0.6);
+  transition: opacity 0.5s ease; /* opacity is GPU-composited; filter is not */
+  opacity: 0.45;
 }
 
 .ps-card--active {
-  filter: brightness(1) saturate(1.1);
+  opacity: 1;
 }
 
 /* Image */
