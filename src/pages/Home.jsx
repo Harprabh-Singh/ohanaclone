@@ -757,7 +757,7 @@ const ContactSection = () => {
 // ─── HOME ────────────────────────────────────────────────────────
 const Home = () => {
   return (
-    <main className="relative overflow-hidden">
+    <main className="relative">
       {/* 1. Hero — above-the-fold statement */}
       <HeroSection />
 

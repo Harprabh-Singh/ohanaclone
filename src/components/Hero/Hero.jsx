@@ -66,6 +66,7 @@ import SplitText from './SplitText';
 import './Hero.css';
 
 gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 /*
  * CATEGORIES — single shared source for BOTH the desktop/scroll menu-
@@ -248,6 +249,7 @@ export default function Hero() {
       start: 'top top',
       end: () => window.innerWidth > 700 ? '+=400%' : '+=160%',
       pin: true,
+      pinReparent: true,
       pinSpacing: true,
       scrub: isMobile ? 0.4 : 1,  // tighter on mobile = silky, no perceptible lag
       anticipatePin: 1,           // prevents a flash/jump when the pin fires
