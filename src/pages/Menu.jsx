@@ -220,6 +220,78 @@ export default function Menu() {
     return () => ctx.revert();
   }, []);
 
+  /* Swipe support to translate horizontal swipes into vertical scroll (for mobile) */
+  useEffect(() => {
+    const trigger = triggerRef.current;
+    if (!trigger) return;
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let isHorizontalSwipe = null;
+
+    const handleTouchStart = (e) => {
+      if (e.touches.length !== 1) return;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      isHorizontalSwipe = null;
+    };
+
+    const handleTouchMove = (e) => {
+      if (!touchStartX || !touchStartY) return;
+
+      // Only apply for mobile-sized screens
+      if (window.innerWidth > 768) return;
+
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+
+      const diffX = touchStartX - currentX;
+      const diffY = touchStartY - currentY;
+
+      if (isHorizontalSwipe === null) {
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 5) {
+          isHorizontalSwipe = true;
+        } else if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 5) {
+          isHorizontalSwipe = false;
+        }
+      }
+
+      if (isHorizontalSwipe) {
+        if (e.cancelable) {
+          e.preventDefault();
+        }
+        
+        // Multiplier for responsive scrolling on mobile
+        const scrollSensitivity = 2.5; 
+        window.scrollBy({
+          top: diffX * scrollSensitivity,
+          behavior: 'auto'
+        });
+        
+        touchStartX = currentX;
+        touchStartY = currentY;
+      }
+    };
+
+    const handleTouchEnd = () => {
+      touchStartX = 0;
+      touchStartY = 0;
+      isHorizontalSwipe = null;
+    };
+
+    trigger.addEventListener('touchstart', handleTouchStart, { passive: true });
+    trigger.addEventListener('touchmove', handleTouchMove, { passive: false });
+    trigger.addEventListener('touchend', handleTouchEnd, { passive: true });
+    trigger.addEventListener('touchcancel', handleTouchEnd, { passive: true });
+
+    return () => {
+      trigger.removeEventListener('touchstart', handleTouchStart);
+      trigger.removeEventListener('touchmove', handleTouchMove);
+      trigger.removeEventListener('touchend', handleTouchEnd);
+      trigger.removeEventListener('touchcancel', handleTouchEnd);
+    };
+  }, []);
+
   return (
     <main style={{ background: '#0A0800', color: '#FAF7F1', overflowX: 'hidden', position: 'relative' }}>
       
