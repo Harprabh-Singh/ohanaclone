@@ -393,7 +393,7 @@ export default function Menu() {
             maxWidth: '640px', margin: '0 0 64px',
             fontFamily: 'Georgia, serif', fontStyle: 'italic',
           }}>
-            17 categories. Everything from sunrise eggs to midnight desserts —
+            8 categories. Everything from sunrise eggs to midnight desserts —
             served above Gar-Ali with the warmth Ohana is known for.
           </p>
 
@@ -417,8 +417,8 @@ export default function Menu() {
             borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: '36px', flexWrap: 'wrap',
           }}>
             {[
-              { n: '17',      l: 'Categories' },
-              { n: '80+',     l: 'Dishes' },
+              { n: '8',       l: 'Categories' },
+              { n: '130+',    l: 'Dishes' },
               { n: '4.8★',    l: 'Avg Rating' },
               { n: 'Daily',   l: 'Open 11AM–10PM' },
             ].map(s => (
@@ -513,7 +513,7 @@ export default function Menu() {
                 fontSize: '10px', fontWeight: '700', letterSpacing: '0.2em',
                 color: 'rgba(255,255,255,0.15)',
                 fontFamily: "'Archivo Black', sans-serif",
-              }}>17</span>
+              }}>08</span>
             </div>
           </div>
 
