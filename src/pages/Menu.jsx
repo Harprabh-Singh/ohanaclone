@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { categoryData } from '../data/menuData';
+import FlipBook from '../components/FlipBook';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -130,9 +131,6 @@ function PlateCard({ item, index }) {
    MENU PAGE
 ───────────────────────────────────────────────────────────────── */
 export default function Menu() {
-  const triggerRef  = useRef(null);
-  const stripRef    = useRef(null);
-  const progressRef = useRef(null);
   const counterRef  = useRef(null);
   const heroRef     = useRef(null);
 
@@ -181,116 +179,7 @@ export default function Menu() {
     return () => ctx.revert();
   }, []);
 
-  /* Horizontal scroll — all devices */
-  useEffect(() => {
-    const trigger = triggerRef.current;
-    const strip   = stripRef.current;
-    if (!trigger || !strip) return;
 
-    const getScrollAmount = () => {
-      // Calculate scroll distance using the wrapper width instead of window.innerWidth
-      // to avoid scrollbar width discrepancies.
-      const wrapperWidth = strip.parentElement.offsetWidth;
-      return strip.scrollWidth - wrapperWidth + 40; // Add 40px buffer for the end padding
-    };
-
-    const ctx = gsap.context(() => {
-      gsap.to(strip, {
-        x: () => -getScrollAmount(),
-        ease: 'none',
-        scrollTrigger: {
-          trigger,
-          start: 'top top',
-          end: () => `+=${getScrollAmount()}`,
-          scrub: 1, // smoothed scrub
-          pin: true,
-          pinSpacing: true,
-          invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            if (progressRef.current)
-              progressRef.current.style.transform = `scaleX(${self.progress})`;
-            if (counterRef.current)
-              counterRef.current.textContent =
-                String(Math.round(self.progress * (categoryData.length - 1)) + 1).padStart(2, '0');
-          },
-        },
-      });
-    });
-
-    return () => ctx.revert();
-  }, []);
-
-  /* Swipe support to translate horizontal swipes into vertical scroll (for mobile) */
-  useEffect(() => {
-    const trigger = triggerRef.current;
-    if (!trigger) return;
-
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let isHorizontalSwipe = null;
-
-    const handleTouchStart = (e) => {
-      if (e.touches.length !== 1) return;
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-      isHorizontalSwipe = null;
-    };
-
-    const handleTouchMove = (e) => {
-      if (!touchStartX || !touchStartY) return;
-
-      // Only apply for mobile-sized screens
-      if (window.innerWidth > 768) return;
-
-      const currentX = e.touches[0].clientX;
-      const currentY = e.touches[0].clientY;
-
-      const diffX = touchStartX - currentX;
-      const diffY = touchStartY - currentY;
-
-      if (isHorizontalSwipe === null) {
-        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 5) {
-          isHorizontalSwipe = true;
-        } else if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 5) {
-          isHorizontalSwipe = false;
-        }
-      }
-
-      if (isHorizontalSwipe) {
-        if (e.cancelable) {
-          e.preventDefault();
-        }
-        
-        // Multiplier for responsive scrolling on mobile
-        const scrollSensitivity = 2.5; 
-        window.scrollBy({
-          top: diffX * scrollSensitivity,
-          behavior: 'auto'
-        });
-        
-        touchStartX = currentX;
-        touchStartY = currentY;
-      }
-    };
-
-    const handleTouchEnd = () => {
-      touchStartX = 0;
-      touchStartY = 0;
-      isHorizontalSwipe = null;
-    };
-
-    trigger.addEventListener('touchstart', handleTouchStart, { passive: true });
-    trigger.addEventListener('touchmove', handleTouchMove, { passive: false });
-    trigger.addEventListener('touchend', handleTouchEnd, { passive: true });
-    trigger.addEventListener('touchcancel', handleTouchEnd, { passive: true });
-
-    return () => {
-      trigger.removeEventListener('touchstart', handleTouchStart);
-      trigger.removeEventListener('touchmove', handleTouchMove);
-      trigger.removeEventListener('touchend', handleTouchEnd);
-      trigger.removeEventListener('touchcancel', handleTouchEnd);
-    };
-  }, []);
 
   return (
     <main style={{ background: '#0A0800', color: '#FAF7F1', overflowX: 'hidden', position: 'relative' }}>
@@ -457,91 +346,13 @@ export default function Menu() {
       </section>
 
       {/* ══════════════════════════════════════════════
-          DESKTOP — HORIZONTAL SCROLL GALLERY
-          Pinned via GSAP ScrollTrigger. Hidden on mobile.
+          MENU FLIP BOOK
+          Replaces the old GSAP horizontal scroll gallery.
+          Shows all 6 real printed Ohana menu pages as a
+          3D page-flip book experience.
       ══════════════════════════════════════════════ */}
-      <div id="menu-gallery" ref={triggerRef} style={{ display: 'block' }}>
-        <div style={{
-          height: '100vh', width: '100%', overflow: 'hidden',
-          background: 'radial-gradient(ellipse at 50% 50%, rgba(182,145,46,0.15) 0%, #0A0800 60%, #080509 100%)',
-          display: 'flex', flexDirection: 'column', position: 'relative',
-        }}>
-          {/* Warm center glow in the gallery */}
-          <div style={{
-            position: 'absolute', top: '50%', left: '50%',
-            transform: 'translate(-50%,-50%)',
-            width: '100vw', height: '80vh', pointerEvents: 'none', zIndex: 0,
-            background: 'radial-gradient(ellipse, rgba(182,145,46,0.2) 0%, transparent 65%)',
-            filter: 'blur(60px)',
-          }} />
-          {/* Progress bar */}
-          <div style={{
-            height: '2px', background: 'rgba(255,255,255,0.04)',
-            flexShrink: 0, position: 'relative',
-          }}>
-            <div ref={progressRef} style={{
-              position: 'absolute', inset: 0,
-              background: 'linear-gradient(90deg, #B6912E, #C42D78, #E8742A)',
-              transformOrigin: 'left', transform: 'scaleX(0)',
-              willChange: 'transform',
-            }} />
-          </div>
-
-          {/* Top label bar */}
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '18px clamp(40px, 5vw, 80px)',
-            flexShrink: 0, borderBottom: '1px solid rgba(255,255,255,0.035)',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{ width: '28px', height: '1px', background: '#B6912E' }} />
-              <span style={{
-                fontSize: '8px', fontWeight: '800', letterSpacing: '0.5em',
-                textTransform: 'uppercase', color: '#B6912E',
-              }}>
-                Menu — Scroll to Explore
-              </span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span ref={counterRef} style={{
-                fontSize: '10px', fontWeight: '900', letterSpacing: '0.2em',
-                color: 'rgba(255,255,255,0.4)',
-                fontFamily: "'Archivo Black', sans-serif",
-              }}>01</span>
-              <div style={{ width: '32px', height: '1px', background: 'rgba(255,255,255,0.1)' }} />
-              <span style={{
-                fontSize: '10px', fontWeight: '700', letterSpacing: '0.2em',
-                color: 'rgba(255,255,255,0.15)',
-                fontFamily: "'Archivo Black', sans-serif",
-              }}>08</span>
-            </div>
-          </div>
-
-          {/* Scrolling strip — GPU-isolated with translateZ */}
-          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', alignItems: 'center', position: 'relative', zIndex: 1, transform: 'translateZ(0)' }}>
-            <div ref={stripRef} style={{
-              display: 'flex', height: '100%', alignItems: 'center',
-              willChange: 'transform',
-            }}>
-              {categoryData.map((item, i) => (
-                <PlateCard key={item.slug} item={item} index={i} />
-              ))}
-            </div>
-          </div>
-
-          {/* Bottom-right drag hint */}
-          <div style={{
-            position: 'absolute', bottom: '28px', right: '48px',
-            display: 'flex', alignItems: 'center', gap: '10px', pointerEvents: 'none',
-          }}>
-            <span style={{
-              fontSize: '8px', fontWeight: '700', letterSpacing: '0.35em',
-              textTransform: 'uppercase', color: 'rgba(255,255,255,0.14)',
-            }}>drag to explore</span>
-            <div style={{ width: '32px', height: '1px', background: 'rgba(255,255,255,0.12)' }} />
-            <span style={{ fontSize: '14px', color: 'rgba(255,255,255,0.14)' }}>→</span>
-          </div>
-        </div>
+      <div id="menu-gallery">
+        <FlipBook />
       </div>
 
       {/* ══════════════════════════════════════════════

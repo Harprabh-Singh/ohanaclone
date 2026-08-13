@@ -11,17 +11,34 @@ const PALETTE = ['#B6912E', '#C42D78', '#E8742A', '#D42020', '#6B8F6B'];
 const accent = (i) => PALETTE[i % PALETTE.length];
 
 /* ─────────────────────────────────────────────────────────────────
-   BADGE CHIP
+   DIETARY LEFT-BAR COLOR LOGIC
+   Sage green = Veg only, Warm maroon = Non-Veg, Rose = Contains Pork
+───────────────────────────────────────────────────────────────── */
+const dietaryBarColor = (item) => {
+  if (item.containsPork) return '#C06080'; // rose-maroon
+  if (item.isVeg && !item.isNonVeg) return '#6B9E6B';   // sage green
+  if (item.isNonVeg) return '#A83232';    // warm maroon
+  return null; // no bar for unspecified
+};
+
+/* ─────────────────────────────────────────────────────────────────
+   BADGE CHIP — outlined pill, quiet and premium
+   Per spec: 1px border matching category color, near-transparent bg,
+   not a solid fill button.
 ───────────────────────────────────────────────────────────────── */
 function Badge({ label, color }) {
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: '4px',
-      padding: '3px 10px', borderRadius: '100px',
-      fontSize: '9px', fontWeight: '800', letterSpacing: '0.22em',
-      textTransform: 'uppercase', border: `1px solid ${color}33`,
-      background: `${color}18`, color,
+      padding: '2px 9px', borderRadius: '100px',
+      fontSize: '8px', fontWeight: '700', letterSpacing: '0.24em',
+      textTransform: 'uppercase',
+      /* Outlined pill — 1px border, near-transparent fill */
+      border: `1px solid ${color}60`,
+      background: `${color}0D`, /* ~5% opacity */
+      color: `${color}CC`,     /* ~80% opacity — slightly muted */
       whiteSpace: 'nowrap', flexShrink: 0,
+      lineHeight: 1.6,
     }}>
       {label}
     </span>
@@ -29,11 +46,84 @@ function Badge({ label, color }) {
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   MENU ITEM ROW  — dark glass card
+   PRICE DISPLAY — tabular/monospace feel, smaller ₹ symbol
+───────────────────────────────────────────────────────────────── */
+function PriceDisplay({ price, hov, accentColor }) {
+  const isMulti = typeof price === 'string' && price.includes('/');
+  const isMRP   = price === 'MRP';
+
+  if (isMRP) {
+    return (
+      <span style={{
+        fontFamily: "'Courier New', 'Lucida Console', monospace",
+        fontSize: 'clamp(14px, 2vw, 18px)', fontWeight: '700',
+        color: hov ? '#F2C230' : 'rgba(255,248,236,0.55)',
+        letterSpacing: '0.06em', lineHeight: 1,
+        transition: 'color 0.18s ease',
+      }}>MRP</span>
+    );
+  }
+
+  if (isMulti) {
+    /* e.g. "100/120" → split and render as "₹100 / ₹120" */
+    const [a, b] = price.split('/');
+    return (
+      <div style={{ textAlign: 'right' }}>
+        <span style={{
+          fontFamily: "'Courier New', 'Lucida Console', monospace",
+          fontSize: 'clamp(15px, 2.2vw, 20px)', fontWeight: '700',
+          color: hov ? '#F2C230' : '#FFF8EC',
+          letterSpacing: '0.02em', lineHeight: 1,
+          transition: 'color 0.18s ease',
+        }}>
+          <span style={{ fontSize: '0.7em', verticalAlign: '0.15em', marginRight: '1px', opacity: 0.7 }}>₹</span>{a.trim()}
+          <span style={{ opacity: 0.35, margin: '0 4px', fontSize: '0.75em' }}>/</span>
+          <span style={{ fontSize: '0.7em', verticalAlign: '0.15em', marginRight: '1px', opacity: 0.7 }}>₹</span>{b.trim()}
+        </span>
+        <div style={{
+          fontSize: '8px', color: 'rgba(255,248,236,0.28)',
+          fontWeight: '600', letterSpacing: '0.22em',
+          textTransform: 'uppercase', marginTop: '4px',
+        }}>veg / non-veg</div>
+      </div>
+    );
+  }
+
+  /* Single numeric price */
+  const num = typeof price === 'number' ? price : parseInt(price, 10);
+  return (
+    <span style={{
+      fontFamily: "'Courier New', 'Lucida Console', monospace",
+      fontSize: 'clamp(17px, 2.4vw, 22px)', fontWeight: '700',
+      color: hov ? '#F2C230' : '#FFF8EC',
+      letterSpacing: '0.02em', lineHeight: 1,
+      transition: 'color 0.18s ease',
+    }}>
+      <span style={{
+        fontSize: '0.68em', verticalAlign: '0.15em',
+        marginRight: '1px', opacity: 0.65,
+        fontFamily: 'Georgia, serif',
+      }}>₹</span>
+      {num}
+    </span>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   MENU ITEM ROW  — Ohana brand restyle
+   Changes (visual/CSS only — no logic altered):
+   • Dark espresso bg (#120A05) + SVG paper-grain texture
+   • Dietary left accent bar (3px, sage/maroon/rose)
+   • Dish name in Georgia serif, warm cream
+   • Outlined pill badges
+   • Dotted leader line between name block and price
+   • Tabular price with smaller ₹ offset
+   • Clean 180ms lift on hover — no bounce
 ───────────────────────────────────────────────────────────────── */
 function ItemRow({ item, index, accentColor }) {
   const [hov, setHov] = useState(false);
   const rowRef = useRef(null);
+  const barColor = dietaryBarColor(item);
 
   useEffect(() => {
     if (!rowRef.current) return;
@@ -52,95 +142,106 @@ function ItemRow({ item, index, accentColor }) {
     );
   }, [index]);
 
-  const priceDisplay = typeof item.price === 'number'
-    ? `₹${item.price}`
-    : item.price === 'MRP' ? 'MRP' : `₹${item.price}`;
-
   return (
     <div
       ref={rowRef}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        display: 'flex', alignItems: 'flex-start', gap: '20px',
-        padding: '20px 24px',
-        background: hov ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
-        border: `1px solid ${hov ? `${accentColor}44` : 'rgba(255,255,255,0.07)'}`,
-        borderRadius: '16px',
-        transition: 'all 0.35s cubic-bezier(0.34,1.56,0.64,1)',
+        display: 'flex', alignItems: 'center', gap: '0',
+        /* Dark espresso background */
+        background: hov
+          ? 'rgba(24,14,4,0.96)'
+          : 'rgba(18,10,5,0.90)',
+        /* SVG paper-grain texture overlay via pseudo-element trick using outline */
+        backgroundImage: [
+          /* warm grain via SVG data URI — subtle, low contrast */
+          `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E")`,
+        ].join(','),
+        border: `1px solid ${hov ? `rgba(242,194,48,0.22)` : 'rgba(255,248,236,0.07)'}`,
+        borderLeft: barColor
+          ? `3px solid ${barColor}` /* dietary accent bar */
+          : `3px solid transparent`,
+        borderRadius: '12px',
+        /* Clean non-bouncy lift — 180ms linear-ish ease, no spring */
+        transition: 'background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease',
         transform: hov ? 'translateY(-2px)' : 'translateY(0)',
-        boxShadow: hov ? `0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px ${accentColor}22` : 'none',
+        boxShadow: hov
+          ? `0 8px 28px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.35)`
+          : `0 2px 6px rgba(0,0,0,0.3)`,
         cursor: 'default',
         position: 'relative',
         overflow: 'hidden',
+        padding: 'clamp(14px, 3vw, 18px) clamp(16px, 4vw, 22px) clamp(14px, 3vw, 18px) clamp(14px, 4vw, 20px)',
       }}
     >
-      {/* Left glow strip */}
-      <div style={{
-        position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
-        width: '3px', height: hov ? '60%' : '0%',
-        background: `linear-gradient(to bottom, transparent, ${accentColor}, transparent)`,
-        borderRadius: '4px', transition: 'height 0.4s ease',
-      }} />
+      {/* Image Placeholder (if we add images to data later) */}
+      {item.image && (
+        <div style={{
+          width: '120px', height: '120px', flexShrink: 0,
+          borderRadius: '8px', overflow: 'hidden',
+          background: `url(${item.image}) center/cover`,
+        }} />
+      )}
 
-      {/* Content */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '6px', flexWrap: 'wrap' }}>
+      {/* Content Block */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        
+        {/* Top Row: Title + Leader Line + Price */}
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', marginBottom: '8px' }}>
+          
+          {/* Dish name */}
           <h3 style={{
-            fontFamily: "'Archivo Black', 'Arial Black', sans-serif",
-            fontSize: 'clamp(15px, 2vw, 18px)', fontWeight: '900',
-            color: '#FFFFFF', margin: 0, letterSpacing: '-0.02em',
-            lineHeight: 1.2, flex: 1,
-            transition: 'color 0.3s ease',
+            fontFamily: "Georgia, 'Times New Roman', serif",
+            fontSize: 'clamp(15px, 4vw, 19px)', fontWeight: '700',
+            color: hov ? '#FFF8EC' : 'rgba(255,248,236,0.92)',
+            margin: '0', letterSpacing: '0.01em',
+            lineHeight: 1.2,
+            transition: 'color 0.18s ease',
+            /* Natural word wrapping (no mid-word breaks unless it's a giant word) */
+            overflowWrap: 'break-word',
+            wordBreak: 'normal',
           }}>
             {item.title}
           </h3>
+
+          {/* Dotted leader line */}
+          <div
+            className="menu-leader-line"
+            style={{
+              flex: 1, minWidth: '16px',
+              borderBottom: '1.5px dotted rgba(255,248,236,0.15)',
+              margin: '0 12px 5px 12px',
+            }}
+          />
+
+          {/* Price block */}
+          <div style={{ flexShrink: 0, textAlign: 'right' }}>
+            <PriceDisplay price={item.price} hov={hov} accentColor={accentColor} />
+          </div>
         </div>
 
+        {/* Description — italic, muted */}
         {item.description && (
           <p style={{
-            fontSize: '13px', color: 'rgba(255,255,255,0.45)',
+            fontSize: '13px', color: 'rgba(255,248,236,0.45)',
             fontFamily: 'Georgia, serif', fontStyle: 'italic',
-            lineHeight: 1.5, margin: '0 0 10px', maxWidth: '540px',
+            lineHeight: 1.5, margin: '0 0 12px',
           }}>
             {item.description}
           </p>
         )}
 
-        {/* Badges row */}
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-          {item.isOhanaSpecial && <Badge label="★ Ohana Special" color="#B6912E" />}
-          {item.isNew && <Badge label="New" color="#6B8F6B" />}
-          {item.isSpicy && <Badge label="🌶 Spicy" color="#E8742A" />}
-          {item.containsPork && <Badge label="Contains Pork" color="#C42D78" />}
-          {item.isVeg && <Badge label="Veg" color="#6B8F6B" />}
-          {item.isNonVeg && <Badge label="Non-Veg" color="#C42D78" />}
-          {item.priceLabel && <Badge label={item.priceLabel} color="rgba(255,255,255,0.4)" />}
+        {/* Badges row — outlined pills */}
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: 'auto' }}>
+          {item.isVeg        && <Badge label="Veg"            color="#6B9E6B" />}
+          {item.isNonVeg     && <Badge label="Non-Veg"        color="#A83232" />}
+          {item.containsPork && <Badge label="Contains Pork"  color="#C06080" />}
+          {item.isOhanaSpecial && <Badge label="Ohana Special" color="#F2C230" />}
+          {item.isSpicy      && <Badge label="Spicy"          color="#FF5A2A" />}
+          {item.isNew        && <Badge label="New"            color="#F2C230" />}
+          {item.priceLabel   && <Badge label={item.priceLabel} color="rgba(255,248,236,0.35)" />}
         </div>
-      </div>
-
-      {/* Price */}
-      <div style={{
-        flexShrink: 0, textAlign: 'right',
-        transform: hov ? 'scale(1.05)' : 'scale(1)',
-        transition: 'transform 0.3s ease',
-      }}>
-        <div style={{
-          fontFamily: "'Archivo Black', sans-serif",
-          fontSize: 'clamp(18px, 2.5vw, 24px)', fontWeight: '900',
-          color: hov ? accentColor : '#FFFFFF',
-          letterSpacing: '-0.03em', lineHeight: 1,
-          transition: 'color 0.3s ease',
-        }}>
-          {priceDisplay}
-        </div>
-        {typeof item.price === 'string' && item.price.includes('/') && (
-          <div style={{
-            fontSize: '9px', color: 'rgba(255,255,255,0.3)',
-            fontWeight: '700', letterSpacing: '0.2em',
-            textTransform: 'uppercase', marginTop: '4px',
-          }}>Veg / Non-Veg</div>
-        )}
       </div>
     </div>
   );
@@ -210,8 +311,12 @@ function SubcategorySection({ subcategory, items, accentColor, sectionIndex }) {
         </div>
       </div>
 
-      {/* Items */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {/* Items Grid */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 340px), 1fr))',
+        gap: '20px',
+      }}>
         {items.map((item, i) => (
           <ItemRow key={item.title} item={item} index={i} accentColor={accentColor} />
         ))}
@@ -775,6 +880,18 @@ export default function MenuCategory() {
         }
         input::placeholder { color: rgba(255,255,255,0.2); }
         ::-webkit-scrollbar { display: none; }
+
+        /* Dotted leader line: hidden on narrow viewports (≤ 520px)
+           to avoid visual clutter — falls back to plain right-aligned price */
+        @media (max-width: 520px) {
+          .menu-leader-line { display: none !important; }
+        }
+
+        /* Tabular numerals for price column — enables tnum on supporting fonts */
+        .menu-price-num {
+          font-variant-numeric: tabular-nums;
+          font-feature-settings: "tnum" 1;
+        }
       `}</style>
     </main>
   );

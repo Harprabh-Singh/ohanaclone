@@ -6,5 +6,8 @@ export default defineConfig({
   base: './',
   server: {
     port: 4173,
+    watch: {
+      ignored: ['**/public/menu-pages/**']
+    }
   },
 });

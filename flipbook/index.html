@@ -1,0 +1,680 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>MODE — Digital Fashion Magazine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sree+Krushnadevaraya&family=Catamaran:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    /* ═══ TOKENS ═══════════════════════════════════════════════════ */
+    :root {
+      --yellow:   #ffce14;
+      --bg:       #e2e2f5;
+      --persp:    1800px;
+      --dur:      920ms;
+      --ease:     cubic-bezier(0.645,0.045,0.355,1.000);
+      --bw:       min(92vw,1300px);
+      --bh:       min(84svh,650px);
+      --serif:    'Sree Krushnadevaraya',serif;
+      --sans:     'Catamaran',sans-serif;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    img{display:block;max-width:100%}
+
+    /* ═══ BODY ══════════════════════════════════════════════════════ */
+    body{
+      font-family:var(--serif);
+      background:var(--bg);
+      min-height:100svh;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0)
+              env(safe-area-inset-bottom,0) env(safe-area-inset-left,0);
+    }
+
+    /* ═══ STAGE ═════════════════════════════════════════════════════ */
+    .stage{
+      display:flex;flex-direction:column;
+      align-items:center;
+      gap:clamp(10px,2vh,22px);
+      width:100%;
+    }
+
+    /* ═══ BOOK ══════════════════════════════════════════════════════ */
+    .book{
+      position:relative;
+      width:var(--bw);height:var(--bh);
+      perspective:var(--persp);
+      box-shadow:0 41px 38px -20px rgba(10,49,80,.65);
+      user-select:none;-webkit-user-select:none;
+    }
+    .book__ambient{position:absolute;inset:0;background:rgba(255,155,0,.70);pointer-events:none;z-index:-1}
+
+    /* ═══ PANELS ════════════════════════════════════════════════════ */
+    .panel{position:absolute;top:0;height:100%;width:50%;overflow:hidden}
+    .panel--left {left:0}
+    .panel--right{left:50%}
+
+    /* ═══ PAGES ═════════════════════════════════════════════════════ */
+    .page{
+      position:absolute;inset:0;
+      background-size:cover;background-position:center;
+      overflow:hidden;
+      opacity:0;pointer-events:none;
+      transition:opacity .12s ease;
+    }
+    .page.show{opacity:1;pointer-events:auto}
+
+    /* ═══ GUTTER ════════════════════════════════════════════════════ */
+    .book__gutter{
+      position:absolute;top:0;left:calc(50% - 6px);width:12px;height:100%;
+      z-index:40;pointer-events:none;
+      background:linear-gradient(to right,transparent 0%,rgba(0,0,0,.10) 30%,
+        rgba(0,0,0,.24) 50%,rgba(0,0,0,.10) 70%,transparent 100%);
+    }
+
+    /* ═══ TURNER ════════════════════════════════════════════════════ */
+    .turner{
+      position:absolute;top:0;width:50%;height:100%;
+      transform-style:preserve-3d;
+      z-index:30;pointer-events:none;
+      visibility:hidden;
+    }
+    .turner.on{visibility:visible}
+    .turner__face{
+      position:absolute;inset:0;
+      backface-visibility:hidden;-webkit-backface-visibility:hidden;
+      overflow:hidden;
+      background-size:cover;background-position:center;
+    }
+    .turner__face--back{transform:rotateY(180deg)}
+    .turner__shade{
+      position:absolute;inset:0;pointer-events:none;z-index:10;
+    }
+    .turner__face--front .turner__shade{background:linear-gradient(to left,rgba(0,0,0,.28),transparent 65%)}
+    .turner__face--back  .turner__shade{background:linear-gradient(to right,rgba(0,0,0,.22),transparent 65%)}
+
+    /* ═══ NAV ═══════════════════════════════════════════════════════ */
+    .nav{display:flex;align-items:center;gap:clamp(14px,3vw,30px)}
+    .nav__btn{
+      position:relative;
+      width:44px;height:44px;
+      border:1px solid var(--yellow);border-radius:50%;
+      background:transparent;color:var(--yellow);
+      cursor:pointer;font-size:16px;
+      display:flex;align-items:center;justify-content:center;
+      transition:box-shadow .22s;flex-shrink:0;
+    }
+    .nav__btn:hover:not(:disabled){box-shadow:0 0 0 10px rgba(191,151,38,.28)}
+    .nav__btn:disabled{opacity:.25;cursor:default}
+    .nav__btn::before{
+      content:'';position:absolute;height:1px;width:32px;
+      background:var(--yellow);top:50%;transform:translateY(-50%);
+      transition:width .18s;
+    }
+    .nav__btn--prev::before{right:calc(100% + 1px)}
+    .nav__btn--next::before{left: calc(100% + 1px)}
+    .nav__btn:hover:not(:disabled)::before{width:46px}
+    .nav__lbl{
+      font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+      color:rgba(0,0,0,.42);min-width:88px;text-align:center;
+      font-family:var(--sans);
+    }
+
+    /* ═══ CONTENT ATOMS ════════════════════════════════════════════ */
+    .logo{
+      position:absolute;top:0;left:0;
+      font-size:clamp(14px,2.2vw,20px);
+      padding:clamp(18px,4vw,33px) clamp(16px,3vw,30px);
+      line-height:1;color:var(--yellow);z-index:5;
+    }
+    .hamburger{
+      position:absolute;top:clamp(22px,4vw,38px);right:clamp(16px,3vw,30px);
+      z-index:5;cursor:pointer;
+      display:flex;flex-direction:column;gap:5px;padding:4px;
+    }
+    .ham-bar{display:block;width:20px;height:1px;background:var(--yellow)}
+    .ham-bar:last-child{width:8px}
+    .pgnum{
+      position:absolute;bottom:clamp(14px,2.5vw,20px);left:clamp(18px,3.5vw,34px);
+      color:var(--yellow);letter-spacing:clamp(22px,4.5vw,60px);font-size:11px;z-index:5;
+    }
+    .pgnum::after{
+      content:'';display:block;position:absolute;
+      left:clamp(8px,1.5vw,20px);top:18px;
+      height:1px;width:clamp(40px,8vw,100px);background:var(--yellow);
+    }
+    .ftr{
+      position:absolute;bottom:clamp(16px,3vw,26px);right:clamp(16px,3vw,30px);
+      z-index:5;color:var(--yellow);font-size:12px;
+    }
+    .ftr i{margin:0 8px;cursor:pointer}
+    .layer{position:absolute;inset:0;pointer-events:none;z-index:2}
+
+    /* picture */
+    .c-pic{
+      position:absolute;left:50%;
+      transform:translateX(clamp(-60px,-8vw,-28px));
+      top:clamp(160px,34%,294px);
+      width:clamp(130px,26%,220px);
+    }
+    .c-pic img{width:100%}
+
+    /* center card */
+    .c-ctr{
+      position:absolute;text-align:center;
+      width:clamp(170px,38%,260px);
+      left:50%;top:50%;transform:translate(-50%,-50%);
+    }
+    .c-ctr.clip-l{
+      clip-path:polygon(0 0,50% 0,50% 100%,0 100%);
+      right:clamp(-100px,-14vw,-130px);left:auto;transform:none;
+    }
+    .c-ctr.clip-r{
+      clip-path:polygon(50% 0,100% 0,100% 100%,50% 100%);
+      left:clamp(-100px,-14vw,-130px);transform:none;
+    }
+    .c-ctr .logo{position:relative;font-size:clamp(20px,4vw,30px);padding:0}
+    .c-ctr h4,.c-ctr h6{color:var(--yellow);font-weight:normal;margin:0}
+    .c-ctr h4{
+      font-size:clamp(22px,4.5vw,38px);line-height:1;
+      border-top:1px solid var(--yellow);border-bottom:1px solid var(--yellow);
+      padding:clamp(8px,2vw,15px) clamp(10px,2.5vw,20px) clamp(12px,2.5vw,29px);
+    }
+    .c-ctr h6{font-size:clamp(13px,2.5vw,20px);opacity:.5}
+    .c-ctr h6:nth-of-type(2){font-size:clamp(11px,2vw,16px);margin-top:10px}
+
+    /* offset text */
+    .c-off{
+      position:absolute;color:var(--yellow);
+      width:clamp(180px,42%,280px);
+      top:clamp(140px,30%,260px);
+      left:50%;
+      transform:translateX(clamp(-280px,-38vw,-180px));
+    }
+    .c-off h2{font-size:clamp(11px,1.8vw,16px);text-transform:uppercase;letter-spacing:2px;margin:20px 0 8px;color:var(--yellow)}
+    .c-off h1{color:var(--yellow);font-size:clamp(38px,9vw,100px);font-weight:normal;line-height:.88;letter-spacing:-2px}
+    .c-off p{color:var(--yellow);margin-top:14px;font-size:13px;line-height:1.55;opacity:.7}
+
+    /* quote */
+    .c-quo{
+      position:absolute;right:clamp(16px,4vw,38px);
+      bottom:clamp(60px,12%,100px);
+      width:clamp(130px,26%,200px);
+    }
+    .c-quo h5{position:relative}
+    .c-quo h5 span{display:block;color:var(--yellow);font-size:clamp(18px,3.5vw,34px);font-weight:normal;line-height:clamp(15px,3vw,24px)}
+    .c-quo h5 span.nm,.c-quo h5 span.au{font-size:13px;opacity:.7;margin-top:22px}
+    .c-quo h5 span.q{font-family:var(--sans);font-size:clamp(48px,9vw,80px);position:absolute;right:clamp(0px,2vw,18px);top:clamp(38px,9%,88px)}
+
+    /* big outlined word */
+    .c-big{
+      position:absolute;bottom:clamp(-10px,-1vh,0px);left:clamp(16px,4vw,40px);
+      color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.12);
+      font-size:clamp(50px,12vw,130px);font-weight:700;pointer-events:none;white-space:nowrap;
+    }
+
+    /* sections (pg7) */
+    .c-sect{position:absolute;inset:0}
+    .c-sec{position:absolute;color:var(--yellow)}
+    .c-sec h2,.c-sec p{margin:0;color:var(--yellow)}
+    .c-sec h2{font-size:clamp(13px,2vw,18px);margin-bottom:6px}
+    .c-sec p{font-size:13px;line-height:1.5;opacity:.9}
+
+    /* center image (pg5) */
+    .c-cimg{
+      position:absolute;left:50%;top:50%;
+      transform:translate(-50%,-50%);
+      width:min(68%,210px);text-align:center;
+    }
+    .c-cimg img{width:100%}
+
+    /* ═══ PER-PAGE BACKGROUNDS ══════════════════════════════════════ */
+    #pg1{background:url('https://cdnfl01.viewbug.com/media/mediafiles/2017/10/16/75667840_large.jpg') center/cover}
+    #pg2{background:url('https://data.whicdn.com/images/86911589/original.jpg') center/cover}
+    #pg3{background:url('https://iso.500px.com/wp-content/uploads/2014/12/fashion_1.jpg') left top/cover}
+    #pg4{background:url('https://iso.500px.com/wp-content/uploads/2014/12/fashion_1.jpg') right top/cover}
+    #pg5{background:url('http://cdn.lightgalleries.net/4d80d92265da9/images/Tayna16-12_90574-2.jpg') center/cover}
+    #pg6{background:#4a5f5c}
+    #pg7{background:url('http://ruthrose.co.uk/wp-content/uploads/2018/04/lingerie-fashion-photographer-photography-shoot-fitness-swimwear-shoot180317_POCKET9661-f1.jpg') left top/cover}
+    #pg8{background:url('http://ruthrose.co.uk/wp-content/uploads/2018/04/lingerie-fashion-photographer-photography-shoot-fitness-swimwear-shoot180317_POCKET9661-f1.jpg') right top/cover}
+
+    /* ═══ TABLET ════════════════════════════════════════════════════ */
+    @media(min-width:701px) and (max-width:1100px){
+      :root{--bw:min(94vw,900px);--bh:min(80svh,520px)}
+    }
+
+    /* ═══ MOBILE ════════════════════════════════════════════════════ */
+    @media(max-width:700px){
+      body{overflow:hidden;justify-content:flex-start}
+      .stage{height:100svh;justify-content:space-between;padding:env(safe-area-inset-top,8px) 0 env(safe-area-inset-bottom,8px);gap:0}
+      .book{width:100vw;height:calc(100svh - 72px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));box-shadow:none;perspective:none}
+      .panel--left{display:none}
+      .panel--right{left:0;width:100%}
+      .page{width:100%}
+      .turner{width:100%;left:0!important}
+      .book__gutter{display:none}
+      .nav{height:72px;padding:0 24px env(safe-area-inset-bottom,0);justify-content:center;gap:20px}
+      .nav__btn{width:48px;height:48px}
+      /* Reset desktop gutter-clipping on mobile */
+      .c-ctr.clip-l,.c-ctr.clip-r{
+        clip-path:none!important;left:50%!important;right:auto!important;
+        transform:translate(-50%,-50%)!important;
+      }
+      .c-off{transform:translateX(-50%)!important;left:50%!important}
+      .c-pic{left:50%;transform:translateX(-50%);top:28%;width:min(75vw,210px)}
+      .c-quo{right:14px;bottom:clamp(60px,14vw,90px);width:min(55vw,190px)}
+      .c-big{font-size:clamp(38px,13vw,76px)}
+    }
+
+    /* ═══ REDUCED MOTION ════════════════════════════════════════════ */
+    @media(prefers-reduced-motion:reduce){
+      :root{--dur:1ms}
+      .turner{transition-duration:1ms!important}
+    }
+  </style>
+</head>
+<body>
+
+<div class="stage" role="main">
+  <!-- ── BOOK ───────────────────────────────────────────────────── -->
+  <div class="book" id="book" aria-label="Fashion Magazine">
+    <div class="book__ambient" aria-hidden="true"></div>
+
+    <!-- LEFT PANEL -->
+    <div class="panel panel--left" id="leftPanel" aria-hidden="true">
+
+      <!-- Page 2 -->
+      <div class="page" id="pg2" data-page="2">
+        <div class="logo" aria-hidden="true">Fashion.</div>
+        <div class="hamburger" role="button" aria-label="Menu" tabindex="0">
+          <span class="ham-bar"></span><span class="ham-bar"></span><span class="ham-bar"></span>
+        </div>
+        <div class="layer">
+          <div class="c-pic">
+            <img src="https://www.colorfusionstudio.com/wp-content/uploads/2015/07/cfs-models-003-683x1024.jpg"
+                 alt="Fashion editorial portrait">
+          </div>
+          <!-- Centre-card LEFT half -->
+          <div class="c-ctr clip-l" style="top:50%">
+            <span class="logo">Fashion.</span>
+            <h6>Spring / Summer</h6>
+            <h4>New<br>Arrivals</h4>
+            <h6>2024 Collection</h6>
+            <h6>Mode Magazine</h6>
+          </div>
+        </div>
+        <div class="pgnum" aria-hidden="true">02</div>
+      </div>
+
+      <!-- Page 4 -->
+      <div class="page" id="pg4" data-page="4">
+        <div class="layer">
+          <div class="c-off">
+            <h2>The Collection</h2>
+            <h1>New<br>Sea&shy;son</h1>
+            <p>Discover the art of contemporary fashion. Each piece tells a story woven from light, texture, and intention.</p>
+          </div>
+        </div>
+        <div class="pgnum" aria-hidden="true">04</div>
+      </div>
+
+      <!-- Page 6 -->
+      <div class="page" id="pg6" data-page="6">
+        <div class="layer" style="display:flex;align-items:center;justify-content:center">
+          <div style="text-align:center;color:var(--yellow)">
+            <div style="font-size:clamp(10px,1.5vw,13px);letter-spacing:5px;text-transform:uppercase;opacity:.55;margin-bottom:18px">Editorial</div>
+            <h2 style="font-size:clamp(28px,6vw,54px);font-weight:normal;line-height:.9;margin-bottom:20px;border-top:1px solid var(--yellow);border-bottom:1px solid var(--yellow);padding:clamp(10px,2vw,18px) clamp(12px,3vw,28px)">Autumn<br>Whispers</h2>
+            <p style="font-size:clamp(11px,1.8vw,14px);opacity:.55;letter-spacing:3px;text-transform:uppercase">Volume XII</p>
+          </div>
+        </div>
+        <div class="pgnum" aria-hidden="true">06</div>
+      </div>
+
+    </div><!-- /leftPanel -->
+
+    <!-- RIGHT PANEL -->
+    <div class="panel panel--right" id="rightPanel">
+
+      <!-- Page 1 – COVER (full-width: overflows to left 100%) -->
+      <div class="page" id="pg1" data-page="1"
+           style="width:200%;left:-100%;z-index:10" aria-label="Cover">
+        <div class="logo" aria-hidden="true">Fashion.</div>
+        <div class="hamburger" role="button" aria-label="Menu" tabindex="0">
+          <span class="ham-bar"></span><span class="ham-bar"></span><span class="ham-bar"></span>
+        </div>
+        <div class="layer" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+          <div style="color:var(--yellow);font-size:clamp(9px,1.2vw,13px);letter-spacing:5px;text-transform:uppercase;opacity:.65;margin-bottom:16px">Spring / Summer 2024</div>
+          <h1 style="color:var(--yellow);font-size:clamp(54px,12vw,140px);font-weight:normal;line-height:.85;letter-spacing:-3px">MODE</h1>
+          <div style="width:56px;height:1px;background:var(--yellow);margin:22px auto"></div>
+          <h2 style="color:var(--yellow);font-size:clamp(12px,2vw,18px);font-weight:normal;opacity:.65;letter-spacing:6px;text-transform:uppercase">Magazine</h2>
+        </div>
+        <div class="pgnum" aria-hidden="true">01</div>
+        <div class="ftr" aria-label="Social links">
+          <i class="fab fa-instagram" aria-label="Instagram"></i>
+          <i class="fab fa-twitter" aria-label="Twitter"></i>
+          <i class="fab fa-facebook" aria-label="Facebook"></i>
+        </div>
+      </div>
+
+      <!-- Page 3 -->
+      <div class="page" id="pg3" data-page="3" aria-label="Page 3">
+        <div class="layer">
+          <!-- Centre-card RIGHT half -->
+          <div class="c-ctr clip-r" style="top:50%">
+            <span class="logo">Fashion.</span>
+            <h6>Spring / Summer</h6>
+            <h4>New<br>Arrivals</h4>
+            <h6>2024 Collection</h6>
+            <h6>Mode Magazine</h6>
+          </div>
+          <div class="c-quo">
+            <h5>
+              <span class="q">&ldquo;</span>
+              <span>Fashion is</span>
+              <span>the armor</span>
+              <span>to survive</span>
+              <span>everyday life.</span>
+              <span class="nm">&#8212; William</span>
+              <span class="au">Reid</span>
+            </h5>
+          </div>
+          <div class="c-big" aria-hidden="true">Look</div>
+        </div>
+        <div class="pgnum" aria-hidden="true">03</div>
+      </div>
+
+      <!-- Page 5 -->
+      <div class="page" id="pg5" data-page="5" aria-label="Page 5">
+        <div class="layer">
+          <div class="c-cimg">
+            <img src="https://www.colorfusionstudio.com/wp-content/uploads/2015/07/cfs-models-003-683x1024.jpg"
+                 alt="Fashion editorial" style="filter:brightness(.86)">
+          </div>
+          <div style="position:absolute;right:clamp(14px,4vw,40px);top:50%;transform:translateY(-50%);text-align:right;color:var(--yellow)">
+            <div style="font-size:clamp(9px,1.2vw,12px);letter-spacing:4px;text-transform:uppercase;opacity:.6;margin-bottom:10px">The Look</div>
+            <h2 style="font-size:clamp(26px,5.5vw,52px);font-weight:normal;line-height:.9">Natural<br>Light</h2>
+            <div style="width:30px;height:1px;background:var(--yellow);margin:14px 0 14px auto"></div>
+            <div style="font-size:clamp(9px,1.2vw,12px);letter-spacing:3px;text-transform:uppercase;opacity:.55">Shoot 2024</div>
+          </div>
+        </div>
+        <div class="pgnum" aria-hidden="true">05</div>
+      </div>
+
+      <!-- Page 7 -->
+      <div class="page" id="pg7" data-page="7" aria-label="Page 7">
+        <div class="layer">
+          <div class="c-sect">
+            <div class="c-sec" style="top:clamp(70px,14%,100px);left:clamp(18px,5vw,50px);width:min(80%,200px)">
+              <h2>The Season</h2>
+              <p>Autumn whispers through the collection. Each piece a story of transformation and grace woven in silk and shadow.</p>
+            </div>
+            <div class="c-sec" style="top:clamp(210px,38%,274px);left:clamp(30px,8vw,80px);width:min(80%,300px)">
+              <h2>The Vision</h2>
+              <p>Where tradition meets the contemporary. Crafted for those who see fashion as a form of living art.</p>
+            </div>
+            <div class="c-sec" style="top:clamp(340px,58%,410px);left:clamp(20px,6vw,60px);width:min(80%,260px)">
+              <h2>The Details</h2>
+              <p>Every thread, every silhouette — meticulously considered for the modern woman who dares.</p>
+            </div>
+          </div>
+        </div>
+        <div class="pgnum" aria-hidden="true">07</div>
+        <div class="ftr" aria-label="Social links">
+          <i class="fab fa-instagram" aria-label="Instagram"></i>
+          <i class="fab fa-twitter" aria-label="Twitter"></i>
+          <i class="fab fa-facebook" aria-label="Facebook"></i>
+        </div>
+      </div>
+
+      <!-- Page 8 – BACK COVER (full-width) -->
+      <div class="page" id="pg8" data-page="8"
+           style="width:200%;left:-100%;z-index:10" aria-label="Back Cover">
+        <div class="logo" aria-hidden="true">Fashion.</div>
+        <div class="layer" style="display:flex;align-items:center;justify-content:flex-end;padding-right:clamp(24px,8vw,110px)">
+          <div style="text-align:right;color:var(--yellow)">
+            <div style="font-size:clamp(9px,1.2vw,12px);letter-spacing:5px;text-transform:uppercase;opacity:.55;margin-bottom:18px">Until Next Season</div>
+            <h2 style="font-size:clamp(36px,9vw,100px);font-weight:normal;line-height:.88;margin-bottom:24px">&Agrave;<br>Bien&shy;t&ocirc;t</h2>
+            <div style="width:40px;height:1px;background:var(--yellow);margin-left:auto;margin-bottom:20px"></div>
+            <div style="font-size:12px">
+              <i class="fab fa-instagram" aria-label="Instagram" style="margin:0 10px;cursor:pointer"></i>
+              <i class="fab fa-twitter" aria-label="Twitter" style="margin:0 10px;cursor:pointer"></i>
+              <i class="fab fa-facebook" aria-label="Facebook" style="margin:0 10px;cursor:pointer"></i>
+            </div>
+          </div>
+        </div>
+        <div class="pgnum" aria-hidden="true">08</div>
+      </div>
+
+    </div><!-- /rightPanel -->
+
+    <!-- GUTTER -->
+    <div class="book__gutter" aria-hidden="true"></div>
+
+    <!-- TURNER -->
+    <div class="turner" id="turner" aria-hidden="true">
+      <div class="turner__face turner__face--front" id="tFront">
+        <div class="turner__shade"></div>
+      </div>
+      <div class="turner__face turner__face--back" id="tBack">
+        <div class="turner__shade"></div>
+      </div>
+    </div>
+
+  </div><!-- /book -->
+
+  <!-- ── NAV ──────────────────────────────────────────────────────── -->
+  <nav class="nav" aria-label="Magazine navigation">
+    <button class="nav__btn nav__btn--prev" id="prevBtn" aria-label="Previous page" disabled>
+      <i class="fas fa-chevron-left" aria-hidden="true"></i>
+    </button>
+    <div class="nav__lbl" id="navLbl" aria-live="polite">Cover</div>
+    <button class="nav__btn nav__btn--next" id="nextBtn" aria-label="Next page">
+      <i class="fas fa-chevron-right" aria-hidden="true"></i>
+    </button>
+  </nav>
+</div><!-- /stage -->
+
+<script>
+'use strict';
+/* ─────────────────────────────────────────────────────────────────
+   PHYSICAL BOOK — STATE MACHINE
+   Sheets:
+     Cover  (pg1 full-width)
+     Sheet1 left=pg2  right=pg3
+     Sheet2 left=pg4  right=pg5
+     Sheet3 left=pg6  right=pg7
+     Back   (pg8 full-width)
+───────────────────────────────────────────────────────────────── */
+const SPREADS = [
+  { id:'cover',    label:'Cover',        left:null,  right:'pg1', full:true  },
+  { id:'spread-1', label:'Pages 2 \u2013 3', left:'pg2', right:'pg3', full:false },
+  { id:'spread-2', label:'Pages 4 \u2013 5', left:'pg4', right:'pg5', full:false },
+  { id:'spread-3', label:'Pages 6 \u2013 7', left:'pg6', right:'pg7', full:false },
+  { id:'back',     label:'Back Cover',   left:null,  right:'pg8', full:true  },
+];
+
+let cur   = 0;
+let busy  = false;
+const mob = () => window.innerWidth <= 700;
+const dur = () => {
+  const v = getComputedStyle(document.documentElement).getPropertyValue('--dur').trim();
+  return parseFloat(v) || 920;
+};
+
+const book     = document.getElementById('book');
+const lPanel   = document.getElementById('leftPanel');
+const rPanel   = document.getElementById('rightPanel');
+const turner   = document.getElementById('turner');
+const tFront   = document.getElementById('tFront');
+const tBack    = document.getElementById('tBack');
+const prevBtn  = document.getElementById('prevBtn');
+const nextBtn  = document.getElementById('nextBtn');
+const navLbl   = document.getElementById('navLbl');
+
+/* ── helpers ── */
+function showOnly(panel, id) {
+  panel.querySelectorAll('.page').forEach(p => p.classList.remove('show'));
+  if (id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('show');
+  }
+}
+
+function cloneBg(face, srcId) {
+  if (!srcId) { face.style.cssText = ''; return; }
+  const s = document.getElementById(srcId);
+  if (!s) return;
+  const cs = window.getComputedStyle(s);
+  face.style.background          = cs.background;
+  face.style.backgroundSize      = 'cover';
+  face.style.backgroundPosition  = cs.backgroundPosition;
+  face.style.backgroundColor     = cs.backgroundColor;
+}
+
+/* Snap to spread (no animation) */
+function snap(idx) {
+  const sp = SPREADS[idx];
+  lPanel.style.display = (sp.full || mob()) ? 'none' : '';
+  showOnly(lPanel, sp.left);
+  showOnly(rPanel, sp.right);
+  prevBtn.disabled = (idx === 0);
+  nextBtn.disabled = (idx === SPREADS.length - 1);
+  navLbl.textContent = sp.label;
+}
+
+/* ── NEXT ── */
+function goNext() {
+  if (busy || cur >= SPREADS.length - 1) return;
+  busy = true;
+
+  const from = SPREADS[cur];
+  const to   = SPREADS[cur + 1];
+  const d    = dur();
+
+  /* Turner sits on the RIGHT; front=current right page, back=next left page */
+  cloneBg(tFront, from.right);
+  cloneBg(tBack,  to.left || to.right);
+
+  turner.style.transition    = 'none';
+  turner.style.left          = mob() ? '0' : '50%';
+  turner.style.width         = mob() ? '100%' : '50%';
+  turner.style.transformOrigin = 'left center';
+  turner.style.transform     = 'rotateY(0deg)';
+  turner.classList.add('on');
+
+  /* Pre-load next left page (turner covers it) */
+  lPanel.style.display = (to.full || mob()) ? 'none' : '';
+  showOnly(lPanel, to.left);
+
+  /* Trigger 3-D flip */
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    turner.style.transition = 'transform ' + d + 'ms var(--ease)';
+    turner.style.transform  = 'rotateY(-180deg)';
+  }));
+
+  /* At midpoint swap the right page under the turner */
+  setTimeout(() => showOnly(rPanel, to.right), d / 2);
+
+  /* Cleanup */
+  setTimeout(() => {
+    cur++;
+    turner.classList.remove('on');
+    turner.style.transition = 'none';
+    turner.style.transform  = 'rotateY(0deg)';
+    snap(cur);
+    busy = false;
+  }, d + 40);
+}
+
+/* ── PREV ── */
+function goPrev() {
+  if (busy || cur <= 0) return;
+  busy = true;
+
+  const from = SPREADS[cur];
+  const to   = SPREADS[cur - 1];
+  const d    = dur();
+
+  /* Turner sits on the LEFT, already at -180deg;
+     front=prev right page (will swing back to right),
+     back=current left page (peeling away from left)  */
+  cloneBg(tFront, to.right);
+  cloneBg(tBack,  from.left || from.right);
+
+  turner.style.transition    = 'none';
+  turner.style.left          = '0';
+  turner.style.width         = mob() ? '100%' : '50%';
+  turner.style.transformOrigin = 'right center';
+  turner.style.transform     = 'rotateY(-180deg)';
+  turner.classList.add('on');
+
+  /* Pre-load the right page we're revealing */
+  showOnly(rPanel, to.right);
+
+  /* Trigger: unflip back to 0 */
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    turner.style.transition = 'transform ' + d + 'ms var(--ease)';
+    turner.style.transform  = 'rotateY(0deg)';
+  }));
+
+  /* Swap left page at midpoint */
+  setTimeout(() => {
+    lPanel.style.display = (to.full || mob()) ? 'none' : '';
+    showOnly(lPanel, to.left);
+  }, d / 2);
+
+  /* Cleanup */
+  setTimeout(() => {
+    cur--;
+    turner.classList.remove('on');
+    turner.style.transition = 'none';
+    turner.style.transform  = 'rotateY(0deg)';
+    snap(cur);
+    busy = false;
+  }, d + 40);
+}
+
+/* ── EVENTS ── */
+prevBtn.addEventListener('click', goPrev);
+nextBtn.addEventListener('click', goNext);
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goNext();
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goPrev();
+});
+
+let _tx = 0, _ty = 0;
+book.addEventListener('touchstart', e => {
+  _tx = e.changedTouches[0].screenX;
+  _ty = e.changedTouches[0].screenY;
+}, { passive:true });
+book.addEventListener('touchend', e => {
+  const dx = _tx - e.changedTouches[0].screenX;
+  const dy = Math.abs(_ty - e.changedTouches[0].screenY);
+  if (Math.abs(dx) > 48 && dy < 80) dx > 0 ? goNext() : goPrev();
+}, { passive:true });
+
+/* Click left/right half of book (desktop) */
+book.addEventListener('click', e => {
+  if (busy) return;
+  const mid = book.getBoundingClientRect().left + book.offsetWidth / 2;
+  e.clientX > mid ? goNext() : goPrev();
+});
+
+let _rt;
+window.addEventListener('resize', () => {
+  clearTimeout(_rt);
+  _rt = setTimeout(() => snap(cur), 120);
+});
+
+/* ── INIT ── */
+snap(0);
+</script>
+</body>
+</html>
