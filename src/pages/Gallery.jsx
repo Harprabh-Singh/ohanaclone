@@ -1,64 +1,74 @@
-import { useMemo, useState } from 'react';
-import Lightbox from '../components/Lightbox';
-import SectionReveal from '../components/SectionReveal';
+import { useState } from 'react';
 import { galleryImages } from '../data/galleryImages';
+import Lightbox from '../components/Lightbox';
+import './Gallery.css';
 
-const filters = ['All', 'Food', 'Interior', 'Terrace'];
+const descriptions = {
+  Interior: 'Step inside our warm, carefully designed space — where every corner tells a story of comfort and character.',
+  Terrace: 'Dine under the open sky on our lush terrace, where the breeze meets the aroma of fresh cuisine.',
+  Food: 'From garden-fresh salads to indulgent mains — every plate crafted with passion and premium ingredients.',
+};
 
 const Gallery = () => {
-  const [active, setActive] = useState('All');
   const [lightboxIndex, setLightboxIndex] = useState(null);
 
-  const images = useMemo(() => {
-    return active === 'All' ? galleryImages : galleryImages.filter((image) => image.category === active);
-  }, [active]);
-
   return (
-    <main className="pt-24">
-      <section className="bg-teal-dark py-20 text-white">
-        <div className="mx-auto max-w-7xl px-5 text-center md:px-8">
-          <p className="section-heading text-4xl font-black md:text-5xl">A Table With A View.</p>
-          <p className="mt-4 mx-auto max-w-2xl text-base leading-8 text-white/70 md:text-lg">Real food, real space, real evenings.</p>
-        </div>
+    <main className="gallery-page">
+      {/* Hero Header */}
+      <section className="pt-28 pb-16 text-center px-5">
+        <p className="section-heading text-5xl md:text-7xl font-black text-[#eebb4d] tracking-wide uppercase mb-4">
+          Ohana Gallery
+        </p>
+        <p className="text-white/50 uppercase tracking-[0.3em] text-xs md:text-sm">
+          Scroll to explore our story
+        </p>
+        <div className="mx-auto mt-6 h-px w-24 bg-gradient-to-r from-transparent via-[#eebb4d66] to-transparent" />
       </section>
 
-      <SectionReveal>
-        <section className="bg-cream py-16">
-          <div className="mx-auto max-w-7xl px-5 md:px-8">
-            <div className="mb-8 flex flex-wrap gap-3">
-              {filters.map((filter) => (
-                <button
-                  key={filter}
-                  type="button"
-                  onClick={() => setActive(filter)}
-                  className={`rounded-full px-5 py-2 text-sm font-semibold transition ${active === filter ? 'bg-magenta text-white' : 'border border-slate-300 bg-white text-teal-dark'}`}
-                >
-                  {filter}
-                </button>
-              ))}
+      {/* Timeline */}
+      <div className="main-timeline">
+        {galleryImages.map((img, index) => {
+          const isLeft = index % 2 === 0;
+          return (
+            <div
+              key={index}
+              className={`tl-item ${isLeft ? 'tl-left' : 'tl-right'}`}
+            >
+              <div
+                className="tl-card cursor-pointer"
+                onClick={() => setLightboxIndex(index)}
+              >
+                <div className="tl-img-wrap">
+                  <img
+                    src={img.src}
+                    alt={img.label}
+                    className="tl-img"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="tl-card-body">
+                  <p className="tl-category">{img.category}</p>
+                  <p className="tl-label">{img.label}</p>
+                  <p className="tl-description">
+                    {descriptions[img.category] || 'A glimpse of the Ohana experience.'}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="columns-1 gap-4 md:columns-2 xl:columns-4">
-              {images.map((image, index) => (
-                <button
-                  key={image.src + index}
-                  type="button"
-                  onClick={() => setLightboxIndex(index)}
-                  className="mb-4 block w-full overflow-hidden rounded-[18px] bg-slate-100 text-left shadow-[0_24px_50px_rgba(0,0,0,0.12)] transition hover:-translate-y-1 hover:shadow-[0_30px_70px_rgba(0,0,0,0.2)]"
-                >
-                  <img src={image.src} alt={image.label} className="w-full object-cover transition duration-500 hover:scale-105" />
-                  <div className="p-4 text-left">
-                    <p className="text-sm font-semibold uppercase tracking-[0.16em] text-teal-dark">{image.category}</p>
-                    <p className="mt-2 text-lg font-black text-teal-dark">{image.label}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-      </SectionReveal>
+          );
+        })}
+      </div>
 
+      {/* Bottom rule */}
+      <div className="mx-auto mt-16 h-px max-w-md bg-gradient-to-r from-transparent via-[#eebb4d55] to-transparent" />
+
+      {/* Lightbox */}
       {lightboxIndex !== null && (
-        <Lightbox images={images} startIndex={lightboxIndex} onClose={() => setLightboxIndex(null)} />
+        <Lightbox
+          images={galleryImages}
+          startIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+        />
       )}
     </main>
   );

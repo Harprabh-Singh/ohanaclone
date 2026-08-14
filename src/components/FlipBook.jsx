@@ -14,17 +14,23 @@ import { useState, useRef, useEffect } from 'react';
      → React transition fires because the SAME element changes its transform value
 
    Page stack (index 0 = top of stack):
-     0: front=Cover        back=menu3  (Breakfast & more)
-     1: front=menu1        back=menu2  (Food menu spread)
-     2: front=menu4        back=menu5  (Beverages spread)
-     3: front=menu6        back=dark   (back cover)
+     0: front=Cover        back=menu3
+     1: front=menu1        back=menu2
+     2: front=menu4        back=menu5
+     3: front=menu6        back=menu7
+     4: front=menu8        back=menu9
+     5: front=menu10       back=menu11
+     6: front=menu12       back=menu13
 ───────────────────────────────────────────────────────────────── */
 
 const PAGES = [
-  { front: '/menu-pages/cover.jpg',  back: '/menu-pages/menu3.png' },
-  { front: '/menu-pages/menu1.png',  back: '/menu-pages/menu2.png' },
-  { front: '/menu-pages/menu4.png',  back: '/menu-pages/menu5.png' },
-  { front: '/menu-pages/menu6.png',  back: 'dark'                  },
+  { front: '/menu-pages/cover.jpg',  back: '/menu-pages/menu3.png'  },
+  { front: '/menu-pages/menu1.png',  back: '/menu-pages/menu2.png'  },
+  { front: '/menu-pages/menu4.png',  back: '/menu-pages/menu5.png'  },
+  { front: '/menu-pages/menu6.png',  back: '/menu-pages/menu7.png'  },
+  { front: '/menu-pages/menu8.png',  back: '/menu-pages/menu9.png'  },
+  { front: '/menu-pages/menu10.png', back: '/menu-pages/menu11.png' },
+  { front: '/menu-pages/menu12.png', back: '/menu-pages/menu13.png' },
 ];
 const N = PAGES.length; // 4 pages → can be flipped 0-4 times
 
@@ -342,7 +348,7 @@ export default function FlipBook() {
                     position: 'absolute', inset: 0,
                     backfaceVisibility: 'hidden',
                     WebkitBackfaceVisibility: 'hidden',
-                    transform: 'rotateY(0deg) translateZ(1px)',
+                    transform: 'rotateY(0deg)',
                   }}>
                     <PageFace content={page.front} side="right" />
                     <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '24px', background: 'linear-gradient(to left, rgba(0,0,0,0.18), transparent)', pointerEvents: 'none' }} />
@@ -353,7 +359,7 @@ export default function FlipBook() {
                     position: 'absolute', inset: 0,
                     backfaceVisibility: 'hidden',
                     WebkitBackfaceVisibility: 'hidden',
-                    transform: 'rotateY(180deg) translateZ(1px)',
+                    transform: 'rotateY(180deg)',
                   }}>
                     <PageFace content={page.back} side="left" />
                     <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '24px', background: 'linear-gradient(to right, rgba(0,0,0,0.18), transparent)', pointerEvents: 'none' }} />
