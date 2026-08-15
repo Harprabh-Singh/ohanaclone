@@ -133,6 +133,18 @@ function PlateCard({ item, index }) {
 export default function Menu() {
   const counterRef  = useRef(null);
   const heroRef     = useRef(null);
+  const flipBookRef = useRef(null);
+
+  const categoryToFlipMap = {
+    'breakfast-brunch': 1,
+    'starters': 2,
+    'street-bites': 3,
+    'mains-pasta': 4,
+    'pizza': 4,
+    'steaks-grill': 5,
+    'dessert': 6,
+    'beverages': 7,
+  };
 
   /* Set page bg to dark so no white flash */
 
@@ -347,13 +359,180 @@ export default function Menu() {
 
       {/* ══════════════════════════════════════════════
           MENU FLIP BOOK
-          Replaces the old GSAP horizontal scroll gallery.
-          Shows all 6 real printed Ohana menu pages as a
-          3D page-flip book experience.
       ══════════════════════════════════════════════ */}
-      <div id="menu-gallery">
-        <FlipBook />
+      {/* ══════════════════════════════════════════════
+          CATEGORY NAV BAR — sticky pill buttons
+      ══════════════════════════════════════════════ */}
+      <div id="menu-gallery" style={{ position: 'relative' }}>
+        <div style={{
+          position: 'sticky',
+          top: '0',
+          zIndex: 50,
+          padding: 'clamp(14px, 2vh, 20px) clamp(16px, 4vw, 48px)',
+          background: 'linear-gradient(to bottom, rgba(10,8,0,0.97) 0%, rgba(10,8,0,0.85) 100%)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderBottom: '1px solid rgba(182,145,46,0.15)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '12px',
+        }}>
+          <span style={{
+            fontSize: '8px',
+            fontWeight: '800',
+            letterSpacing: '0.45em',
+            textTransform: 'uppercase',
+            color: 'rgba(182,145,46,0.7)',
+          }}>
+            Browse by Category
+          </span>
+          <div style={{
+            display: 'flex',
+            gap: 'clamp(10px, 2vw, 20px)',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            width: '100%',
+          }}>
+            {[
+              {
+                name: 'Morning & Bites',
+                icon: '🥐',
+                slugs: ['breakfast-brunch', 'starters', 'street-bites'],
+                color: '#E8742A'
+              },
+              {
+                name: 'Main Courses',
+                icon: '🍽️',
+                slugs: ['mains-pasta', 'pizza', 'steaks-grill'],
+                color: '#B6912E'
+              },
+              {
+                name: 'Sweets & Drinks',
+                icon: '🥂',
+                slugs: ['dessert', 'beverages'],
+                color: '#C42D78'
+              }
+            ].map((chapter) => {
+              return (
+                <div
+                  key={chapter.name}
+                  className="chapter-dropdown"
+                  style={{
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: `1px solid rgba(255,255,255,0.08)`,
+                    borderRadius: '100px',
+                    padding: '4px',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    overflow: 'hidden',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                    e.currentTarget.style.borderColor = `rgba(${chapter.color === '#E8742A' ? '232,116,42' : chapter.color === '#B6912E' ? '182,145,46' : '196,45,120'}, 0.4)`;
+                    const menu = e.currentTarget.querySelector('.chapter-menu');
+                    if (menu) {
+                      menu.style.maxWidth = '600px';
+                      menu.style.opacity = '1';
+                      menu.style.marginLeft = '8px';
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                    const menu = e.currentTarget.querySelector('.chapter-menu');
+                    if (menu) {
+                      menu.style.maxWidth = '0px';
+                      menu.style.opacity = '0';
+                      menu.style.marginLeft = '0px';
+                    }
+                  }}
+                >
+                  {/* Chapter Label */}
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: '8px',
+                    padding: '6px 16px',
+                    color: '#FFF',
+                    fontSize: 'clamp(10px, 1.2vw, 12px)',
+                    fontWeight: '800',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    whiteSpace: 'nowrap',
+                    cursor: 'default',
+                  }}>
+                    <span style={{ fontSize: '16px' }}>{chapter.icon}</span>
+                    {chapter.name}
+                  </div>
+
+                  {/* Expanding horizontal menu */}
+                  <div
+                    className="chapter-menu"
+                    style={{
+                      display: 'flex',
+                      gap: '6px',
+                      maxWidth: '0px',
+                      opacity: 0,
+                      marginLeft: '0px',
+                      transition: 'all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)',
+                      overflow: 'hidden',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {chapter.slugs.map(slug => {
+                      const cat = categoryData.find(c => c.slug === slug);
+                      if (!cat) return null;
+                      return (
+                        <button
+                          key={slug}
+                          onClick={() => {
+                            if (flipBookRef.current) {
+                              flipBookRef.current.goToPage(categoryToFlipMap[slug] || 0);
+                            }
+                          }}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '6px 14px',
+                            borderRadius: '100px',
+                            background: 'rgba(0,0,0,0.4)',
+                            border: `1px solid rgba(255,255,255,0.1)`,
+                            color: 'rgba(255,255,255,0.7)',
+                            fontSize: '9px',
+                            fontWeight: '700',
+                            letterSpacing: '0.1em',
+                            textTransform: 'uppercase',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                          }}
+                          onMouseEnter={e => {
+                            e.currentTarget.style.background = cat.accent;
+                            e.currentTarget.style.color = '#000';
+                            e.currentTarget.style.borderColor = cat.accent;
+                          }}
+                          onMouseLeave={e => {
+                            e.currentTarget.style.background = 'rgba(0,0,0,0.4)';
+                            e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
+                            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+                          }}
+                        >
+                          <span style={{ fontSize: '12px' }}>{cat.icon}</span>
+                          {cat.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <FlipBook ref={flipBookRef} />
       </div>
+
 
       {/* ══════════════════════════════════════════════
           BOTTOM CTA

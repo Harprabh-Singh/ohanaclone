@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 
 /* ─────────────────────────────────────────────────────────────────
    OHANA MENU FLIP BOOK  v4  — faithful to the reference SCSS
@@ -150,11 +150,54 @@ function NavBtn({ onClick, disabled, direction }) {
 /* ─────────────────────────────────────────────────────────────────
    MAIN
 ───────────────────────────────────────────────────────────────── */
-export default function FlipBook() {
+const FlipBook = forwardRef((props, ref) => {
   const [flipped, setFlipped] = useState(0);
   const [animIdx, setAnimIdx] = useState(-1);
   const busy = useRef(false);
-  const DURATION = 900;
+  const DURATION = 700; // slightly faster per-page for rapid sequential flips
+
+  // Mirror flipped into a ref so async callbacks always see the latest value
+  const flippedRef = useRef(0);
+  useEffect(() => { flippedRef.current = flipped; }, [flipped]);
+
+  useImperativeHandle(ref, () => ({
+    goToPage: (targetIndex) => {
+      if (busy.current) return;
+      const clampedTarget = Math.max(0, Math.min(targetIndex, N));
+      const current = flippedRef.current;
+      if (clampedTarget === current) return;
+
+      const direction = clampedTarget > current ? 1 : -1;
+      const numSteps = Math.abs(clampedTarget - current);
+      let step = 0;
+
+      const doOneFlip = () => {
+        if (step >= numSteps) return;
+        busy.current = true;
+
+        // pageToAnimate: when going forward, animate current page; backward, animate current-1
+        const pageToAnimate = direction > 0 ? flippedRef.current : flippedRef.current - 1;
+        setAnimIdx(pageToAnimate);
+        const nextFlipped = flippedRef.current + direction;
+        flippedRef.current = nextFlipped;
+        setFlipped(nextFlipped);
+
+        step++;
+
+        setTimeout(() => {
+          setAnimIdx(-1);
+          busy.current = false;
+          if (step < numSteps) {
+            // Brief gap between flips so each turn is visible
+            setTimeout(doOneFlip, 80);
+          }
+        }, DURATION + 80);
+      };
+
+      doOneFlip();
+    },
+  }));
+
 
   // Mobile detection
   const [isMobile, setIsMobile] = useState(
@@ -218,6 +261,7 @@ export default function FlipBook() {
   const onTouchStart = (e) => {
     if (e.touches.length === 1) touchStartX.current = e.touches[0].clientX;
   };
+
 
   const onTouchEnd = (e) => {
     if (touchStartX.current === null) return;
@@ -410,6 +454,8 @@ export default function FlipBook() {
       </div>
     </div>
   );
-}
+});
+
+export default FlipBook;
 
 
