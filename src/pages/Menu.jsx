@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { categoryData } from '../data/menuData';
@@ -242,6 +242,43 @@ export default function Menu() {
     }, 180);
   };
   useEffect(() => () => { if (pageTimer.current) clearTimeout(pageTimer.current); }, []);
+
+  /* ── Deep-link: /menu?flip=N&side=left|right ──
+     Land the flipbook on a specific spread (used by the Home hero's
+     category cards). Shareable/refresh-safe; the params are consumed and
+     stripped from the URL so later manual flips aren't overridden. */
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const flipParam = searchParams.get('flip');
+    if (flipParam === null) return;
+    const flip = parseInt(flipParam, 10);
+    const side = searchParams.get('side') === 'right' ? 'right' : 'left';
+    if (!Number.isInteger(flip) || flip < 1 || flip > 7) {
+      setSearchParams({}, { replace: true });
+      return;
+    }
+
+    let cancelled = false;
+    let attempts = 0;
+    const tryJump = () => {
+      if (cancelled) return;
+      if (flipBookRef.current && flipBookRef.current.goToPage) {
+        const gallery = document.getElementById('menu-gallery');
+        if (gallery) {
+          const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          gallery.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+        }
+        flipBookRef.current.goToPage(flip, side);
+        setSearchParams({}, { replace: true }); // consume the deep link
+        return;
+      }
+      // Book not mounted yet (page transitions / hero entrance) — retry ~2s
+      if (++attempts < 20) setTimeout(tryJump, 100);
+      else setSearchParams({}, { replace: true });
+    };
+    const t = setTimeout(tryJump, 300);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [searchParams, setSearchParams]);
 
   const categoryToFlipMap = {
     'breakfast-brunch': 1,

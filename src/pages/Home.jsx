@@ -350,6 +350,9 @@ const TestimonialsSection = () => {
   const row1 = [...REVIEWS, ...REVIEWS];
   const row2 = [...REVIEWS.slice(4), ...REVIEWS.slice(0, 4), ...REVIEWS.slice(4), ...REVIEWS.slice(0, 4)];
 
+  const row1Ref = useRef(null);
+  const row2Ref = useRef(null);
+
   useEffect(() => {
     if (!sectionRef.current) return;
     const ctx = gsap.context(() => {
@@ -423,7 +426,32 @@ const TestimonialsSection = () => {
         }} />
 
         {/* Row 1 — scrolls left */}
-        <div style={{ overflow: 'hidden', marginBottom: '20px' }}>
+        <div 
+          ref={row1Ref}
+          className="reviews-scroll-container"
+          style={{ marginBottom: '20px' }}
+          onMouseDown={(e) => {
+            const el = row1Ref.current;
+            if (!el) return;
+            el.isDown = true;
+            el.startX = e.pageX - el.offsetLeft;
+            el.scrollLeftVal = el.scrollLeft;
+          }}
+          onMouseLeave={() => {
+            if (row1Ref.current) row1Ref.current.isDown = false;
+          }}
+          onMouseUp={() => {
+            if (row1Ref.current) row1Ref.current.isDown = false;
+          }}
+          onMouseMove={(e) => {
+            const el = row1Ref.current;
+            if (!el || !el.isDown) return;
+            e.preventDefault();
+            const x = e.pageX - el.offsetLeft;
+            const walk = (x - el.startX) * 1.5;
+            el.scrollLeft = el.scrollLeftVal - walk;
+          }}
+        >
           <div className="tr-row tr-left" style={{
             display: 'flex', gap: '20px', width: 'max-content',
             animation: 'tr-scroll-left 40s linear infinite',
@@ -433,7 +461,31 @@ const TestimonialsSection = () => {
         </div>
 
         {/* Row 2 — scrolls right */}
-        <div style={{ overflow: 'hidden' }}>
+        <div 
+          ref={row2Ref}
+          className="reviews-scroll-container"
+          onMouseDown={(e) => {
+            const el = row2Ref.current;
+            if (!el) return;
+            el.isDown = true;
+            el.startX = e.pageX - el.offsetLeft;
+            el.scrollLeftVal = el.scrollLeft;
+          }}
+          onMouseLeave={() => {
+            if (row2Ref.current) row2Ref.current.isDown = false;
+          }}
+          onMouseUp={() => {
+            if (row2Ref.current) row2Ref.current.isDown = false;
+          }}
+          onMouseMove={(e) => {
+            const el = row2Ref.current;
+            if (!el || !el.isDown) return;
+            e.preventDefault();
+            const x = e.pageX - el.offsetLeft;
+            const walk = (x - el.startX) * 1.5;
+            el.scrollLeft = el.scrollLeftVal - walk;
+          }}
+        >
           <div className="tr-row tr-right" style={{
             display: 'flex', gap: '20px', width: 'max-content',
             animation: 'tr-scroll-right 48s linear infinite',
@@ -448,6 +500,21 @@ const TestimonialsSection = () => {
       <style>{`
         .ts-section { padding: 120px 0; }
 
+        .reviews-scroll-container {
+          overflow-x: auto;
+          overflow-y: hidden;
+          scrollbar-width: none; /* Firefox */
+          -ms-overflow-style: none;  /* IE and Edge */
+          cursor: grab;
+          user-select: none;
+        }
+        .reviews-scroll-container::-webkit-scrollbar {
+          display: none; /* Chrome, Safari, Opera */
+        }
+        .reviews-scroll-container:active {
+          cursor: grabbing;
+        }
+
         @keyframes tr-scroll-left {
           0%   { transform: translateX(0); }
           100% { transform: translateX(-50%); }
@@ -456,7 +523,7 @@ const TestimonialsSection = () => {
           0%   { transform: translateX(-50%); }
           100% { transform: translateX(0); }
         }
-        .tr-row:hover { animation-play-state: paused !important; }
+        .reviews-scroll-container:hover .tr-row { animation-play-state: paused !important; }
 
         @media (max-width: 700px) {
           .ts-section { padding: 60px 0 32px 0; }

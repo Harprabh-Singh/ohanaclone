@@ -60,12 +60,13 @@ import cupImg from './ui/cup.png';
 import dishesImg from './ui/dishes.png';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { ArrowRight, MapPin, ChefHat, Users, Heart, Star } from 'lucide-react';
 import useMouseParallax from './useMouseParallax';
 import SplitText from './SplitText';
 import './Hero.css';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 /*
  * CATEGORIES — single shared source for BOTH the desktop/scroll menu-
@@ -90,14 +91,21 @@ gsap.registerPlugin(ScrollTrigger);
  * overpromise a specific dish for those two until real art exists.
  */
 const CATEGORIES = [
-  { id: 'coffee',  name: 'COFFEE',  emoji: '☕', desc: 'Single origin & blends' },
-  { id: 'burgers', name: 'BURGERS', emoji: '🍔', desc: 'Juicy, flame-grilled' },
-  { id: 'pizzas',  name: 'PIZZAS',  emoji: '🍕', desc: 'Wood-fired perfection' },
-  { id: 'pasta',   name: 'PASTA',   emoji: '🍝', desc: 'Italian classics done right' },
-  { id: 'cakes',   name: 'CAKES',   emoji: '🎂', desc: 'Handcrafted indulgence' },
-  { id: 'drinks',  name: 'DRINKS',  emoji: '🥤', desc: 'Refreshing & revitalizing' },
-  { id: 'snacks',  name: 'SNACKS',  emoji: '🍟', desc: 'Bites to keep you going' },
+  { id: 'coffee',  name: 'COFFEE',  emoji: '☕', desc: 'Single origin & blends',      book: { flip: 7, side: 'left'  } },
+  { id: 'burgers', name: 'BURGERS', emoji: '🍔', desc: 'Juicy, flame-grilled',        book: { flip: 3, side: 'right' } },
+  { id: 'pizzas',  name: 'PIZZAS',  emoji: '🍕', desc: 'Wood-fired perfection',       book: { flip: 4, side: 'right' } },
+  { id: 'pasta',   name: 'PASTA',   emoji: '🍝', desc: 'Italian classics done right', book: { flip: 4, side: 'left'  } },
+  { id: 'cakes',   name: 'CAKES',   emoji: '🎂', desc: 'Handcrafted indulgence',      book: { flip: 5, side: 'left'  } },
+  { id: 'drinks',  name: 'DRINKS',  emoji: '🥤', desc: 'Refreshing & revitalizing',   book: { flip: 6, side: 'left'  } },
+  { id: 'snacks',  name: 'SNACKS',  emoji: '🍟', desc: 'Bites to keep you going',     book: { flip: 2, side: 'right' } },
 ];
+
+/* Deep-link to the /menu flipbook: /menu?flip=N&side=left|right lands the
+   book on the matching spread. `book` targets mirror The Index ledger on
+   /menu exactly (coffee→Hot Brews, drinks→Mojito & Coolers, burgers→Hot
+   Dogs, pizzas→Pizza, pasta→Pasta & Spaghetti, cakes→Dessert, snacks→
+   Appetizers), so both hero surfaces share one contract. */
+const menuBookUrl = (cat) => `/menu?flip=${cat.book.flip}&side=${cat.book.side}`;
 
 // ── Scroll timing constants ────────────────────────────────
 const TEXT_FADE_END = 0.32;
@@ -167,6 +175,11 @@ export default function Hero() {
       hasPickedNonCoffeeRef.current = true;
     }
   }, []);
+
+  // Ref to prevent multiple snap animations firing simultaneously
+  const isSnappingRef = useRef(false);
+  // Ref to track previous scroll progress for threshold detection
+  const prevProgressRef = useRef(0);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -253,7 +266,35 @@ export default function Hero() {
 
     // ── Scroll-driven animation ────────────────────────────
     const isMobile = window.innerWidth <= 700;
-    ScrollTrigger.create({
+
+    // Helper: smoothly animate window scroll to a target Y position.
+    // While animating, native wheel/touch events are suppressed so the
+    // user's momentum cannot compete with the programmatic scroll.
+    const smoothScrollTo = (targetY, duration = 2.4) => {
+      if (isSnappingRef.current) return;
+      isSnappingRef.current = true;
+
+      // Block native scroll so trackpad inertia / mouse-wheel can't fight us
+      const preventScroll = (e) => { e.preventDefault(); };
+      document.addEventListener('wheel',     preventScroll, { passive: false });
+      document.addEventListener('touchmove', preventScroll, { passive: false });
+
+      gsap.to(window, {
+        scrollTo: { y: targetY, autoKill: false },
+        duration,
+        ease: 'power1.inOut',
+        onComplete: () => {
+          document.removeEventListener('wheel',     preventScroll);
+          document.removeEventListener('touchmove', preventScroll);
+          // Brief grace period before allowing another snap
+          setTimeout(() => { isSnappingRef.current = false; }, 400);
+        },
+      });
+    };
+
+    // We need the ScrollTrigger instance to compute target scroll positions
+    let st;
+    st = ScrollTrigger.create({
       trigger: root,
       start: 'top top',
       end: () => window.innerWidth > 700 ? '+=400%' : '+=160%',
@@ -263,7 +304,27 @@ export default function Hero() {
       anticipatePin: 1,           // prevents a flash/jump when the pin fires
       onUpdate: (self) => {
         const p = self.progress;
+        const prevP = prevProgressRef.current;
+        prevProgressRef.current = p;
         scrollProgress.current = p;
+
+        // ── Auto-snap: forbidden zone enforcement ────────
+        // The user must NEVER rest between 5% and 95%.
+        // Any time ScrollTrigger reports progress in that range and we're
+        // not already snapping, immediately snap to the correct end.
+        if (!isSnappingRef.current && p > 0.05 && p < 0.95) {
+          const scrollStart = self.start;
+          const scrollEnd   = self.end;
+          const totalRange  = scrollEnd - scrollStart;
+
+          if (self.direction === 1) {
+            // Scrolling DOWN — snap to 95% (menu panel)
+            smoothScrollTo(scrollStart + totalRange * 0.95);
+          } else {
+            // Scrolling UP — snap back to absolute top (0%)
+            smoothScrollTo(scrollStart);
+          }
+        }
 
         // ── Non-coffee reset on scroll-back-to-top ────────
         // If the user scrolled back up past the reset threshold AND
@@ -474,7 +535,7 @@ export default function Hero() {
 
           <div className="oh4-mobile-menu-grid">
             {CATEGORIES.map((cat) => (
-              <Link to={`/menu#${cat.id}`} key={cat.id} className={`oh4-mobile-cat-card ${cat.id === 'snacks' ? 'full-width' : ''}`} style={{ textDecoration: 'none' }}>
+              <Link to={menuBookUrl(cat)} key={cat.id} className={`oh4-mobile-cat-card ${cat.id === 'snacks' ? 'full-width' : ''}`} style={{ textDecoration: 'none' }}>
                 <div className="oh4-mobile-cat-icon-wrap">
                   {CatIcons[cat.id] || <span style={{ fontSize: '20px' }}>{cat.emoji}</span>}
                 </div>
@@ -613,11 +674,12 @@ export default function Hero() {
           <div className="oh4-dmp-grid">
             {CATEGORIES.map((cat) => (
               <Link
-                to={`/menu#${cat.id}`}
+                to={menuBookUrl(cat)}
                 key={cat.id}
                 className={`oh4-dmp-card${cat.id === 'snacks' ? ' full-width' : ''}${activeModel === cat.id ? ' active' : ''}`}
                 style={{ textDecoration: 'none' }}
-                onClick={() => handleCatClick(cat.id)}
+                onMouseEnter={() => handleCatClick(cat.id)}
+                onFocus={() => handleCatClick(cat.id)}
               >
                 <div className="oh4-dmp-icon-wrap">
                   {CatIcons[cat.id] || <span style={{ fontSize: '22px' }}>{cat.emoji}</span>}
