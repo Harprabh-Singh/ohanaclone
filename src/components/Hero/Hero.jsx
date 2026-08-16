@@ -196,6 +196,9 @@ export default function Hero() {
   const mTrackRef = useRef(null);
   const mGhostRef = useRef(null);
   const mDrag = useRef({ down: false, startX: 0, dx: 0, moved: false });
+  // Timestamp of the last real drag's end — click suppression window
+  // covers the pointercancel → synthetic-click race on touch devices.
+  const mLastDragEndRef = useRef(0);
 
   // Peek-carousel geometry: 76% slides with a 12% side inset so the
   // neighboring dishes peek in from the edges (dimmed + scaled down).
@@ -246,6 +249,9 @@ export default function Hero() {
   const onStageUp = () => {
     if (!mDrag.current.down) return;
     mDrag.current.down = false;
+    if (mDrag.current.moved) {
+      mLastDragEndRef.current = Date.now();
+    }
     const w = mStageRef.current?.clientWidth ?? 1;
     const dx = mDrag.current.dx;
     let next = mIdx;
@@ -255,9 +261,12 @@ export default function Hero() {
     // Clear the moved flag AFTER the click event has had a chance to fire
     setTimeout(() => { mDrag.current.moved = false; }, 60);
   };
-  // Suppress Link navigation when the gesture was a drag, not a tap
+  // Suppress Link navigation when the gesture was a drag, not a tap.
+  // The timestamp window catches the case where the browser fired
+  // pointercancel mid-swipe (gesture handoff) and the moved flag
+  // never got set before the synthetic click arrived.
   const onStageClickCapture = (e) => {
-    if (mDrag.current.moved) {
+    if (mDrag.current.moved || Date.now() - mLastDragEndRef.current < 350) {
       e.preventDefault();
       e.stopPropagation();
     }
@@ -771,6 +780,7 @@ export default function Hero() {
             onPointerDown={onStageDown}
             onPointerMove={onStageMove}
             onPointerUp={onStageUp}
+            onPointerCancel={onStageUp}
             onPointerLeave={onStageUp}
             onClickCapture={onStageClickCapture}
           >
