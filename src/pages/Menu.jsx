@@ -396,22 +396,55 @@ export default function Menu() {
           }}>
             {[
               {
-                name: 'Morning & Bites',
-                icon: '🥐',
-                slugs: ['breakfast-brunch', 'starters', 'street-bites'],
-                color: '#E8742A'
+                name: '01 — BREAKFAST & BRUNCH',
+                icon: '🍳',
+                color: '#E8742A',
+                items: [
+                  { name: 'All Day Breakfast Combos', flip: 1, side: 'right' },
+                  { name: 'Sandwiches',               flip: 2, side: 'left' },
+                  { name: 'Omelettes',                flip: 2, side: 'left' },
+                  { name: 'Add Ons',                  flip: 1, side: 'left' },
+                  { name: 'Soups',                    flip: 1, side: 'left' }
+                ]
               },
               {
-                name: 'Main Courses',
-                icon: '🍽️',
-                slugs: ['mains-pasta', 'pizza', 'steaks-grill'],
-                color: '#B6912E'
+                name: '02 — STARTERS & SHARING',
+                icon: '🥗',
+                color: '#6B8F6B',
+                items: [
+                  { name: 'Salads',                                    flip: 2, side: 'right' },
+                  { name: 'Appetizer — Veg',                           flip: 2, side: 'right' },
+                  { name: 'Appetizer — Non-Veg',                       flip: 3, side: 'left'  },
+                  { name: 'Hawker Style Steamed Dumplings',            flip: 3, side: 'right' },
+                  { name: 'Hot Dogs — The American Comfort Snack',     flip: 3, side: 'right' }
+                ]
               },
               {
-                name: 'Sweets & Drinks',
-                icon: '🥂',
-                slugs: ['dessert', 'beverages'],
-                color: '#C42D78'
+                name: '03 — MAINS & MORE',
+                icon: '🍝',
+                color: '#B6912E',
+                items: [
+                  { name: 'Pasta & Spaghetti', flip: 4, side: 'left'  },
+                  { name: 'Mains',             flip: 5, side: 'right' },
+                  { name: 'Pizza',             flip: 4, side: 'right' },
+                  { name: 'Steaks',            flip: 5, side: 'left'  },
+                  { name: 'Dessert',           flip: 5, side: 'left'  }
+                ]
+              },
+              {
+                name: '04 — BEVERAGES',
+                icon: '🧋',
+                color: '#C42D78',
+                items: [
+                  { name: 'Mojito & Coolers',         flip: 6, side: 'left'  },
+                  { name: 'Shakes',                   flip: 6, side: 'left'  },
+                  { name: 'Juices',                   flip: 6, side: 'right' },
+                  { name: 'Ohana Summer Selections',  flip: 6, side: 'right' },
+                  { name: 'Others',                   flip: 6, side: 'right' },
+                  { name: 'Hot Brews',                flip: 7, side: 'left'  },
+                  { name: 'Cold Brews',               flip: 7, side: 'left'  },
+                  { name: 'Tea',                      flip: 7, side: 'left'  }
+                ]
               }
             ].map((chapter) => {
               return (
@@ -431,10 +464,10 @@ export default function Menu() {
                   }}
                   onMouseEnter={e => {
                     e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
-                    e.currentTarget.style.borderColor = `rgba(${chapter.color === '#E8742A' ? '232,116,42' : chapter.color === '#B6912E' ? '182,145,46' : '196,45,120'}, 0.4)`;
+                    e.currentTarget.style.borderColor = `rgba(${chapter.color === '#E8742A' ? '232,116,42' : chapter.color === '#B6912E' ? '182,145,46' : chapter.color === '#6B8F6B' ? '107,143,107' : '196,45,120'}, 0.4)`;
                     const menu = e.currentTarget.querySelector('.chapter-menu');
                     if (menu) {
-                      menu.style.maxWidth = '600px';
+                      menu.style.maxWidth = '1200px';
                       menu.style.opacity = '1';
                       menu.style.marginLeft = '8px';
                     }
@@ -476,19 +509,19 @@ export default function Menu() {
                       opacity: 0,
                       marginLeft: '0px',
                       transition: 'all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)',
-                      overflow: 'hidden',
+                      overflowX: 'auto',
+                      scrollbarWidth: 'none',
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {chapter.slugs.map(slug => {
-                      const cat = categoryData.find(c => c.slug === slug);
-                      if (!cat) return null;
+                    <style>{`.chapter-menu::-webkit-scrollbar { display: none; }`}</style>
+                    {chapter.items.map(item => {
                       return (
                         <button
-                          key={slug}
+                          key={item.name}
                           onClick={() => {
                             if (flipBookRef.current) {
-                              flipBookRef.current.goToPage(categoryToFlipMap[slug] || 0);
+                              flipBookRef.current.goToPage(item.flip, item.side);
                             }
                           }}
                           style={{
@@ -508,9 +541,9 @@ export default function Menu() {
                             transition: 'all 0.2s ease',
                           }}
                           onMouseEnter={e => {
-                            e.currentTarget.style.background = cat.accent;
+                            e.currentTarget.style.background = chapter.color;
                             e.currentTarget.style.color = '#000';
-                            e.currentTarget.style.borderColor = cat.accent;
+                            e.currentTarget.style.borderColor = chapter.color;
                           }}
                           onMouseLeave={e => {
                             e.currentTarget.style.background = 'rgba(0,0,0,0.4)';
@@ -518,8 +551,7 @@ export default function Menu() {
                             e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
                           }}
                         >
-                          <span style={{ fontSize: '12px' }}>{cat.icon}</span>
-                          {cat.name}
+                          {item.name}
                         </button>
                       );
                     })}
