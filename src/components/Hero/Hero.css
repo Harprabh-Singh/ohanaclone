@@ -2775,9 +2775,12 @@
     width: 100%;
     flex: 1 1 auto;
     min-height: 0;
-    margin-top: clamp(4px, 1vh, 10px);
+    margin-top: clamp(2px, 0.6vh, 6px);
     overflow: hidden;
-    touch-action: pan-y;
+    /* none (not pan-y): the browser can never hijack the gesture
+       mid-drag — vertical swipes are passed to the page scroll by
+       the axis lock in Hero.jsx instead */
+    touch-action: none;
     cursor: grab;
   }
   .oh4-mstage:active { cursor: grabbing; }
@@ -2792,7 +2795,28 @@
     pointer-events: none;
   }
 
-  /* Giant ghost numeral — parallaxes at 35% of drag distance */
+  /* Editorial ruler — hairline with edge labels framing the stage */
+  .oh4-mstage-ruler {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 4px 8px;
+    border-bottom: 1px solid rgba(242, 231, 208, 0.12);
+    z-index: 2;
+    pointer-events: none;
+  }
+  .oh4-mstage-ruler span {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 8px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(242, 231, 208, 0.4);
+  }
+
+  /* Giant outlined category word bleeding behind the dish —
+     parallaxes at 35% of drag distance */
   .oh4-mstage-ghost {
     position: absolute;
     inset: 0;
@@ -2802,12 +2826,14 @@
     pointer-events: none;
     will-change: transform;
   }
-  .oh4-mstage-ghost-num {
+  .oh4-mstage-ghost-word {
     font-family: 'Archivo Black', sans-serif;
-    font-size: clamp(150px, 46vw, 240px);
+    font-size: clamp(88px, 25vw, 150px);
     line-height: 1;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
     color: transparent;
-    -webkit-text-stroke: 1px rgba(242, 231, 208, 0.17);
+    -webkit-text-stroke: 1.5px rgba(242, 231, 208, 0.16);
     animation: oh4-mstage-ghost-in 0.6s ease both;
   }
   @keyframes oh4-mstage-ghost-in {
@@ -2840,8 +2866,10 @@
     transform: none;
   }
   .oh4-mstage-slide img {
-    height: 94%;
-    max-width: 92%;
+    /* deliberately oversized — the dish bleeds past the slide and
+       crops against the stage, floating in front of the ghost word */
+    height: 118%;
+    max-width: 118%;
     width: auto;
     object-fit: contain;
     filter: drop-shadow(0 26px 44px rgba(0, 0, 0, 0.6));

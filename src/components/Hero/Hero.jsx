@@ -212,10 +212,10 @@ export default function Hero() {
     setMIdx(clamped);
     const w = mStageRef.current?.clientWidth ?? 1;
     if (mTrackRef.current) {
-      gsap.to(mTrackRef.current, { x: trackXFor(clamped, w), rotation: 0, duration: 0.7, ease: 'expo.out' });
+      gsap.to(mTrackRef.current, { x: trackXFor(clamped, w), rotation: 0, duration: 0.6, ease: 'expo.out', overwrite: 'auto' });
     }
     if (mGhostRef.current) {
-      gsap.to(mGhostRef.current, { x: 0, duration: 0.7, ease: 'expo.out' });
+      gsap.to(mGhostRef.current, { x: 0, duration: 0.6, ease: 'expo.out', overwrite: 'auto' });
     }
     // The docked hero cup IS the coffee dish — it only steps aside
     // when the user pages away from coffee, and returns on page-back.
@@ -230,20 +230,44 @@ export default function Hero() {
   }, []);
 
   const onStageDown = (e) => {
-    mDrag.current = { down: true, startX: e.clientX, dx: 0, moved: false };
+    mDrag.current = { down: true, startX: e.clientX, startY: e.clientY, lastY: e.clientY, dx: 0, axis: null, moved: false };
+    // Keep every move event flowing to the stage even if the finger
+    // strays outside it — without this the drag stutters and snaps.
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* noop */ }
   };
   const onStageMove = (e) => {
-    if (!mDrag.current.down) return;
-    const dx = e.clientX - mDrag.current.startX;
-    mDrag.current.dx = dx;
-    if (Math.abs(dx) > 8) mDrag.current.moved = true;
+    const d = mDrag.current;
+    if (!d.down) return;
+    const dx = e.clientX - d.startX;
+    const dy = e.clientY - d.startY;
+    // Axis lock: first decisive movement decides the gesture. Vertical
+    // swipes scroll the page by hand (normalizeScroll is parked while
+    // the menu is open, so nothing double-scrolls or fights the drag).
+    if (!d.axis && Math.hypot(dx, dy) > 10) {
+      d.axis = Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
+    }
+    if (d.axis === 'y') {
+      const step = e.clientY - d.lastY;
+      d.lastY = e.clientY;
+      window.scrollBy(0, -step);
+      return;
+    }
+    if (d.axis !== 'x') return;
+    d.dx = dx;
+    if (Math.abs(dx) > 8) d.moved = true;
     const w = mStageRef.current?.clientWidth ?? 1;
     if (mTrackRef.current) {
-      gsap.set(mTrackRef.current, { x: trackXFor(mIdx, w) + dx, rotation: dx * 0.008 });
+      gsap.set(mTrackRef.current, { x: trackXFor(mIdx, w) + dx, rotation: dx * 0.004 });
     }
     // Ghost numeral trails at 35% for depth
     if (mGhostRef.current) {
       gsap.set(mGhostRef.current, { x: dx * 0.35 });
+    }
+    // The docked coffee cup hands off DURING the drag — fades out over
+    // the first quarter-width instead of lingering until release.
+    if (mIdx === 0 && mobileCupRef.current) {
+      const fadeT = Math.min(1, Math.abs(dx) / (w * 0.25));
+      gsap.set(mobileCupRef.current, { opacity: 1 - fadeT });
     }
   };
   const onStageUp = () => {
@@ -255,8 +279,11 @@ export default function Hero() {
     const w = mStageRef.current?.clientWidth ?? 1;
     const dx = mDrag.current.dx;
     let next = mIdx;
-    if (dx < -w * 0.15) next = mIdx + 1;
-    else if (dx > w * 0.15) next = mIdx - 1;
+    
+    // Require a more deliberate swipe (35% of screen width) to change items
+    if (dx < -w * 0.35) next = mIdx + 1;
+    else if (dx > w * 0.35) next = mIdx - 1;
+    
     goToIdx(next);
     // Clear the moved flag AFTER the click event has had a chance to fire
     setTimeout(() => { mDrag.current.moved = false; }, 60);
@@ -305,6 +332,7 @@ export default function Hero() {
     document.documentElement.classList.add('has-hero');
     document.body.classList.add('has-hero');
     let normalizer = null;
+    let normalizerOn = false;
     if (isMobileDevice) {
       // Kill rubber-band / elastic overscroll — prevents the whole page
       // from bouncing up before the pin registers
@@ -312,6 +340,7 @@ export default function Hero() {
       document.body.style.overscrollBehavior = 'none';
       // GSAP takes ownership of the scroll axis on touch
       normalizer = ScrollTrigger.normalizeScroll({ allowNestedScroll: true, lockAxis: false });
+      normalizerOn = true;
     }
     
     const catBar = root.querySelector('.oh4-cat-bar');
@@ -354,7 +383,7 @@ export default function Hero() {
       if (!c.h || !s.h) return; // image not decoded yet — keep fallback
       cupDelta.x = s.cx - c.cx;
       cupDelta.y = s.cy - c.cy;
-      cupDelta.scale = Math.min((s.h * 0.88) / c.h, (s.w * SLIDE_W * 0.84) / c.w);
+      cupDelta.scale = Math.min((s.h * 1.14) / c.h, (s.w * SLIDE_W * 1.1) / c.w);
     };
     measureCupTarget();
     // The cup is purely visual — never intercept taps on the stage.
@@ -441,11 +470,24 @@ export default function Hero() {
         prevProgressRef.current = p;
         scrollProgress.current = p;
 
+        // ── Park normalizeScroll while the menu owns the screen ──
+        // With the menu fully open, the normalizer's touchmove
+        // interception fights the dish-stage drag (page micro-scrolls
+        // during a swipe = the "snapping" jank). Disabled here, the
+        // stage's own axis lock handles vertical scrolls manually.
+        if (normalizer) {
+          if (p > 0.9 && normalizerOn) {
+            normalizer.disable();
+            normalizerOn = false;
+          } else if (p < 0.85 && !normalizerOn) {
+            normalizer.enable();
+            normalizerOn = true;
+          }
+        }
+
         // ── Auto-snap: forbidden zone enforcement ────────
-        // The user must NEVER rest between 5% and 95%.
-        // Any time ScrollTrigger reports progress in that range and we're
-        // not already snapping, immediately snap to the correct end.
-        if (!isSnappingRef.current && p > 0.05 && p < 0.95) {
+        // Mobile only! On desktop, we want a continuous, smooth trackpad scrub.
+        if (isMobile && !isSnappingRef.current && p > 0.05 && p < 0.95) {
           const scrollStart = self.start;
           const scrollEnd   = self.end;
           const totalRange  = scrollEnd - scrollStart;
@@ -786,10 +828,17 @@ export default function Hero() {
           >
             <div className="oh4-mstage-glow" aria-hidden="true" />
 
-            {/* Giant ghost numeral — parallaxes at 35% of drag distance */}
+            {/* Editorial ruler — frames the stage like a printed index */}
+            <div className="oh4-mstage-ruler" aria-hidden="true">
+              <span>Menu index</span>
+              <span>{String(CATEGORIES.length).padStart(2, '0')} sections</span>
+            </div>
+
+            {/* Giant outlined category word bleeding behind the dish —
+                parallaxes at 35% of drag distance */}
             <div ref={mGhostRef} className="oh4-mstage-ghost" aria-hidden="true">
-              <span key={mIdx} className="oh4-mstage-ghost-num">
-                {String(mIdx + 1).padStart(2, '0')}
+              <span key={mIdx} className="oh4-mstage-ghost-word">
+                {CATEGORIES[mIdx].name}
               </span>
             </div>
 
