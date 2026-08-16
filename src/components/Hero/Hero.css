@@ -2580,3 +2580,392 @@
 
 
 
+
+/* ═══════════════════════════════════════════════════════════
+   THE REEL — typography-led menu index (desktop) + swipeable
+   dish pager (mobile). Replaces the old card-grid menu panel.
+   Fonts come from the global index.html link (Archivo Black,
+   Instrument Serif, Work Sans).
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── DESKTOP (> 700px) ── */
+@media (min-width: 701px) {
+
+  .oh4-menu-panel.oh4-desktop-menu-redesign .oh4-mp-right {
+    border-left: none;
+    padding: clamp(36px, 6vh, 64px) 5% clamp(20px, 4vh, 40px) 4.5%;
+    justify-content: center;
+  }
+
+  .oh4-reel-header { margin-bottom: clamp(14px, 3vh, 30px); }
+  .oh4-reel-eyebrow {
+    display: block;
+    font-family: 'Work Sans', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: rgba(217, 180, 91, 0.8);
+    margin-bottom: 10px;
+  }
+  .oh4-reel-title {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: clamp(44px, 5vw, 78px);
+    line-height: 0.9;
+    letter-spacing: 0;
+    display: flex;
+    gap: 0.22em;
+    margin: 0;
+  }
+  .oh4-reel-title-solid { color: #F2E7D0; }
+  .oh4-reel-title-italic {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-weight: 400;
+    color: #D9B45B;
+  }
+
+  /* Rows — hairline-separated index entries */
+  .oh4-reel-rows { display: flex; flex-direction: column; }
+  .oh4-reel-row {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(10px, 1.2vw, 18px);
+    padding: clamp(8px, 1.6vh, 15px) 2px;
+    border-top: 1px solid rgba(242, 231, 208, 0.12);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .oh4-reel-row:last-child { border-bottom: 1px solid rgba(242, 231, 208, 0.12); }
+  .oh4-reel-num {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: rgba(217, 180, 91, 0.55);
+    transform: translateY(-3px);
+    transition: color 0.3s;
+    flex: 0 0 auto;
+  }
+  .oh4-reel-name {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: clamp(22px, 2.6vw, 42px);
+    line-height: 1;
+    letter-spacing: 0.01em;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(242, 231, 208, 0.35);
+    transition: color 0.35s ease, -webkit-text-stroke-color 0.35s ease, transform 0.35s ease;
+  }
+  .oh4-reel-tag {
+    margin-left: auto;
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: clamp(12px, 1vw, 15px);
+    color: rgba(242, 231, 208, 0.45);
+    white-space: nowrap;
+    transition: color 0.3s;
+  }
+  .oh4-reel-arrow {
+    align-self: center;
+    display: inline-flex;
+    color: rgba(217, 180, 91, 0);
+    transform: translateX(-8px);
+    transition: color 0.3s, transform 0.35s ease;
+  }
+  .oh4-reel-row:hover .oh4-reel-name,
+  .oh4-reel-row.active .oh4-reel-name {
+    color: #F2E7D0;
+    -webkit-text-stroke-color: transparent;
+    transform: translateX(6px);
+  }
+  .oh4-reel-row:hover .oh4-reel-num,
+  .oh4-reel-row.active .oh4-reel-num { color: #D9B45B; }
+  .oh4-reel-row:hover .oh4-reel-tag { color: rgba(242, 231, 208, 0.8); }
+  .oh4-reel-row:hover .oh4-reel-arrow { color: #D9B45B; transform: translateX(0); }
+
+  /* Full-menu text link */
+  .oh4-reel-full {
+    margin-top: clamp(14px, 3vh, 28px);
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Work Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #D9B45B;
+    text-decoration: none;
+    padding-bottom: 6px;
+    position: relative;
+  }
+  .oh4-reel-full::after {
+    content: '';
+    position: absolute;
+    left: 0; bottom: 0;
+    width: 100%; height: 1px;
+    background: #D9B45B;
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+  .oh4-reel-full:hover::after { transform: scaleX(0.35); }
+
+  /* Floating dish preview — transform driven by rAF in Hero.jsx;
+     opacity/scale on the inner wrapper driven by GSAP. */
+  .oh4-reel-preview {
+    position: absolute;
+    left: 0; top: 0;
+    z-index: 30;
+    pointer-events: none;
+    will-change: transform;
+  }
+  .oh4-reel-preview-inner {
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+  .oh4-reel-preview img {
+    height: clamp(180px, 30vh, 300px);
+    width: auto;
+    display: block;
+    filter: drop-shadow(0 30px 50px rgba(0, 0, 0, 0.6));
+  }
+}
+
+/* ── MOBILE (≤ 700px) — full-screen swipeable DISH STAGE.
+     Mobile-first flagship surface: the stage flex-grows to fill
+     the viewport, giant ghost numeral parallaxes behind the dish,
+     and the hero cup morphs into the coffee slide. ── */
+@media (max-width: 700px) {
+
+  .oh4-mobile-menu-layer {
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    justify-content: flex-start;
+    /* top padding clears the fixed site navbar */
+    padding: max(64px, env(safe-area-inset-top)) 0 max(10px, env(safe-area-inset-bottom));
+  }
+
+  .oh4-mstage-header {
+    text-align: center;
+    width: 100%;
+    padding: 0 22px;
+  }
+  .oh4-mstage-header .oh4-reel-eyebrow {
+    display: block;
+    font-family: 'Work Sans', sans-serif;
+    font-size: 8.5px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(217, 180, 91, 0.75);
+    margin-bottom: 6px;
+  }
+  .oh4-mreel-title {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: clamp(24px, 7vw, 34px);
+    line-height: 1;
+    display: flex;
+    justify-content: center;
+    gap: 0.2em;
+    margin: 0;
+  }
+
+  /* ── Stage ── */
+  .oh4-mstage {
+    position: relative;
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    margin-top: clamp(4px, 1vh, 10px);
+    overflow: hidden;
+    touch-action: pan-y;
+    cursor: grab;
+  }
+  .oh4-mstage:active { cursor: grabbing; }
+
+  /* Warm glow behind the dish */
+  .oh4-mstage-glow {
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 78vmin; height: 78vmin;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(217, 180, 91, 0.14) 0%, rgba(217, 180, 91, 0.05) 42%, transparent 68%);
+    pointer-events: none;
+  }
+
+  /* Giant ghost numeral — parallaxes at 35% of drag distance */
+  .oh4-mstage-ghost {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    will-change: transform;
+  }
+  .oh4-mstage-ghost-num {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: clamp(150px, 46vw, 240px);
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(242, 231, 208, 0.17);
+    animation: oh4-mstage-ghost-in 0.6s ease both;
+  }
+  @keyframes oh4-mstage-ghost-in {
+    from { opacity: 0; transform: translateY(14px) scale(0.96); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .oh4-mstage-track {
+    position: relative;
+    display: flex;
+    height: 100%;
+    will-change: transform;
+    z-index: 1;
+  }
+  .oh4-mstage-slide {
+    flex: 0 0 76%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-user-select: none;
+    /* neighbors recede so the active dish owns the stage */
+    opacity: 0.45;
+    transform: scale(0.88);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .oh4-mstage-slide.on {
+    opacity: 1;
+    transform: none;
+  }
+  .oh4-mstage-slide img {
+    height: 94%;
+    max-width: 92%;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 26px 44px rgba(0, 0, 0, 0.6));
+    pointer-events: none;
+    /* barely-there idle float — 4px, slow, no rotation (no dizziness) */
+    animation: oh4-mstage-float 3.6s ease-in-out infinite;
+  }
+  @keyframes oh4-mstage-float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-5px); }
+  }
+
+  /* ── Editorial meta — pulls up over the dish's lower edge so the
+     huge name layers ON the imagery (depth without ornaments).
+     Remounts via key={mIdx} to re-animate on every page. ── */
+  .oh4-mstage-meta {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    padding: 0 24px;
+    margin-top: calc(-1 * clamp(44px, 11vh, 72px));
+    animation: oh4-mstage-up 0.5s ease both;
+    pointer-events: none;
+  }
+  @keyframes oh4-mstage-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .oh4-mstage-name {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: clamp(40px, 12.5vw, 60px);
+    line-height: 0.95;
+    letter-spacing: 0.01em;
+    color: #F2E7D0;
+    margin: 0 0 4px;
+    text-shadow: 0 6px 34px rgba(0, 0, 0, 0.85), 0 2px 10px rgba(0, 0, 0, 0.6);
+  }
+  .oh4-mstage-tag {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: clamp(14px, 3.8vw, 17px);
+    color: rgba(242, 231, 208, 0.65);
+    margin: 0;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+  }
+
+  /* ── Ledger row — position / item count / price floor,
+     hairline-ruled, straight from menuData ── */
+  .oh4-mstage-ledger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 24px;
+    margin-top: clamp(8px, 1.6vh, 14px);
+    border-top: 1px solid rgba(242, 231, 208, 0.14);
+    border-bottom: 1px solid rgba(242, 231, 208, 0.14);
+  }
+  .oh4-mstage-ledger span {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgba(242, 231, 208, 0.55);
+  }
+  .oh4-mstage-ledger .oh4-mstage-ledger-gold { color: #D9B45B; }
+
+  /* ── Segmented progress ── */
+  .oh4-mstage-progress {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: clamp(8px, 1.6vh, 14px);
+    padding: 4px 0;
+  }
+  .oh4-mstage-seg {
+    width: 22px;
+    height: 3px;
+    border: none;
+    padding: 0;
+    background: rgba(242, 231, 208, 0.18);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 0.3s, width 0.3s;
+  }
+  .oh4-mstage-seg.on { background: #D9B45B; width: 34px; }
+
+  .oh4-mstage-hint {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 8.5px;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: rgba(242, 231, 208, 0.35);
+    margin-top: 4px;
+  }
+
+  /* Full-menu pill */
+  .oh4-mreel-full {
+    margin-top: clamp(6px, 1.2vh, 10px);
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Work Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: #D9B45B;
+    text-decoration: none;
+    padding: 10px 22px;
+    border: 1px solid rgba(217, 180, 91, 0.4);
+    border-radius: 999px;
+  }
+  .oh4-mreel-full::after { display: none; }
+}
+
+/* Shared reel title word styling — applies at both breakpoints
+   (the desktop media block above only covers > 700px). */
+.oh4-reel-title-solid { color: #F2E7D0; }
+.oh4-reel-title-italic {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  color: #D9B45B;
+}

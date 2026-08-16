@@ -58,6 +58,13 @@ import { Suspense, useEffect, useRef, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import cupImg from './ui/cup.png';
 import dishesImg from './ui/dishes.png';
+import dishCoffee from './models/satellites/cup5.png';
+import dishBurger from './models/satellites/cup2.png';
+import dishPizza from './models/satellites/cup1.png';
+import dishCake from './models/satellites/cup3.png';
+import dishFries from './models/satellites/cup4.png';
+import dishSplash from './models/satellites/cup7.png';
+import dishBeans from './models/satellites/cup6b.png';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
@@ -91,13 +98,13 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
  * overpromise a specific dish for those two until real art exists.
  */
 const CATEGORIES = [
-  { id: 'coffee',  name: 'COFFEE',  emoji: '☕', desc: 'Single origin & blends',      book: { flip: 7, side: 'left'  } },
-  { id: 'burgers', name: 'BURGERS', emoji: '🍔', desc: 'Juicy, flame-grilled',        book: { flip: 3, side: 'right' } },
-  { id: 'pizzas',  name: 'PIZZAS',  emoji: '🍕', desc: 'Wood-fired perfection',       book: { flip: 4, side: 'right' } },
-  { id: 'pasta',   name: 'PASTA',   emoji: '🍝', desc: 'Italian classics done right', book: { flip: 4, side: 'left'  } },
-  { id: 'cakes',   name: 'CAKES',   emoji: '🎂', desc: 'Handcrafted indulgence',      book: { flip: 5, side: 'left'  } },
-  { id: 'drinks',  name: 'DRINKS',  emoji: '🥤', desc: 'Refreshing & revitalizing',   book: { flip: 6, side: 'left'  } },
-  { id: 'snacks',  name: 'SNACKS',  emoji: '🍟', desc: 'Bites to keep you going',     book: { flip: 2, side: 'right' } },
+  { id: 'coffee',  name: 'COFFEE',  img: dishCoffee, desc: 'Single origin, poured slow',  stats: ['24 items', 'from ₹75'],  book: { flip: 7, side: 'left'  } },
+  { id: 'burgers', name: 'BURGERS', img: dishBurger, desc: 'Flame-grilled, stacked tall', stats: ['3 items',  'from ₹250'], book: { flip: 3, side: 'right' } },
+  { id: 'pizzas',  name: 'PIZZAS',  img: dishPizza,  desc: 'Wood-fired, leopard-spotted', stats: ['11 items', 'from ₹350'], book: { flip: 4, side: 'right' } },
+  { id: 'pasta',   name: 'PASTA',   img: dishBeans,  desc: 'Rolled into every sauce',     stats: ['2 items',  'from ₹375'], book: { flip: 4, side: 'left'  } },
+  { id: 'cakes',   name: 'CAKES',   img: dishCake,   desc: 'Baked for the sweet tooth',   stats: ['1 item',   'from ₹220'], book: { flip: 5, side: 'left'  } },
+  { id: 'drinks',  name: 'DRINKS',  img: dishSplash, desc: 'Coolers, shakes & brews',     stats: ['25 items', 'from ₹140'], book: { flip: 6, side: 'left'  } },
+  { id: 'snacks',  name: 'SNACKS',  img: dishFries,  desc: 'Small plates, big cravings',  stats: ['14 items', 'from ₹180'], book: { flip: 2, side: 'right' } },
 ];
 
 /* Deep-link to the /menu flipbook: /menu?flip=N&side=left|right lands the
@@ -124,16 +131,6 @@ const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
 const easeOutQuad = (t) => 1 - Math.pow(1 - t, 2);
 const remap = (p, start, end) =>
   Math.max(0, Math.min((p - start) / (end - start), 1));
-
-const CatIcons = {
-  coffee: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1" /><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" /><path d="M6 1v3M10 1v3M14 1v3" /></svg>,
-  burgers: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 11a8 8 0 0 1 16 0H4z" /><path d="M4 15h16v2a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-2z" /><path d="M4 13h16" /></svg>,
-  pizzas: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2l8 18H4L12 2z" /><path d="M11 12h.01M14 16h.01M10 16h.01" /><path d="M4 20h16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" /></svg>,
-  pasta: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 14a8 8 0 0 0 16 0H4z" /><path d="M12 6s-2 3 0 5 0 3 0 3M8 6s-2 3 0 5 0 3 0 3M16 6s-2 3 0 5 0 3 0 3" /></svg>,
-  cakes: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 14v6h12v-6" /><path d="M6 14l6-6 6 6M12 4v4" /></svg>,
-  drinks: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M7 8l1 14h8l1-14" /><path d="M6 8h12" /><path d="M12 8V2" /><path d="M12 2h3" /></svg>,
-  snacks: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 12l2 10h8l2-10" /><path d="M8 12V4M12 12V3M16 12V5" /></svg>,
-};
 
 export default function Hero() {
   const rootRef = useRef(null);
@@ -175,6 +172,96 @@ export default function Hero() {
       hasPickedNonCoffeeRef.current = true;
     }
   }, []);
+
+  // ── THE REEL (desktop) — cursor-follow dish preview ──────
+  // reelPreviewApiRef is populated by the effect below; row hover
+  // handlers call into it without re-rendering React.
+  const reelPreviewRef = useRef(null);
+  const reelPreviewApiRef = useRef({ show: () => {}, hide: () => {}, swap: () => {} });
+
+  const handleReelEnter = useCallback((cat) => {
+    handleCatClick(cat.id);
+    reelPreviewApiRef.current.swap(cat.img);
+    reelPreviewApiRef.current.show();
+  }, [handleCatClick]);
+
+  // ── MOBILE DISH STAGE — full-screen swipeable pager. The stage
+  // flex-grows to fill the viewport (no dead space); the dish track
+  // follows the finger with a slight tilt, the giant ghost numeral
+  // parallaxes behind it, and releasing past the threshold pages to
+  // the next category. Tap (no drag) navigates via the Link.
+  const [mIdx, setMIdx] = useState(0);
+  const mIdxRef = useRef(0);
+  const mStageRef = useRef(null);
+  const mTrackRef = useRef(null);
+  const mGhostRef = useRef(null);
+  const mDrag = useRef({ down: false, startX: 0, dx: 0, moved: false });
+
+  // Peek-carousel geometry: 76% slides with a 12% side inset so the
+  // neighboring dishes peek in from the edges (dimmed + scaled down).
+  const SLIDE_W = 0.76;
+  const SLIDE_INSET = (1 - SLIDE_W) / 2;
+  const trackXFor = (i, w) => w * SLIDE_INSET - i * w * SLIDE_W;
+
+  const goToIdx = useCallback((i) => {
+    const clamped = Math.max(0, Math.min(CATEGORIES.length - 1, i));
+    mIdxRef.current = clamped;
+    setMIdx(clamped);
+    const w = mStageRef.current?.clientWidth ?? 1;
+    if (mTrackRef.current) {
+      gsap.to(mTrackRef.current, { x: trackXFor(clamped, w), rotation: 0, duration: 0.7, ease: 'expo.out' });
+    }
+    if (mGhostRef.current) {
+      gsap.to(mGhostRef.current, { x: 0, duration: 0.7, ease: 'expo.out' });
+    }
+    // The docked hero cup IS the coffee dish — it only steps aside
+    // when the user pages away from coffee, and returns on page-back.
+    if (mobileCupRef.current) {
+      gsap.to(mobileCupRef.current, {
+        opacity: clamped === 0 ? 1 : 0,
+        duration: 0.35,
+        ease: 'power2.out',
+        overwrite: 'auto',
+      });
+    }
+  }, []);
+
+  const onStageDown = (e) => {
+    mDrag.current = { down: true, startX: e.clientX, dx: 0, moved: false };
+  };
+  const onStageMove = (e) => {
+    if (!mDrag.current.down) return;
+    const dx = e.clientX - mDrag.current.startX;
+    mDrag.current.dx = dx;
+    if (Math.abs(dx) > 8) mDrag.current.moved = true;
+    const w = mStageRef.current?.clientWidth ?? 1;
+    if (mTrackRef.current) {
+      gsap.set(mTrackRef.current, { x: trackXFor(mIdx, w) + dx, rotation: dx * 0.008 });
+    }
+    // Ghost numeral trails at 35% for depth
+    if (mGhostRef.current) {
+      gsap.set(mGhostRef.current, { x: dx * 0.35 });
+    }
+  };
+  const onStageUp = () => {
+    if (!mDrag.current.down) return;
+    mDrag.current.down = false;
+    const w = mStageRef.current?.clientWidth ?? 1;
+    const dx = mDrag.current.dx;
+    let next = mIdx;
+    if (dx < -w * 0.15) next = mIdx + 1;
+    else if (dx > w * 0.15) next = mIdx - 1;
+    goToIdx(next);
+    // Clear the moved flag AFTER the click event has had a chance to fire
+    setTimeout(() => { mDrag.current.moved = false; }, 60);
+  };
+  // Suppress Link navigation when the gesture was a drag, not a tap
+  const onStageClickCapture = (e) => {
+    if (mDrag.current.moved) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
 
   // Ref to prevent multiple snap animations firing simultaneously
   const isSnappingRef = useRef(false);
@@ -225,8 +312,44 @@ export default function Hero() {
     const panel = menuPanelRef.current;
     const statsBar = statsBarRef.current;
     const textLayer = textLayerRef.current;
-    const catCards = panel?.querySelectorAll('.oh4-menu-cat') ?? [];
+    const catCards = panel?.querySelectorAll('.oh4-reel-row') ?? [];
     const canvasWrap = root.querySelector('.oh4-canvas-wrap');
+
+    // ── Cup docking target ────────────────────────────────
+    // The SAME hero cup element travels into the dish stage's coffee
+    // slot as scroll progresses — no hide-and-replace. Deltas are
+    // computed from transform-free layout geometry (offsetParent
+    // chain) once per refresh, so the per-tick scroll handler never
+    // triggers getBoundingClientRect reflows.
+    const cupDelta = { x: 0, y: -window.innerHeight * 0.35, scale: 2.15 };
+    const measureCupTarget = () => {
+      const cup = mobileCupRef.current;
+      const stage = mStageRef.current;
+      if (!cup || !stage || window.innerWidth > 700) return;
+      const centerOf = (el) => {
+        let x = 0, y = 0, n = el;
+        while (n && n !== root) {
+          x += n.offsetLeft;
+          y += n.offsetTop;
+          n = n.offsetParent;
+        }
+        return {
+          cx: x + el.offsetWidth / 2,
+          cy: y + el.offsetHeight / 2,
+          w: el.offsetWidth,
+          h: el.offsetHeight,
+        };
+      };
+      const c = centerOf(cup);
+      const s = centerOf(stage);
+      if (!c.h || !s.h) return; // image not decoded yet — keep fallback
+      cupDelta.x = s.cx - c.cx;
+      cupDelta.y = s.cy - c.cy;
+      cupDelta.scale = Math.min((s.h * 0.88) / c.h, (s.w * SLIDE_W * 0.84) / c.w);
+    };
+    measureCupTarget();
+    // The cup is purely visual — never intercept taps on the stage.
+    if (mobileCupRef.current) mobileCupRef.current.style.pointerEvents = 'none';
 
     const titleLetterEls = Array.from(titleLetters).map((el) => ({
       el,
@@ -247,7 +370,7 @@ export default function Hero() {
       { opacity: 0, y: 18 }
     );
     gsap.set(statsBar, { opacity: 0, y: 8 });
-    gsap.set(titleLetters, { yPercent: 130, opacity: 0 });
+    gsap.set(titleLetters, { opacity: 0 });
     gsap.set(panel, { opacity: 0, x: 60 });
     gsap.set(catCards, { opacity: 0, y: 20 });
 
@@ -302,6 +425,7 @@ export default function Hero() {
       pinSpacing: true,
       scrub: isMobile ? 0.4 : 1,  // tighter on mobile = silky, no perceptible lag
       anticipatePin: 1,           // prevents a flash/jump when the pin fires
+      onRefresh: measureCupTarget, // re-measure the cup's docking target
       onUpdate: (self) => {
         const p = self.progress;
         const prevP = prevProgressRef.current;
@@ -326,6 +450,16 @@ export default function Hero() {
           }
         }
 
+        // ── Return the dish stage to coffee on scroll-up intent ──
+        // If the user paged to another dish (cup stepped aside) and
+        // starts scrolling up from the menu, slide the stage back to
+        // coffee and fade the cup back in FIRST — so by the time the
+        // cup travels home it's already the coffee dish again, with
+        // no sudden reappearance mid-journey.
+        if (self.direction === -1 && p > 0.85 && mIdxRef.current !== 0) {
+          goToIdx(0);
+        }
+
         // ── Non-coffee reset on scroll-back-to-top ────────
         // If the user scrolled back up past the reset threshold AND
         // had previously picked a non-coffee category, silently snap
@@ -337,6 +471,19 @@ export default function Hero() {
           // React state update — batched by React, fires on next render
           setActiveModel('coffee');
           activeModelRef.current = 'coffee';
+        }
+
+        // ── Dish-stage reset on scroll-back-to-top ────────
+        // If the user paged away from coffee and then scrolls back to
+        // the hero, snap the stage back to coffee and bring the cup
+        // home so the next scroll-down starts clean.
+        if (p < RESET_THRESHOLD && mIdxRef.current !== 0) {
+          mIdxRef.current = 0;
+          setMIdx(0);
+          const w = mStageRef.current?.clientWidth ?? 1;
+          if (mTrackRef.current) gsap.set(mTrackRef.current, { x: trackXFor(0, w), rotation: 0 });
+          if (mGhostRef.current) gsap.set(mGhostRef.current, { x: 0 });
+          if (mobileCupRef.current) gsap.set(mobileCupRef.current, { opacity: 1 });
         }
 
         // ── 1. Text layer fades out ───────────────────────
@@ -370,12 +517,15 @@ export default function Hero() {
         // BackgroundComposition.jsx / Hero.css's .oh5-bg-composition.
         setBgOpacity(textOpacity);
 
-        // ── 1c. Mobile cup animation ──────────────────────
+        // ── 1c. Mobile cup TRAVELS into the menu stage ────
+        // Same element, straight-line dock from its hero position
+        // to the stage's coffee slot (measured in cupDelta).
         if (mobileCupRef.current) {
           const cp = Math.min(p, 0.9) / 0.9;
-          const riseY = cp * -35; // -30vh (lower than before)
-          const scale = 2 + (0.15 * cp); // Keep it big
-          mobileCupRef.current.style.transform = `translate(0px, ${riseY}vh) scale(${scale})`;
+          const x = cupDelta.x * cp;
+          const y = cupDelta.y * cp;
+          const scale = 2 + (cupDelta.scale - 2) * cp;
+          mobileCupRef.current.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
         }
 
         // ── 1d. Mobile layers fade out ────────────────────
@@ -389,6 +539,11 @@ export default function Hero() {
           mobileMenuRef.current.style.opacity = menuOp;
           mobileMenuRef.current.style.pointerEvents = menuOp > 0.5 ? 'auto' : 'none';
           mobileMenuRef.current.style.transform = `translateY(${(1 - menuOp) * 40}px)`;
+          // Once the menu owns the screen, lift the docked cup above
+          // the stage layer so it reads as the coffee dish itself.
+          if (mobileCupRef.current) {
+            mobileCupRef.current.style.zIndex = menuOp > 0.5 ? '30' : '10';
+          }
         }
 
         // ── 2. Stats bar fades with text layer ───────────
@@ -448,6 +603,86 @@ export default function Hero() {
       document.documentElement.classList.remove('has-hero');
     };
   }, []);
+
+  // ── THE REEL: floating dish preview that trails the cursor ──
+  // rAF lerp loop writes transform on the OUTER wrapper only; GSAP owns
+  // opacity/scale on the INNER wrapper (show/hide) and on the <img>
+  // (crossfade swap) so the three never fight over the same property.
+  useEffect(() => {
+    const panel = menuPanelRef.current;
+    const preview = reelPreviewRef.current;
+    if (!panel || !preview) return;
+    const inner = preview.querySelector('.oh4-reel-preview-inner');
+    const img = preview.querySelector('img');
+    if (!inner || !img) return;
+
+    const pos = { x: 0, y: 0, tx: 0, ty: 0, rot: 0 };
+    let raf = null;
+    let running = false;
+
+    const tick = () => {
+      const dx = pos.tx - pos.x;
+      pos.x += dx * 0.12;
+      pos.y += (pos.ty - pos.y) * 0.12;
+      const targetRot = Math.max(-8, Math.min(8, dx * 0.12));
+      pos.rot += (targetRot - pos.rot) * 0.08;
+      preview.style.transform =
+        `translate3d(${pos.x}px, ${pos.y}px, 0) translate(-50%, -62%) rotate(${pos.rot}deg)`;
+      raf = requestAnimationFrame(tick);
+    };
+
+    const onMove = (e) => {
+      const r = panel.getBoundingClientRect();
+      pos.tx = e.clientX - r.left;
+      pos.ty = e.clientY - r.top;
+      if (!running) {
+        pos.x = pos.tx;
+        pos.y = pos.ty;
+        running = true;
+        raf = requestAnimationFrame(tick);
+      }
+    };
+
+    reelPreviewApiRef.current = {
+      show: () => {
+        gsap.to(inner, { opacity: 1, scale: 1, duration: 0.45, ease: 'expo.out', overwrite: 'auto' });
+      },
+      hide: () => {
+        gsap.to(inner, { opacity: 0, scale: 0.85, duration: 0.3, ease: 'power2.in', overwrite: 'auto' });
+      },
+      swap: (src) => {
+        if (img.dataset.cur === src) return;
+        img.dataset.cur = src;
+        gsap.timeline()
+          .to(img, { opacity: 0, scale: 0.9, duration: 0.14, ease: 'power2.in',
+            onComplete: () => { img.src = src; } })
+          .to(img, { opacity: 1, scale: 1, duration: 0.38, ease: 'expo.out' });
+      },
+    };
+
+    const rowsWrap = panel.querySelector('.oh4-reel-rows');
+    const onLeave = () => reelPreviewApiRef.current.hide();
+    panel.addEventListener('mousemove', onMove);
+    if (rowsWrap) rowsWrap.addEventListener('mouseleave', onLeave);
+
+    return () => {
+      panel.removeEventListener('mousemove', onMove);
+      if (rowsWrap) rowsWrap.removeEventListener('mouseleave', onLeave);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  // Keep the mobile stage track aligned on viewport resize
+  useEffect(() => {
+    const onResize = () => {
+      const w = mStageRef.current?.clientWidth ?? 1;
+      if (mTrackRef.current) gsap.set(mTrackRef.current, { x: trackXFor(mIdx, w) });
+    };
+    window.addEventListener('resize', onResize);
+    onResize(); // align the initial peek position on mount
+    return () => window.removeEventListener('resize', onResize);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mIdx]);
 
   return (
     <section ref={rootRef} className="oh4-hero" aria-label="Ohana Cafe Hero">
@@ -517,39 +752,86 @@ export default function Hero() {
 
         {/* MOBILE MENU LAYER (< 700px) */}
         <div ref={mobileMenuRef} className="oh4-mobile-menu-layer" aria-hidden="true" style={{ opacity: 0, pointerEvents: 'none', transform: 'translateY(40px)' }}>
-          <div className="oh4-mobile-menu-header">
-            <div className="oh4-mobile-menu-subtitle">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#eebb4d" strokeWidth="1.5">
-                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-              </svg>
-              Fresh ingredients, daily specials.
-            </div>
-            <h2 className="oh4-mobile-menu-title">
-              Our Menu
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#eebb4d" strokeWidth="1.2" className="oh4-leaf-icon">
-                <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z" />
-              </svg>
-              <div className="oh4-mobile-menu-underline" />
+          <div className="oh4-mstage-header">
+            <span className="oh4-reel-eyebrow">Fresh ingredients · Daily specials</span>
+            <h2 className="oh4-menu-title oh4-mreel-title">
+              <SplitText text="Our" className="oh4-reel-title-solid" />
+              <SplitText text="Menu" className="oh4-reel-title-italic" />
             </h2>
           </div>
 
-          <div className="oh4-mobile-menu-grid">
-            {CATEGORIES.map((cat) => (
-              <Link to={menuBookUrl(cat)} key={cat.id} className={`oh4-mobile-cat-card ${cat.id === 'snacks' ? 'full-width' : ''}`} style={{ textDecoration: 'none' }}>
-                <div className="oh4-mobile-cat-icon-wrap">
-                  {CatIcons[cat.id] || <span style={{ fontSize: '20px' }}>{cat.emoji}</span>}
-                </div>
-                <div className="oh4-mobile-cat-info">
-                  <h3>{cat.name}</h3>
-                  <p>{cat.desc}</p>
-                </div>
-                <ArrowRight className="oh4-mobile-cat-arrow" size={16} />
-              </Link>
+          {/* Full-screen dish stage — swipe left/right to travel between
+              categories. The coffee slide is an EMPTY docking slot: the
+              actual hero cup travels here on scroll (see 1c/cupDelta)
+              and parks in this space, so the cup you watched rise is
+              the same element sitting in the menu — no replacement. */}
+          <div
+            ref={mStageRef}
+            className="oh4-mstage"
+            onPointerDown={onStageDown}
+            onPointerMove={onStageMove}
+            onPointerUp={onStageUp}
+            onPointerLeave={onStageUp}
+            onClickCapture={onStageClickCapture}
+          >
+            <div className="oh4-mstage-glow" aria-hidden="true" />
+
+            {/* Giant ghost numeral — parallaxes at 35% of drag distance */}
+            <div ref={mGhostRef} className="oh4-mstage-ghost" aria-hidden="true">
+              <span key={mIdx} className="oh4-mstage-ghost-num">
+                {String(mIdx + 1).padStart(2, '0')}
+              </span>
+            </div>
+
+            <div ref={mTrackRef} className="oh4-mstage-track">
+              {CATEGORIES.map((cat, i) => (
+                <Link
+                  to={menuBookUrl(cat)}
+                  key={cat.id}
+                  className={`oh4-mstage-slide${i === mIdx ? ' on' : ''}`}
+                  style={{ textDecoration: 'none' }}
+                >
+                  {cat.id === 'coffee' ? (
+                    <span className="oh4-mstage-cup-slot" aria-hidden="true" />
+                  ) : (
+                    <img src={cat.img} alt={cat.name} draggable="false" />
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Editorial meta — the huge name overlaps the dish's lower
+              edge (negative margin), then a hairline ledger row carries
+              the facts: position / item count / price floor. */}
+          <div className="oh4-mstage-meta" key={mIdx}>
+            <h3 className="oh4-mstage-name">{CATEGORIES[mIdx].name}</h3>
+            <p className="oh4-mstage-tag">{CATEGORIES[mIdx].desc}</p>
+          </div>
+
+          <div className="oh4-mstage-ledger">
+            <span>{String(mIdx + 1).padStart(2, '0')} / {String(CATEGORIES.length).padStart(2, '0')}</span>
+            <span className="oh4-mstage-ledger-gold">{CATEGORIES[mIdx].stats[0]}</span>
+            <span>{CATEGORIES[mIdx].stats[1]}</span>
+          </div>
+
+          <div className="oh4-mstage-progress">
+            {CATEGORIES.map((cat, i) => (
+              <button
+                key={cat.id}
+                type="button"
+                className={`oh4-mstage-seg${i === mIdx ? ' on' : ''}`}
+                onClick={() => goToIdx(i)}
+                aria-label={`Go to ${cat.name}`}
+              />
             ))}
           </div>
 
-          <Link to="/menu" className="oh4-mobile-btn-full">
-            VIEW FULL MENU <ArrowRight size={18} />
+          <span className="oh4-mstage-hint">Swipe · Tap the dish to open its page</span>
+
+          <Link to="/menu" className="oh4-reel-full oh4-mreel-full">
+            <span>View full menu</span>
+            <ArrowRight size={14} />
           </Link>
         </div>
       </div>
@@ -653,58 +935,46 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Right Side: Menu Grid — mirrors mobile layout */}
+        {/* Right Side: THE REEL — typography-led category index.
+            Rows are classed .oh4-reel-row so the scroll-scrub stagger
+            (section 5 of onUpdate) drives their entrance. */}
         <div className="oh4-mp-right">
-          <div className="oh4-dmp-header">
-            <div className="oh4-dmp-subtitle">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#eebb4d" strokeWidth="1.5">
-                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-              </svg>
-              Fresh ingredients, daily specials.
-            </div>
-            <h2 className="oh4-dmp-title">
-              Our Menu
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#eebb4d" strokeWidth="1.2" className="oh4-leaf-icon">
-                <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z" />
-              </svg>
-              <div className="oh4-dmp-underline" />
+          <div className="oh4-reel-header">
+            <span className="oh4-reel-eyebrow">Fresh ingredients · Daily specials</span>
+            <h2 className="oh4-menu-title oh4-reel-title">
+              <SplitText text="Our" className="oh4-reel-title-solid" />
+              <SplitText text="Menu" className="oh4-reel-title-italic" />
             </h2>
           </div>
 
-          <div className="oh4-dmp-grid">
-            {CATEGORIES.map((cat) => (
+          <div className="oh4-reel-rows">
+            {CATEGORIES.map((cat, i) => (
               <Link
                 to={menuBookUrl(cat)}
                 key={cat.id}
-                className={`oh4-dmp-card${cat.id === 'snacks' ? ' full-width' : ''}${activeModel === cat.id ? ' active' : ''}`}
-                style={{ textDecoration: 'none' }}
-                onMouseEnter={() => handleCatClick(cat.id)}
-                onFocus={() => handleCatClick(cat.id)}
+                className={`oh4-reel-row${activeModel === cat.id ? ' active' : ''}`}
+                onMouseEnter={() => handleReelEnter(cat)}
+                onFocus={() => handleReelEnter(cat)}
               >
-                <div className="oh4-dmp-icon-wrap">
-                  {CatIcons[cat.id] || <span style={{ fontSize: '22px' }}>{cat.emoji}</span>}
-                </div>
-                <div className="oh4-dmp-info">
-                  <h3>{cat.name}</h3>
-                  <p>{cat.desc}</p>
-                </div>
-                <ArrowRight className="oh4-dmp-arrow" size={18} />
+                <span className="oh4-reel-num">{String(i + 1).padStart(2, '0')}</span>
+                <span className="oh4-reel-name">{cat.name}</span>
+                <span className="oh4-reel-tag">{cat.desc}</span>
+                <span className="oh4-reel-arrow"><ArrowRight size={18} /></span>
               </Link>
             ))}
           </div>
 
-          <Link to="/menu" className="oh4-dmp-btn-full">
-            VIEW FULL MENU <ArrowRight size={20} />
+          <Link to="/menu" className="oh4-reel-full">
+            <span>View full menu</span>
+            <ArrowRight size={16} />
           </Link>
+        </div>
 
-          <div className="oh4-mp-footer-row">
-            <div className="oh4-mp-footer-center">Good food brings us together.</div>
-            <div className="oh4-mp-socials">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>
-            </div>
+        {/* Floating dish preview — trails the cursor over the reel,
+            crossfades to whichever category row is hovered. */}
+        <div ref={reelPreviewRef} className="oh4-reel-preview" aria-hidden="true">
+          <div className="oh4-reel-preview-inner">
+            <img src={dishCoffee} alt="" data-cur={dishCoffee} />
           </div>
         </div>
       </div>
