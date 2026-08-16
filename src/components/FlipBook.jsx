@@ -121,7 +121,7 @@ function NavBtn({ onClick, disabled, direction }) {
 /* ─────────────────────────────────────────────────────────────────
    MAIN FLIPBOOK COMPONENT
 ───────────────────────────────────────────────────────────────── */
-const FlipBook = forwardRef((props, ref) => {
+const FlipBook = forwardRef(({ onPageChange }, ref) => {
   const [flipped, setFlipped] = useState(0);
   const [animIdx, setAnimIdx] = useState(-1);
   const busy = useRef(false);
@@ -135,6 +135,13 @@ const FlipBook = forwardRef((props, ref) => {
 
   // Sync flippedRef with state
   useEffect(() => { flippedRef.current = flipped; }, [flipped]);
+
+  // Notify parent of the current spread index (0..N) whenever it settles.
+  // Fires once per flip step; consumers that care only about the final
+  // landing page should debounce this callback.
+  const onPageChangeRef = useRef(onPageChange);
+  useEffect(() => { onPageChangeRef.current = onPageChange; }, [onPageChange]);
+  useEffect(() => { if (onPageChangeRef.current) onPageChangeRef.current(flipped); }, [flipped]);
 
   // Mobile detection using ref so it's always current inside closures
   useEffect(() => {
@@ -155,6 +162,18 @@ const FlipBook = forwardRef((props, ref) => {
   /* ── Snap helpers ── */
   const snapLeft  = () => { if (scrollRef.current) scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' }); };
   const snapRight = () => { if (scrollRef.current) scrollRef.current.scrollTo({ left: scrollRef.current.scrollWidth, behavior: 'smooth' }); };
+
+  /* ── Initial mobile position ──
+     On mobile the book is 170vw wide and the browser starts the scroll
+     container at left:0 — the BLANK left half. Snap instantly (behavior:
+     'auto', so no motion at all — safe for reduced-motion users) to the
+     right half so the cover is the first thing a mobile visitor sees.
+     Runs once on mount; desktop layout is untouched. */
+  useEffect(() => {
+    if (isMobileRef.current && scrollRef.current) {
+      scrollRef.current.scrollTo({ left: scrollRef.current.scrollWidth, behavior: 'auto' });
+    }
+  }, []);
 
   /* ── Single step flip ── */
   const doFlipStep = (direction, onDone) => {

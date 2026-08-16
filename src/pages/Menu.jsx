@@ -12,6 +12,61 @@ const PALETTE = ['#B6912E', '#C42D78', '#E8742A', '#D42020', '#6B8F6B'];
 const accent = (i) => PALETTE[i % PALETTE.length];
 
 /* ─────────────────────────────────────────────────────────────────
+   THE INDEX — chapter data for the table-of-contents nav.
+   flip/side targets copied verbatim from the previous nav bar;
+   `page` is the printed menu page number shown in the TOC
+   (flipbook spread N shows menu pages 2N-1 | 2N).
+───────────────────────────────────────────────────────────────── */
+const INDEX_CHAPTERS = [
+  {
+    num: '01', short: 'Breakfast', lead: 'Breakfast &', accentWord: 'Brunch',
+    items: [
+      { name: 'All Day Breakfast Combos', page: 2, flip: 1, side: 'right' },
+      { name: 'Sandwiches',               page: 3, flip: 2, side: 'left'  },
+      { name: 'Omelettes',                page: 3, flip: 2, side: 'left'  },
+      { name: 'Add Ons',                  page: 1, flip: 1, side: 'left'  },
+      { name: 'Soups',                    page: 1, flip: 1, side: 'left'  },
+    ],
+  },
+  {
+    num: '02', short: 'Starters', lead: 'Starters &', accentWord: 'Sharing',
+    items: [
+      { name: 'Salads',                                page: 4, flip: 2, side: 'right' },
+      { name: 'Appetizer — Veg',                       page: 4, flip: 2, side: 'right' },
+      { name: 'Appetizer — Non-Veg',                   page: 5, flip: 3, side: 'left'  },
+      { name: 'Hawker Style Steamed Dumplings',        page: 6, flip: 3, side: 'right' },
+      { name: 'Hot Dogs — The American Comfort Snack', page: 6, flip: 3, side: 'right' },
+    ],
+  },
+  {
+    num: '03', short: 'Mains', lead: 'Mains &', accentWord: 'More',
+    items: [
+      { name: 'Pasta & Spaghetti', page: 7,  flip: 4, side: 'left'  },
+      { name: 'Mains',             page: 10, flip: 5, side: 'right' },
+      { name: 'Pizza',             page: 8,  flip: 4, side: 'right' },
+      { name: 'Steaks',            page: 9,  flip: 5, side: 'left'  },
+      { name: 'Dessert',           page: 9,  flip: 5, side: 'left'  },
+    ],
+  },
+  {
+    num: '04', short: 'Beverages', lead: '', accentWord: 'Beverages',
+    items: [
+      { name: 'Mojito & Coolers',        page: 11, flip: 6, side: 'left'  },
+      { name: 'Shakes',                  page: 11, flip: 6, side: 'left'  },
+      { name: 'Juices',                  page: 12, flip: 6, side: 'right' },
+      { name: 'Ohana Summer Selections', page: 12, flip: 6, side: 'right' },
+      { name: 'Others',                  page: 12, flip: 6, side: 'right' },
+      { name: 'Hot Brews',               page: 13, flip: 7, side: 'left'  },
+      { name: 'Cold Brews',              page: 13, flip: 7, side: 'left'  },
+      { name: 'Tea',                     page: 13, flip: 7, side: 'left'  },
+    ],
+  },
+];
+
+/* Flipbook spread index (0 = cover … 7 = menu13) → chapter index (-1 = none) */
+const PAGE_TO_CHAPTER = [-1, 0, 1, 1, 2, 2, 3, 3];
+
+/* ─────────────────────────────────────────────────────────────────
    PLATE CARD
    Used by both desktop horizontal strip and mobile 2-col grid.
    The "plate" is a circular image with a warm dark rim, simulating
@@ -134,6 +189,59 @@ export default function Menu() {
   const counterRef  = useRef(null);
   const heroRef     = useRef(null);
   const flipBookRef = useRef(null);
+
+  /* ── The Index (TOC nav) state ── */
+  const [indexOpen, setIndexOpen]         = useState(false);
+  const [activeChapter, setActiveChapter] = useState(-1);
+  const [pulseTick, setPulseTick]         = useState(0);
+  const pageTimer = useRef(null);
+
+  /* ── First-visit hint ("what do I do here") ──
+     visible → fading → gone; dismissed permanently on first sheet open. */
+  const [hintState, setHintState] = useState('visible');
+  const hintTimer = useRef(null);
+
+  /* Desktop = wide viewport AND fine pointer (mouse/trackpad).
+     matchMedia listener so the hint label text itself swaps. */
+  const [isFineDesktop, setIsFineDesktop] = useState(() =>
+    typeof window !== 'undefined'
+      ? window.matchMedia('(min-width: 900px) and (pointer: fine)').matches
+      : false
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 900px) and (pointer: fine)');
+    const fn = () => setIsFineDesktop(mq.matches);
+    mq.addEventListener('change', fn);
+    return () => mq.removeEventListener('change', fn);
+  }, []);
+
+  const dismissHint = () => {
+    setHintState(prev => {
+      if (prev !== 'visible') return prev;
+      hintTimer.current = setTimeout(() => setHintState('gone'), 550);
+      return 'fading';
+    });
+  };
+
+  const toggleIndex = () => {
+    setIndexOpen(o => {
+      if (!o) dismissHint(); // opening for the first time retires the hint
+      return !o;
+    });
+  };
+  useEffect(() => () => { if (hintTimer.current) clearTimeout(hintTimer.current); }, []);
+
+  /* FlipBook reports every intermediate spread during multi-page jumps;
+     debounce so the nav highlights only the chapter the reader LANDS on. */
+  const handlePageChange = (p) => {
+    if (pageTimer.current) clearTimeout(pageTimer.current);
+    pageTimer.current = setTimeout(() => {
+      const ch = PAGE_TO_CHAPTER[p] ?? -1;
+      setActiveChapter(ch);
+      if (ch >= 0) setPulseTick(t => t + 1); // retrigger numeral pulse
+    }, 180);
+  };
+  useEffect(() => () => { if (pageTimer.current) clearTimeout(pageTimer.current); }, []);
 
   const categoryToFlipMap = {
     'breakfast-brunch': 1,
@@ -361,208 +469,236 @@ export default function Menu() {
           MENU FLIP BOOK
       ══════════════════════════════════════════════ */}
       {/* ══════════════════════════════════════════════
-          CATEGORY NAV BAR — sticky pill buttons
+          THE INDEX — sticky table-of-contents nav
       ══════════════════════════════════════════════ */}
       <div id="menu-gallery" style={{ position: 'relative' }}>
-        <div style={{
-          position: 'sticky',
-          top: '0',
-          zIndex: 50,
-          padding: 'clamp(14px, 2vh, 20px) clamp(16px, 4vw, 48px)',
-          background: 'linear-gradient(to bottom, rgba(10,8,0,0.97) 0%, rgba(10,8,0,0.85) 100%)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          borderBottom: '1px solid rgba(182,145,46,0.15)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '12px',
-        }}>
-          <span style={{
-            fontSize: '8px',
-            fontWeight: '800',
-            letterSpacing: '0.45em',
-            textTransform: 'uppercase',
-            color: 'rgba(182,145,46,0.7)',
-          }}>
-            Browse by Category
-          </span>
-          <div style={{
-            display: 'flex',
-            gap: 'clamp(10px, 2vw, 20px)',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            width: '100%',
-          }}>
-            {[
-              {
-                name: '01 — BREAKFAST & BRUNCH',
-                icon: '🍳',
-                color: '#E8742A',
-                items: [
-                  { name: 'All Day Breakfast Combos', flip: 1, side: 'right' },
-                  { name: 'Sandwiches',               flip: 2, side: 'left' },
-                  { name: 'Omelettes',                flip: 2, side: 'left' },
-                  { name: 'Add Ons',                  flip: 1, side: 'left' },
-                  { name: 'Soups',                    flip: 1, side: 'left' }
-                ]
-              },
-              {
-                name: '02 — STARTERS & SHARING',
-                icon: '🥗',
-                color: '#6B8F6B',
-                items: [
-                  { name: 'Salads',                                    flip: 2, side: 'right' },
-                  { name: 'Appetizer — Veg',                           flip: 2, side: 'right' },
-                  { name: 'Appetizer — Non-Veg',                       flip: 3, side: 'left'  },
-                  { name: 'Hawker Style Steamed Dumplings',            flip: 3, side: 'right' },
-                  { name: 'Hot Dogs — The American Comfort Snack',     flip: 3, side: 'right' }
-                ]
-              },
-              {
-                name: '03 — MAINS & MORE',
-                icon: '🍝',
-                color: '#B6912E',
-                items: [
-                  { name: 'Pasta & Spaghetti', flip: 4, side: 'left'  },
-                  { name: 'Mains',             flip: 5, side: 'right' },
-                  { name: 'Pizza',             flip: 4, side: 'right' },
-                  { name: 'Steaks',            flip: 5, side: 'left'  },
-                  { name: 'Dessert',           flip: 5, side: 'left'  }
-                ]
-              },
-              {
-                name: '04 — BEVERAGES',
-                icon: '🧋',
-                color: '#C42D78',
-                items: [
-                  { name: 'Mojito & Coolers',         flip: 6, side: 'left'  },
-                  { name: 'Shakes',                   flip: 6, side: 'left'  },
-                  { name: 'Juices',                   flip: 6, side: 'right' },
-                  { name: 'Ohana Summer Selections',  flip: 6, side: 'right' },
-                  { name: 'Others',                   flip: 6, side: 'right' },
-                  { name: 'Hot Brews',                flip: 7, side: 'left'  },
-                  { name: 'Cold Brews',               flip: 7, side: 'left'  },
-                  { name: 'Tea',                      flip: 7, side: 'left'  }
-                ]
-              }
-            ].map((chapter) => {
-              return (
-                <div
-                  key={chapter.name}
-                  className="chapter-dropdown"
-                  style={{
-                    position: 'relative',
-                    display: 'flex',
-                    alignItems: 'center',
-                    background: 'rgba(255,255,255,0.03)',
-                    border: `1px solid rgba(255,255,255,0.08)`,
-                    borderRadius: '100px',
-                    padding: '4px',
-                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                    overflow: 'hidden',
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
-                    e.currentTarget.style.borderColor = `rgba(${chapter.color === '#E8742A' ? '232,116,42' : chapter.color === '#B6912E' ? '182,145,46' : chapter.color === '#6B8F6B' ? '107,143,107' : '196,45,120'}, 0.4)`;
-                    const menu = e.currentTarget.querySelector('.chapter-menu');
-                    if (menu) {
-                      menu.style.maxWidth = '1200px';
-                      menu.style.opacity = '1';
-                      menu.style.marginLeft = '8px';
-                    }
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-                    const menu = e.currentTarget.querySelector('.chapter-menu');
-                    if (menu) {
-                      menu.style.maxWidth = '0px';
-                      menu.style.opacity = '0';
-                      menu.style.marginLeft = '0px';
-                    }
-                  }}
-                >
-                  {/* Chapter Label */}
-                  <div style={{
-                    display: 'flex', alignItems: 'center', gap: '8px',
-                    padding: '6px 16px',
-                    color: '#FFF',
-                    fontSize: 'clamp(10px, 1.2vw, 12px)',
-                    fontWeight: '800',
-                    letterSpacing: '0.15em',
-                    textTransform: 'uppercase',
-                    whiteSpace: 'nowrap',
-                    cursor: 'default',
-                  }}>
-                    <span style={{ fontSize: '16px' }}>{chapter.icon}</span>
-                    {chapter.name}
-                  </div>
+        <style>{`
+          .idx-sheet-grid { display: grid; grid-template-columns: 1fr; }
+          @media (min-width: 900px) { .idx-sheet-grid { grid-template-columns: 1fr 1fr; } }
+          .idx-row-name { transition: transform 0.35s cubic-bezier(0.2,0.8,0.2,1), color 0.35s ease; }
+          .idx-row:hover .idx-row-name, .idx-row:active .idx-row-name { transform: translateX(6px); color: #D9B45B; }
+          .idx-row:active .idx-row-page { color: #F2E7D0; }
+          .idx-sheet::-webkit-scrollbar { width: 4px; }
+          .idx-sheet::-webkit-scrollbar-thumb { background: rgba(182,145,46,0.3); }
+          @keyframes idxPulse { 0% { opacity: 1; } 35% { opacity: 0.2; } 100% { opacity: 1; } }
+          .idx-num-pulse { animation: idxPulse 0.7s ease; }
+          @keyframes idxBarIn { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
+          @keyframes idxTagIn { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: translateX(0); } }
+          /* Hint: one-time attention pulse 1.2s after mount */
+          @keyframes idxHintAttn { 0%, 100% { opacity: 1; } 40% { opacity: 0.3; } 70% { opacity: 1; } }
+          .idx-hint-attn { animation: idxHintAttn 1.4s ease 1.2s 1; }
+          /* Mobile hint: touch ripple glyph (transform/opacity only) */
+          .idx-ripple { position: relative; width: 16px; height: 16px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
+          .idx-ripple::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #D9B45B; }
+          .idx-ripple::after { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(217,180,91,0.75); animation: idxRipple 2s cubic-bezier(0.2,0.6,0.3,1) infinite; }
+          @keyframes idxRipple { 0% { transform: scale(0.35); opacity: 0.9; } 70% { opacity: 0.15; } 100% { transform: scale(1.7); opacity: 0; } }
+          /* Desktop hint: gentle down-chevron */
+          .idx-chev { animation: idxChev 2.4s ease-in-out infinite; }
+          @keyframes idxChev { 0%, 100% { transform: translateY(0); opacity: 0.75; } 50% { transform: translateY(3px); opacity: 1; } }
+        `}</style>
 
-                  {/* Expanding horizontal menu */}
-                  <div
-                    className="chapter-menu"
-                    style={{
-                      display: 'flex',
-                      gap: '6px',
-                      maxWidth: '0px',
-                      opacity: 0,
-                      marginLeft: '0px',
-                      transition: 'all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)',
-                      overflowX: 'auto',
-                      scrollbarWidth: 'none',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    <style>{`.chapter-menu::-webkit-scrollbar { display: none; }`}</style>
-                    {chapter.items.map(item => {
-                      return (
-                        <button
-                          key={item.name}
-                          onClick={() => {
-                            if (flipBookRef.current) {
-                              flipBookRef.current.goToPage(item.flip, item.side);
-                            }
-                          }}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            padding: '6px 14px',
-                            borderRadius: '100px',
-                            background: 'rgba(0,0,0,0.4)',
-                            border: `1px solid rgba(255,255,255,0.1)`,
-                            color: 'rgba(255,255,255,0.7)',
-                            fontSize: '9px',
-                            fontWeight: '700',
-                            letterSpacing: '0.1em',
-                            textTransform: 'uppercase',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease',
-                          }}
-                          onMouseEnter={e => {
-                            e.currentTarget.style.background = chapter.color;
-                            e.currentTarget.style.color = '#000';
-                            e.currentTarget.style.borderColor = chapter.color;
-                          }}
-                          onMouseLeave={e => {
-                            e.currentTarget.style.background = 'rgba(0,0,0,0.4)';
-                            e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
-                            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
-                          }}
-                        >
+        {/* Tap-outside veil — sits under the sticky bar, closes the sheet */}
+        {indexOpen && (
+          <div
+            aria-hidden
+            onClick={() => setIndexOpen(false)}
+            style={{ position: 'fixed', inset: 0, zIndex: 45, background: 'transparent' }}
+          />
+        )}
+
+        <div style={{
+          position: 'sticky', top: 0, zIndex: 50,
+          animation: 'idxBarIn 1s cubic-bezier(0.16,1,0.3,1) 0.5s both',
+        }}>
+          {/* ── Collapsed bar ── */}
+          <div
+            role="button" tabIndex={0}
+            aria-expanded={indexOpen}
+            aria-label={indexOpen ? 'Close menu contents' : 'Open menu contents'}
+            onClick={toggleIndex}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleIndex(); } }}
+            style={{
+              height: '56px', display: 'flex', alignItems: 'center',
+              gap: 'clamp(10px, 2.5vw, 28px)',
+              padding: '0 clamp(16px, 4vw, 48px)',
+              background: '#0B0906',
+              borderBottom: '1px solid rgba(182,145,46,0.22)',
+              cursor: 'pointer', userSelect: 'none', WebkitTapHighlightColor: 'transparent',
+            }}
+          >
+            <span style={{
+              fontFamily: "'Work Sans', sans-serif",
+              fontSize: 'clamp(8px, 2.2vw, 9px)', fontWeight: 800, letterSpacing: '0.45em',
+              textTransform: 'uppercase', color: '#B6912E', whiteSpace: 'nowrap',
+            }}>
+              The Index
+            </span>
+            <div style={{ flex: 1, height: '1px', minWidth: '10px', background: 'rgba(182,145,46,0.18)' }} />
+
+            {/* First-visit hint — swaps label by device, retires after first open.
+                Not focusable; the bar's aria-label carries the same meaning. */}
+            {hintState !== 'gone' && (
+              <span
+                aria-hidden="true"
+                className={hintState === 'visible' ? 'idx-hint-attn' : ''}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '9px',
+                  whiteSpace: 'nowrap', overflow: 'hidden',
+                  opacity: hintState === 'fading' ? 0 : 1,
+                  transform: hintState === 'fading' ? 'translateY(4px)' : 'translateY(0)',
+                  transition: 'opacity 0.5s ease, transform 0.5s ease',
+                }}
+              >
+                <span style={{
+                  fontFamily: "'Instrument Serif', Georgia, serif", fontStyle: 'italic',
+                  fontSize: 'clamp(11.5px, 3vw, 14px)', color: '#D9B45B', letterSpacing: '0.03em',
+                }}>
+                  {isFineDesktop ? 'Click to explore the chapters' : 'Tap to open the contents'}
+                </span>
+                {isFineDesktop ? (
+                  <svg className="idx-chev" width="11" height="7" viewBox="0 0 11 7" fill="none" aria-hidden="true">
+                    <path d="M1 1l4.5 4.5L10 1" stroke="#D9B45B" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                ) : (
+                  <span className="idx-ripple" />
+                )}
+              </span>
+            )}
+
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 'clamp(14px, 2.5vw, 26px)' }}>
+              {INDEX_CHAPTERS.map((ch, i) => {
+                const isActive = i === activeChapter;
+                return (
+                  <span key={ch.num} style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                    {isActive && (
+                      <span key={`tag-${pulseTick}`} style={{
+                        fontFamily: "'Instrument Serif', Georgia, serif", fontStyle: 'italic',
+                        fontSize: '15px', color: '#D9B45B', whiteSpace: 'nowrap',
+                        animation: 'idxTagIn 0.5s ease both',
+                      }}>
+                        {ch.short}
+                      </span>
+                    )}
+                    <span
+                      key={isActive ? `n-${pulseTick}` : `n-${i}`}
+                      className={isActive && pulseTick > 0 ? 'idx-num-pulse' : ''}
+                      style={{
+                        fontFamily: "'Archivo Black', 'Arial Black', sans-serif",
+                        fontSize: '15px', lineHeight: 1,
+                        color: isActive ? '#D9B45B' : 'transparent',
+                        WebkitTextStroke: isActive ? 'none' : '1px rgba(242,231,208,0.3)',
+                        transition: 'color 0.4s ease',
+                      }}
+                    >
+                      {ch.num}
+                    </span>
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ── Expanded sheet — unfolds down from the bar ── */}
+          <div
+            className="idx-sheet"
+            style={{
+              position: 'absolute', top: '100%', left: 0, right: 0,
+              maxHeight: '70svh', overflowY: 'auto', WebkitOverflowScrolling: 'touch',
+              background: '#0E0C08',
+              borderBottom: '1px solid rgba(182,145,46,0.35)',
+              clipPath: indexOpen ? 'inset(0 0 0% 0)' : 'inset(0 0 100% 0)',
+              opacity: indexOpen ? 1 : 0,
+              visibility: indexOpen ? 'visible' : 'hidden',
+              transition: indexOpen
+                ? 'clip-path 0.45s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease'
+                : 'clip-path 0.45s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease, visibility 0s linear 0.5s',
+              pointerEvents: indexOpen ? 'auto' : 'none',
+            }}
+          >
+            <div className="idx-sheet-grid">
+              {INDEX_CHAPTERS.map((ch, ci) => {
+                const isActive = ci === activeChapter;
+                return (
+                  <div key={ch.num} style={{
+                    padding: 'clamp(20px, 3vh, 32px) clamp(20px, 4vw, 44px)',
+                    borderTop: '1px solid rgba(242,231,208,0.06)',
+                    background: isActive ? 'rgba(182,145,46,0.045)' : 'transparent',
+                    transition: 'background 0.5s ease',
+                  }}>
+                    {/* Chapter header */}
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '14px', marginBottom: '8px' }}>
+                      <span style={{
+                        fontFamily: "'Archivo Black', 'Arial Black', sans-serif",
+                        fontSize: '26px', lineHeight: 1,
+                        color: isActive ? '#D9B45B' : 'transparent',
+                        WebkitTextStroke: isActive ? 'none' : '1px rgba(242,231,208,0.28)',
+                        transition: 'color 0.4s ease',
+                      }}>
+                        {ch.num}
+                      </span>
+                      <span style={{
+                        fontFamily: "'Work Sans', sans-serif", fontWeight: 700,
+                        fontSize: '13px', letterSpacing: '0.22em', textTransform: 'uppercase',
+                        color: isActive ? '#F2E7D0' : 'rgba(242,231,208,0.75)',
+                        transition: 'color 0.4s ease',
+                      }}>
+                        {ch.lead}{ch.lead ? ' ' : ''}
+                        <span style={{
+                          fontFamily: "'Instrument Serif', Georgia, serif", fontStyle: 'italic',
+                          textTransform: 'none', letterSpacing: '0.04em',
+                          fontSize: '16px', color: '#D9B45B',
+                        }}>
+                          {ch.accentWord}
+                        </span>
+                      </span>
+                    </div>
+                    {/* Ledger rows */}
+                    {ch.items.map((item) => (
+                      <button
+                        key={item.name}
+                        className="idx-row"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (flipBookRef.current) flipBookRef.current.goToPage(item.flip, item.side);
+                          setIndexOpen(false);
+                        }}
+                        style={{
+                          display: 'flex', alignItems: 'baseline', gap: '12px',
+                          width: '100%', minHeight: '56px',
+                          background: 'none', border: 'none', padding: '0',
+                          cursor: 'pointer', textAlign: 'left',
+                          WebkitTapHighlightColor: 'transparent',
+                        }}
+                      >
+                        <span className="idx-row-name" style={{
+                          fontFamily: "'Work Sans', sans-serif",
+                          fontSize: '13px', fontWeight: 600, letterSpacing: '0.06em',
+                          color: isActive ? 'rgba(242,231,208,0.95)' : 'rgba(242,231,208,0.72)',
+                        }}>
                           {item.name}
-                        </button>
-                      );
-                    })}
+                        </span>
+                        <span style={{
+                          flex: 1, minWidth: '20px',
+                          borderBottom: '1px dotted rgba(182,145,46,0.35)',
+                          transform: 'translateY(-4px)',
+                        }} />
+                        <span className="idx-row-page" style={{
+                          fontFamily: "'Archivo Black', 'Arial Black', sans-serif",
+                          fontSize: '12px', letterSpacing: '0.12em', color: '#B6912E',
+                          transition: 'color 0.35s ease',
+                        }}>
+                          {String(item.page).padStart(2, '0')}
+                        </span>
+                      </button>
+                    ))}
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        <FlipBook ref={flipBookRef} />
+        <FlipBook ref={flipBookRef} onPageChange={handlePageChange} />
       </div>
 
 
