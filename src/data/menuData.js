@@ -71,6 +71,21 @@ export const categoryData = [
   },
 ];
 
+/* Category slug → flip-book spread for deep-links (/menu?flip=N&side=…).
+   Matches the printed page where each category starts (spread N shows
+   menu pages 2N-1 | 2N). Shared by the home hero, the palate carousel
+   and the admin panel. */
+export const categoryBookMap = {
+  'breakfast-brunch': { flip: 1, side: 'left'  },
+  'starters':         { flip: 2, side: 'right' },
+  'street-bites':     { flip: 3, side: 'right' },
+  'mains-pasta':      { flip: 4, side: 'left'  },
+  'pizza':            { flip: 4, side: 'right' },
+  'steaks-grill':     { flip: 5, side: 'left'  },
+  'dessert':          { flip: 5, side: 'left'  },
+  'beverages':        { flip: 6, side: 'left'  },
+};
+
 /* ─────────────────────────────────────────────────────────────────
    ALL MENU ITEMS — real items from 6 printed menu pages
    Fields:

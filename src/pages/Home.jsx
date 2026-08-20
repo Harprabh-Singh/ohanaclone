@@ -6,7 +6,8 @@ import HeroSection from '../components/HeroSection';
 import PalateShowcase from '../components/PalateShowcase';
 import HouseFavourites from '../components/Housefavourites';
 import OhanaExperience from '../components/OhanaExperience';
-import { testimonials } from '../data/testimonials';
+import { useContent } from '../content/ContentContext';
+import { defaultStory, defaultReviews } from '../content/defaults';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,6 +18,10 @@ const StorySection = () => {
   const imgRef     = useRef(null);
   const bodyRef    = useRef(null);
   const pillsRef   = useRef(null);
+
+  /* Editable numbers — /admin → Home Page → Story numbers */
+  const contentCtx = useContent();
+  const story = (contentCtx && contentCtx.content && contentCtx.content.story) || defaultStory;
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -149,7 +154,7 @@ const StorySection = () => {
               borderRadius: '14px',
               padding: '14px 20px', textAlign: 'center',
             }}>
-              <p style={{ fontSize: '1.8rem', fontWeight: '900', color: '#B6912E', margin: 0, lineHeight: 1, letterSpacing: '-0.03em' }}>4.8<span style={{ fontSize: '1rem' }}>★</span></p>
+              <p style={{ fontSize: '1.8rem', fontWeight: '900', color: '#B6912E', margin: 0, lineHeight: 1, letterSpacing: '-0.03em' }}>{story.rating}<span style={{ fontSize: '1rem' }}>★</span></p>
               <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.4)', margin: '5px 0 0', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Rating</p>
             </div>
           </div>
@@ -171,9 +176,9 @@ const StorySection = () => {
               borderTop: '1px solid rgba(255,255,255,0.07)',
             }}>
               {[
-                { num: '2K+', label: 'Guests' },
-                { num: '4.8★', label: 'Rating' },
-                { num: '3yr', label: 'In Jorhat' },
+                { num: story.guests, label: 'Guests' },
+                { num: `${story.rating}★`, label: 'Rating' },
+                { num: story.years, label: 'In Jorhat' },
               ].map((s, i) => (
                 <div key={i}>
                   <p style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: '900', color: '#FFFFFF', margin: 0, letterSpacing: '-0.03em', fontFamily: "'Archivo Black', sans-serif" }}>{s.num}</p>
@@ -251,16 +256,8 @@ const StorySection = () => {
 
 
 // ─── TESTIMONIALS SECTION (redesigned — dual infinite marquee) ────
-const REVIEWS = [
-  { quote: "Came for lunch, stayed for the mojito. Dragon wings are not for the faint-hearted.", author: "Priya M.", visit: "Regular since 2023", rating: 5 },
-  { quote: "The terrace at golden hour is something else. Best date spot in Jorhat, no contest.", author: "Rahul D.", visit: "Visited twice this month", rating: 5 },
-  { quote: "Tandoori pizza sounds weird until you try it. Now I can't stop thinking about it.", author: "Sneha K.", visit: "First visit → now a regular", rating: 5 },
-  { quote: "Ohana feels like someone's home — warm, unhurried, and the food just keeps coming.", author: "Arjun B.", visit: "Group booking", rating: 5 },
-  { quote: "The brownie with ice cream is criminal. I've ordered it four times in a row.", author: "Meera T.", visit: "Weekend regular", rating: 5 },
-  { quote: "Every single dish has a story. The kind of place you want to bring everyone you love.", author: "Kavya R.", visit: "Birthday dinner", rating: 5 },
-  { quote: "Staff remembered my name on my second visit. That's Ohana — family, literally.", author: "Dev S.", visit: "Monthly regular", rating: 5 },
-  { quote: "The shake alone is worth the trip. Everything else is just bonus.", author: "Nisha P.", visit: "Takeaway regular", rating: 5 },
-];
+// Reviews come from the content store (real Google reviews — editable
+// under /admin → Home Page → Guest reviews); defaults are bundled.
 
 function ReviewCard({ review, onMouseMove, onMouseLeave }) {
   const cardRef = useRef(null);
@@ -346,9 +343,15 @@ const TestimonialsSection = () => {
   const sectionRef = useRef(null);
   const headRef    = useRef(null);
 
+  const contentCtx = useContent();
+  const REVIEWS = (contentCtx && contentCtx.content && Array.isArray(contentCtx.content.reviews) && contentCtx.content.reviews.length)
+    ? contentCtx.content.reviews : defaultReviews;
+
   // Double the array for seamless loop
   const row1 = [...REVIEWS, ...REVIEWS];
-  const row2 = [...REVIEWS.slice(4), ...REVIEWS.slice(0, 4), ...REVIEWS.slice(4), ...REVIEWS.slice(0, 4)];
+  const half = Math.floor(REVIEWS.length / 2);
+  const shifted = [...REVIEWS.slice(half), ...REVIEWS.slice(0, half)];
+  const row2 = [...shifted, ...shifted];
 
   const row1Ref = useRef(null);
   const row2Ref = useRef(null);

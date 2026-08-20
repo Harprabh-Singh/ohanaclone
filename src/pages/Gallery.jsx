@@ -7,6 +7,15 @@ import Lenis from 'lenis';
 import { ArrowRight } from 'lucide-react';
 import { galleryImages } from '../data/galleryImages';
 import Lightbox from '../components/Lightbox';
+import { useContent } from '../content/ContentContext';
+
+/* Content store (admin-editable) with bundled fallback */
+const useGalleryImages = () => {
+  const ctx = useContent();
+  return (ctx && Array.isArray(ctx.content?.gallery) && ctx.content.gallery.length)
+    ? ctx.content.gallery
+    : galleryImages;
+};
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -36,13 +45,13 @@ const descriptions = {
   Food: 'From garden-fresh salads to indulgent mains — every plate crafted with passion and premium ingredients.',
 };
 
-/* Group the 12 frames into chapters, preserving the global index for the lightbox */
-const CHAPTERS = ['Interior', 'Terrace', 'Food'].map((name, ci) => ({
+/* Group frames into chapters, preserving the global index for the lightbox */
+const buildChapters = (images) => ['Interior', 'Terrace', 'Food'].map((name, ci) => ({
   name,
   num: `0${ci + 1}`,
   desc: descriptions[name],
-  items: galleryImages.map((img, index) => ({ ...img, index })).filter((img) => img.category === name),
-}));
+  items: images.map((img, index) => ({ ...img, index })).filter((img) => img.category === name),
+})).filter((ch) => ch.items.length > 0);
 
 const GoldLabel = ({ children }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
@@ -55,6 +64,7 @@ const GoldLabel = ({ children }) => (
    1 · HERO — full-bleed photo, char reveal
    ═════════════════════════════════════════════════════════════ */
 const HeroSection = ({ reduced }) => {
+  const images = useGalleryImages();
   const sectionRef = useRef(null);
   const bgRef = useRef(null);
   const contentRef = useRef(null);
@@ -123,7 +133,7 @@ const HeroSection = ({ reduced }) => {
         </h1>
 
         <p className="gl-hero-fade" style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.42em', textTransform: 'uppercase', color: C.gold, margin: 0, fontFamily: BODY, opacity: reduced ? 1 : 0 }}>
-          {galleryImages.length} frames · 3 rooms
+          {images.length} frames · 3 rooms
         </p>
       </div>
 
@@ -143,7 +153,7 @@ const HeroSection = ({ reduced }) => {
    ═════════════════════════════════════════════════════════════ */
 
 /* Caption + grade layers shared by pan frames and reduced-stack frames */
-const FrameVisual = ({ item, reduced, parClass }) => (
+const FrameVisual = ({ item, reduced, parClass, total }) => (
   <>
     <div className={parClass} style={{ position: 'absolute', top: 0, left: '-10%', width: '120%', height: '100%' }}>
       <img src={item.src} alt={item.label} loading="lazy" decoding="async"
@@ -156,13 +166,13 @@ const FrameVisual = ({ item, reduced, parClass }) => (
     <figcaption style={{ position: 'absolute', left: 'clamp(14px, 3vw, 26px)', right: 'clamp(14px, 3vw, 26px)', bottom: 'clamp(12px, 2.5vw, 22px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '12px' }}>
       <span style={{ fontFamily: DISPLAY, fontSize: 'clamp(1.05rem, 3vw, 1.7rem)', letterSpacing: '-0.02em', color: C.cream }}>{item.label}</span>
       <span style={{ fontFamily: BODY, fontSize: '10px', fontWeight: 700, letterSpacing: '0.3em', color: C.goldBright, paddingBottom: '4px', whiteSpace: 'nowrap' }}>
-        {String(item.index + 1).padStart(2, '0')}/{String(galleryImages.length).padStart(2, '0')}
+        {String(item.index + 1).padStart(2, '0')}/{String(total).padStart(2, '0')}
       </span>
     </figcaption>
   </>
 );
 
-const PanChapter = ({ ch, ci, reduced, onOpen }) => {
+const PanChapter = ({ ch, ci, reduced, onOpen, total }) => {
   const containerRef = useRef(null);
   const trackRef = useRef(null);
   const counterRef = useRef(null);
@@ -258,7 +268,7 @@ const PanChapter = ({ ch, ci, reduced, onOpen }) => {
           {ch.items.map((item) => (
             <figure key={item.index} onClick={() => onOpen(item.index)}
               style={{ margin: 0, cursor: 'pointer', position: 'relative', overflow: 'hidden', aspectRatio: '4 / 3', background: C.bg3 }}>
-              <FrameVisual item={item} reduced />
+              <FrameVisual item={item} reduced total={total} />
             </figure>
           ))}
         </div>
@@ -276,7 +286,7 @@ const PanChapter = ({ ch, ci, reduced, onOpen }) => {
               style={{ margin: 0, flexShrink: 0, cursor: 'pointer' }}>
               <div className="gl-pan-scale" style={{ transformOrigin: 'center center' }}>
                 <div className="gl-pan-frame" style={{ position: 'relative', overflow: 'hidden', background: C.bg3 }}>
-                  <FrameVisual item={item} reduced={false} parClass="gl-pan-par" />
+                  <FrameVisual item={item} reduced={false} parClass="gl-pan-par" total={total} />
                 </div>
               </div>
             </figure>
@@ -312,11 +322,13 @@ const PanChapter = ({ ch, ci, reduced, onOpen }) => {
 
 const WalkSection = ({ reduced, onOpen }) => {
   const sectionRef = useRef(null);
+  const images = useGalleryImages();
+  const chapters = useMemo(() => buildChapters(images), [images]);
 
   return (
     <section ref={sectionRef} style={{ position: 'relative', background: C.bg }}>
-      {CHAPTERS.map((ch, ci) => (
-        <PanChapter key={ch.name} ch={ch} ci={ci} reduced={reduced} onOpen={onOpen} />
+      {chapters.map((ch, ci) => (
+        <PanChapter key={`${ch.name}:${ch.items.length}`} ch={ch} ci={ci} reduced={reduced} onOpen={onOpen} total={images.length} />
       ))}
 
       <style>{`
@@ -388,6 +400,7 @@ const ClosingSection = ({ reduced }) => {
    ═════════════════════════════════════════════════════════════ */
 const Gallery = () => {
   const [lightboxIndex, setLightboxIndex] = useState(null);
+  const images = useGalleryImages();
   const reduced = useMemo(
     () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     []
@@ -433,7 +446,7 @@ const Gallery = () => {
 
       {lightboxIndex !== null && (
         <Lightbox
-          images={galleryImages}
+          images={images}
           startIndex={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
         />

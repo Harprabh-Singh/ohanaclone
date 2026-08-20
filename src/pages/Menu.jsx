@@ -4,6 +4,8 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { categoryData } from '../data/menuData';
 import FlipBook from '../components/FlipBook';
+import { useContent } from '../content/ContentContext';
+import { defaultMenuStats } from '../content/defaults';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -189,6 +191,11 @@ export default function Menu() {
   const counterRef  = useRef(null);
   const heroRef     = useRef(null);
   const flipBookRef = useRef(null);
+
+  /* Editable hero stats — /admin → Menu Book → Page stats */
+  const contentCtx = useContent();
+  const menuStats = (contentCtx && contentCtx.content && Array.isArray(contentCtx.content.menuStats) && contentCtx.content.menuStats.length)
+    ? contentCtx.content.menuStats : defaultMenuStats;
 
   /* ── The Index (TOC nav) state ── */
   const [indexOpen, setIndexOpen]         = useState(false);
@@ -462,12 +469,7 @@ export default function Menu() {
             opacity: 0, display: 'flex', gap: 'clamp(24px,5vw,64px)',
             borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: '36px', flexWrap: 'wrap',
           }}>
-            {[
-              { n: '8',       l: 'Categories' },
-              { n: '130+',    l: 'Dishes' },
-              { n: '4.8★',    l: 'Avg Rating' },
-              { n: 'Daily',   l: 'Open 11AM–10PM' },
-            ].map(s => (
+            {menuStats.map(s => (
               <div key={s.l}>
                 <div style={{
                   fontFamily: "'Archivo Black', sans-serif",

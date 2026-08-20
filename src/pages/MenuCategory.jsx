@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { categoryData, menuItems } from '../data/menuData';
+import { useContent } from '../content/ContentContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -330,7 +331,17 @@ function SubcategorySection({ subcategory, items, accentColor, sectionIndex }) {
 ───────────────────────────────────────────────────────────────── */
 export default function MenuCategory() {
   const { category } = useParams();
-  const currentCategory = categoryData.find((c) => c.slug === category) || categoryData[0];
+
+  /* Content store (admin-editable) with bundled fallback */
+  const ctx = useContent();
+  const cats = (ctx && Array.isArray(ctx.content?.menu?.categories) && ctx.content.menu.categories.length)
+    ? ctx.content.menu.categories
+    : categoryData;
+  const allMenuItems = (ctx && Array.isArray(ctx.content?.menu?.items) && ctx.content.menu.items.length)
+    ? ctx.content.menu.items
+    : menuItems;
+
+  const currentCategory = cats.find((c) => c.slug === category) || cats[0];
   const accentColor = currentCategory.accent || '#B6912E';
 
   const [activeSubcat, setActiveSubcat] = useState(null);
@@ -351,8 +362,8 @@ export default function MenuCategory() {
 
   /* All items for this category */
   const allItems = useMemo(() =>
-    menuItems.filter((i) => i.category === category),
-    [category]
+    allMenuItems.filter((i) => i.category === category),
+    [allMenuItems, category]
   );
 
   /* Subcategories */
@@ -451,7 +462,7 @@ export default function MenuCategory() {
     return () => observers.forEach((o) => o.disconnect());
   }, [subcategories, category]);
 
-  const siblingCategories = categoryData.filter((c) => c.slug !== category);
+  const siblingCategories = cats.filter((c) => c.slug !== category);
 
   return (
     <main style={{
