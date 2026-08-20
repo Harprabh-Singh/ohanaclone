@@ -9,6 +9,7 @@ import Gallery from './pages/Gallery';
 import About from './pages/About';
 import Reservations from './pages/Reservations';
 import Contact from './pages/Contact';
+import Admin from './pages/Admin';
 
 const pageTransition = {
   initial: { opacity: 0, y: 20 },
@@ -30,10 +31,11 @@ const PageTransition = ({ children }) => (
 
 function App() {
   const location = useLocation();
+  const isAdmin = location.pathname === '/admin';
 
   return (
     <div className="min-h-screen bg-cream text-text-dark">
-      <Navbar />
+      {!isAdmin && <Navbar />}
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<PageTransition><Home /></PageTransition>} />
@@ -43,9 +45,10 @@ function App() {
           <Route path="/about" element={<PageTransition><About /></PageTransition>} />
           <Route path="/reservations" element={<PageTransition><Reservations /></PageTransition>} />
           <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
       </AnimatePresence>
-      {location.pathname !== '/menu' && <Footer />}
+      {location.pathname !== '/menu' && !isAdmin && <Footer />}
     </div>
   );
 }

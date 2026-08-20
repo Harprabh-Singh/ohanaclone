@@ -1,76 +1,24 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { useContent } from '../content/ContentContext';
+import { defaultPalate } from '../content/defaults';
+import { categoryBookMap } from '../data/menuData';
 import './PalateShowcase.css';
 
-const categories = [
-  {
-    key: 'breakfast',
-    title: 'Breakfast',
-    sub: 'Early Hours',
-    copy: 'Our take on the first meal of the day. Exceptional coffee paired with hearty morning plates.',
-    image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=1400&auto=format&fit=crop&q=85',
-    color: '#e8a838',
-    colorDark: '#7a4e0a',
-  },
-  {
-    key: 'appetizers',
-    title: 'Appetizers',
-    sub: 'For the Table',
-    copy: 'Small plates designed to be passed around. The best way to kick off an evening on the terrace.',
-    image: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=1400&auto=format&fit=crop&q=85',
-    color: '#4aad6e',
-    colorDark: '#1a5c34',
-  },
-  {
-    key: 'burgers',
-    title: 'Burgers',
-    sub: 'Between the Buns',
-    copy: 'No shortcuts here. Hand-formed patties, proper cheese, and house sauces piled high on soft brioche.',
-    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1400&auto=format&fit=crop&q=85',
-    color: '#e8622a',
-    colorDark: '#7a2a08',
-  },
-  {
-    key: 'pizza',
-    title: 'Pizza',
-    sub: 'Wood Fired',
-    copy: 'Hand-stretched dough fired until beautifully blistered. Featuring local favorites like our signature ghost pepper chicken.',
-    image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=1400&auto=format&fit=crop&q=85',
-    color: '#e84a2a',
-    colorDark: '#7a1a08',
-  },
-  {
-    key: 'pasta',
-    title: 'Pasta',
-    sub: 'Comfort Bowls',
-    copy: 'Proper comfort food. Rich sauces, plenty of cheese, and pasta cooked exactly how it should be.',
-    image: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=1400&auto=format&fit=crop&q=85',
-    color: '#e8c42a',
-    colorDark: '#7a5c08',
-  },
-  {
-    key: 'beverages',
-    title: 'Beverages',
-    sub: 'Pour & Sip',
-    copy: 'Whether you need a morning caffeine hit or an icy evening mocktail, the bar has you covered.',
-    image: 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=1400&auto=format&fit=crop&q=85',
-    color: '#2a8ce8',
-    colorDark: '#0a3a7a',
-  },
-  {
-    key: 'desserts',
-    title: 'Desserts',
-    sub: 'To Finish',
-    copy: 'Because there’s always room. Baked fresh in-house for when you just need something sweet.',
-    image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=1400&auto=format&fit=crop&q=85',
-    color: '#c42d78',
-    colorDark: '#6a0a38',
-  },
-];
-
-const N = categories.length;
-const CARD_ANGLE = 360 / N;
-
 export default function PalateShowcase() {
+  /* Editable category cards from the content store (/admin → Home Page
+     → Category carousel); falls back to the bundled defaults. */
+  const contentCtx = useContent();
+  const categories = useMemo(() => {
+    const p = contentCtx && contentCtx.content && contentCtx.content.palate;
+    return (Array.isArray(p) && p.length) ? p : defaultPalate;
+  }, [contentCtx ? contentCtx.content : null]);
+
+  const N = categories.length;
+  const CARD_ANGLE = 360 / N;
+  const cardAngleRef = useRef(CARD_ANGLE);
+  cardAngleRef.current = CARD_ANGLE;
+
   const sectionRef    = useRef(null);
   const carouselRef   = useRef(null);
   const rafRef        = useRef(null);
@@ -88,9 +36,11 @@ export default function PalateShowcase() {
   const [isVisible, setIsVisible] = useState(false);
 
   // Which card index is front-facing based on angle
+  const nRef = useRef(N);
+  nRef.current = N;
   const angleToIdx = (angle) => {
     const norm = (((-angle % 360) + 360) % 360);
-    return Math.round(norm / CARD_ANGLE) % N;
+    return Math.round(norm / cardAngleRef.current) % nRef.current;
   };
 
   // Intersection observer
@@ -172,7 +122,7 @@ export default function PalateShowcase() {
     autoSpin.current = false;
     // Rotate to bring idx to front
     const current = (((-currentAngle.current % 360) + 360) % 360);
-    const target  = idx * CARD_ANGLE;
+    const target  = idx * cardAngleRef.current;
     let diff = target - current;
     if (diff > 180)  diff -= 360;
     if (diff < -180) diff += 360;
@@ -180,7 +130,9 @@ export default function PalateShowcase() {
     resumeAuto();
   }, [resumeAuto]);
 
-  const activeCat = categories[activeIdx];
+  const activeCat = categories[Math.min(activeIdx, categories.length - 1)];
+  const activeBook = categoryBookMap[activeCat.categorySlug] || { flip: 1, side: 'left' };
+  const activeBookUrl = `/menu?flip=${activeBook.flip}&side=${activeBook.side}`;
 
   return (
     <section ref={sectionRef} className="ps-root">
@@ -265,10 +217,10 @@ export default function PalateShowcase() {
       {/* ── Active category description ── */}
       <div className="ps-desc">
         <p className="ps-desc__copy" key={activeCat.key}>{activeCat.copy}</p>
-        <button className="ps-desc__btn" type="button" style={{ '--accent': activeCat.color }}>
+        <Link to={activeBookUrl} className="ps-desc__btn" style={{ '--accent': activeCat.color, textDecoration: 'none' }}>
           <span>Explore {activeCat.title}</span>
           <span className="ps-desc__btn-arrow">→</span>
-        </button>
+        </Link>
       </div>
 
       {/* ── Dot nav ── */}

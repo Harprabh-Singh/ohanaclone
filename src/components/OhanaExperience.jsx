@@ -1,16 +1,10 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useContent } from '../content/ContentContext';
+import { defaultExperiences } from '../content/defaults';
 
 gsap.registerPlugin(ScrollTrigger);
-
-const EXPERIENCES = [
-  { id: '01', title: 'Terrace\nDining',      tag: 'Signature Experience', description: 'Open skies, warm lights, evenings worth staying for. Our rooftop terrace is where Jorhat unwinds.',   image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1600&q=80', accent: '#B6912E' },
-  { id: '02', title: 'Coffee\nMoments',      tag: 'All Day',              description: 'Slow pours, rich aromas, and conversations that stretch past noon.',                                   image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1600&q=80', accent: '#C42D78' },
-  { id: '03', title: 'House\nFavourites',    tag: 'Most Ordered',         description: 'Tandoori pizza to fiery wings — the dishes guests order again and again.',                            image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1600&q=80', accent: '#E8742A' },
-  { id: '04', title: 'Gatherings\n& Groups', tag: 'Celebrations',         description: 'The perfect backdrop for long celebrations and even longer conversations.',                            image: 'https://images.unsplash.com/photo-1529543544282-ea669407fca3?auto=format&fit=crop&w=1600&q=80', accent: '#B6912E' },
-  { id: '05', title: 'Night\nAtmosphere',    tag: 'After Sunset',         description: 'Warm lights, cooler air, city below. The terrace transforms after dark.',                            image: 'https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?auto=format&fit=crop&w=1600&q=80', accent: '#C42D78' },
-];
 
 function rgb(hex) {
   if (hex === '#B6912E') return '182,145,46';
@@ -19,6 +13,17 @@ function rgb(hex) {
 }
 
 export default function OhanaExperience() {
+  /* Editable panels from the content store (/admin → Home Page →
+     Experience panels); bundled defaults as fallback. A ref keeps the
+     imperative GSAP closures reading the latest array. */
+  const contentCtx = useContent();
+  const EXPERIENCES = useMemo(() => {
+    const e = contentCtx && contentCtx.content && contentCtx.content.experiences;
+    return (Array.isArray(e) && e.length) ? e : defaultExperiences;
+  }, [contentCtx ? contentCtx.content : null]);
+  const experiencesRef = useRef(EXPERIENCES);
+  experiencesRef.current = EXPERIENCES;
+
   const [active, setActive] = useState(0);
   const sectionRef     = useRef(null);
   const imgCurrentRef  = useRef(null);
@@ -35,7 +40,7 @@ export default function OhanaExperience() {
   const mDescRef  = useRef(null);
   const mTagRef   = useRef(null);
 
-  const exp = EXPERIENCES[active];
+  const exp = EXPERIENCES[Math.min(active, EXPERIENCES.length - 1)];
 
   /* ── scroll entrance ── */
   useEffect(() => {
@@ -58,7 +63,7 @@ export default function OhanaExperience() {
     if (idx === activeRef.current || isAnimating.current) return;
     isAnimating.current = true;
     activeRef.current   = idx;
-    const next = EXPERIENCES[idx];
+    const next = experiencesRef.current[idx];
 
     /* prepare wipe layer */
     if (imgRevealRef.current) {
@@ -84,7 +89,7 @@ export default function OhanaExperience() {
         if (imgCurrentRef.current) imgCurrentRef.current.style.backgroundImage = `url(${next.image})`;
         gsap.set(imgRevealRef.current, { clipPath: 'inset(0 100% 0 0)' });
         if (progressBarRef.current) {
-          gsap.to(progressBarRef.current, { scaleX: (idx + 1) / EXPERIENCES.length, duration: 0.5, ease: 'power2.out' });
+          gsap.to(progressBarRef.current, { scaleX: (idx + 1) / experiencesRef.current.length, duration: 0.5, ease: 'power2.out' });
         }
         setActive(idx);
         gsap.fromTo([...textEls, ...mEls],

@@ -2,74 +2,10 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { DISHES as DEFAULT_DISHES } from '../data/houseFavourites';
+import { useContent } from '../content/ContentContext';
 
 gsap.registerPlugin(ScrollTrigger);
-
-/* ─────────────────── DATA ─────────────────── */
-const DISHES = [
-  {
-    id: 0,
-    name: 'Tandoori Chicken Sausage Pizza',
-    short: 'PIZZA',
-    tagline: 'Tandoor meets Naples.',
-    sub: 'Smoky. Spiced. Dangerous.',
-    price: 320,
-    tag: 'SIGNATURE',
-    accent: '#E8742A',
-    image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1400&q=90',
-    imgPos: 'right',
-  },
-  {
-    id: 1,
-    name: 'Dragon Fiery Chicken Wings',
-    short: 'WINGS',
-    tagline: 'Crackling skin.',
-    sub: 'Volcanic heat. The kind you crave tomorrow.',
-    price: 280,
-    tag: 'MOST ORDERED',
-    accent: '#D42020',
-    image: 'https://images.unsplash.com/photo-1527477396000-e27163b481c2?auto=format&fit=crop&w=1400&q=90',
-    imgPos: 'left',
-  },
-  {
-    id: 2,
-    name: 'Ohana Chunky Shake',
-    short: 'SHAKE',
-    tagline: 'Thick. Cold.',
-    sub: 'Devastating. Three words. No more needed.',
-    price: 180,
-    tag: 'CHEF PICK',
-    accent: '#C42D78',
-    image: 'https://images.unsplash.com/photo-1553787499-6f9133242796?auto=format&fit=crop&w=1400&q=90',
-    imgPos: 'right',
-  },
-  {
-    id: 3,
-    name: 'Grilled Chicken Club Sandwich',
-    short: 'SANDWICH',
-    tagline: 'Triple-decker.',
-    sub: 'Pressed to perfection. Layered with intent.',
-    price: 220,
-    tag: 'CHEF PICK',
-    accent: '#B6912E',
-    image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=1400&q=90',
-    imgPos: 'left',
-  },
-  {
-    id: 4,
-    name: 'Death By Chocolate Brownie',
-    short: 'BROWNIE',
-    tagline: 'With vanilla ice cream.',
-    sub: 'Criminal. You already know.',
-    price: 160,
-    tag: 'FAN FAVOURITE',
-    accent: '#7B3F00',
-    image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=1400&q=90',
-    imgPos: 'right',
-  },
-];
-
-const TOTAL = DISHES.length;
 
 /* ─────────────────── ANIMATED PRICE ─────────────────── */
 function PriceCounter({ value, color }) {
@@ -126,12 +62,29 @@ export default function HouseFavourites() {
   const touchStartRef  = useRef(null);
   const touchDeltaRef  = useRef(0);
 
-  const d = DISHES[active];
+  /* Content store: admin-editable dishes, bundled defaults as fallback */
+  const ctx = useContent();
+  const dishes = (ctx && Array.isArray(ctx.content?.houseFavs) && ctx.content.houseFavs.length)
+    ? ctx.content.houseFavs
+    : DEFAULT_DISHES;
+  const TOTAL = dishes.length;
+  const dishesRef = useRef(dishes); dishesRef.current = dishes;
+  const totalRef = useRef(TOTAL); totalRef.current = TOTAL;
+
+  const d = dishes[active] || dishes[0] || DEFAULT_DISHES[0];
+
+  /* Clamp the active index if the dish list shrank (admin removed dishes) */
+  useEffect(() => {
+    if (activeRef.current > TOTAL - 1) {
+      activeRef.current = 0;
+      setActive(0);
+    }
+  }, [TOTAL]);
 
   useEffect(() => {
-    DISHES.forEach(dish => { const i = new window.Image(); i.src = dish.image; });
+    dishes.forEach(dish => { if (dish.image) { const i = new window.Image(); i.src = dish.image; } });
     isMobileRef.current = window.innerWidth < 768;
-  }, []);
+  }, [dishes]);
 
   useEffect(() => {
     const onResize = () => { isMobileRef.current = window.innerWidth < 768; };
@@ -144,7 +97,8 @@ export default function HouseFavourites() {
     if (idx === activeRef.current) return;
     activeRef.current = idx;
 
-    const dish = DISHES[idx];
+    const dish = dishesRef.current[idx];
+    if (!dish) return;
     const isMobile = isMobileRef.current;
     const priceEl = isMobile ? mobilePriceRef.current : priceValRef.current;
 
@@ -209,11 +163,11 @@ export default function HouseFavourites() {
     }
 
     // DESKTOP: sticky scroll pin across TOTAL viewports
-    wrap.style.height = `${TOTAL * 100}vh`;
+    wrap.style.height = `${totalRef.current * 100}vh`;
 
     const resolveSnap = (progress) => {
       const inner = Math.max(0, Math.min(1, (progress - 0.03) / 0.94));
-      return Math.max(0, Math.min(TOTAL - 1, Math.round(inner * (TOTAL - 1))));
+      return Math.max(0, Math.min(totalRef.current - 1, Math.round(inner * (totalRef.current - 1))));
     };
 
     const st = ScrollTrigger.create({
@@ -239,7 +193,7 @@ export default function HouseFavourites() {
       clearTimeout(snapTimerRef.current);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [TOTAL]);
 
   /* ─────── MOBILE SWIPE / TAP NAVIGATION ─────── */
   useEffect(() => {
@@ -259,12 +213,12 @@ export default function HouseFavourites() {
       const delta = touchDeltaRef.current;
       if (Math.abs(delta) > 40) {
         const next = delta < 0
-          ? Math.min(activeRef.current + 1, TOTAL - 1)
+          ? Math.min(activeRef.current + 1, totalRef.current - 1)
           : Math.max(activeRef.current - 1, 0);
         triggerDishTransition(next);
         // Update progress bar
         if (progressRef.current) {
-          progressRef.current.style.transform = `scaleX(${next / (TOTAL - 1)})`;
+          progressRef.current.style.transform = `scaleX(${next / (totalRef.current - 1)})`;
         }
       }
       touchStartRef.current = null;
@@ -603,7 +557,7 @@ export default function HouseFavourites() {
           padding: '0 0 18px',
           flexWrap: 'wrap', gap: '4px',
         }}>
-          {DISHES.map((dish, idx) => (
+          {dishes.map((dish, idx) => (
             <DishTab
               key={dish.id}
               label={dish.short}
@@ -677,7 +631,7 @@ export default function HouseFavourites() {
             transform: 'translateX(-50%)',
             display: 'flex', gap: '8px', alignItems: 'center', zIndex: 9, pointerEvents: 'none',
           }}>
-            {DISHES.map((dish, idx) => (
+            {dishes.map((dish, idx) => (
               <div key={dish.id} style={{
                 width: idx === active ? '20px' : '6px',
                 height: '6px',

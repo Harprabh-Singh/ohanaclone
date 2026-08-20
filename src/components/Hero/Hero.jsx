@@ -54,17 +54,13 @@
  * MainCupImage.jsx and ActiveCupImage.jsx.
  */
 
-import { Suspense, useEffect, useRef, useState, useCallback } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import cupImg from './ui/cup.png';
 import dishesImg from './ui/dishes.png';
-import dishCoffee from './models/satellites/cup5.png';
-import dishBurger from './models/satellites/cup2.png';
-import dishPizza from './models/satellites/cup1.png';
-import dishCake from './models/satellites/cup3.png';
-import dishFries from './models/satellites/cup4.png';
-import dishSplash from './models/satellites/cup7.png';
-import dishBeans from './models/satellites/cup6b.png';
+import { useContent } from '../../content/ContentContext';
+import { defaultShowcase } from '../../content/defaults';
+import { categoryBookMap } from '../../data/menuData';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
@@ -97,15 +93,38 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
  * cupConfig.js. desc copy below is written generically enough not to
  * overpromise a specific dish for those two until real art exists.
  */
-const CATEGORIES = [
-  { id: 'coffee',  name: 'COFFEE',  img: dishCoffee, desc: 'Single origin, poured slow',  stats: ['24 items', 'from ₹75'],  book: { flip: 7, side: 'left'  } },
-  { id: 'burgers', name: 'BURGERS', img: dishBurger, desc: 'Flame-grilled, stacked tall', stats: ['3 items',  'from ₹250'], book: { flip: 3, side: 'right' } },
-  { id: 'pizzas',  name: 'PIZZAS',  img: dishPizza,  desc: 'Wood-fired, leopard-spotted', stats: ['11 items', 'from ₹350'], book: { flip: 4, side: 'right' } },
-  { id: 'pasta',   name: 'PASTA',   img: dishBeans,  desc: 'Rolled into every sauce',     stats: ['2 items',  'from ₹375'], book: { flip: 4, side: 'left'  } },
-  { id: 'cakes',   name: 'CAKES',   img: dishCake,   desc: 'Baked for the sweet tooth',   stats: ['1 item',   'from ₹220'], book: { flip: 5, side: 'left'  } },
-  { id: 'drinks',  name: 'DRINKS',  img: dishSplash, desc: 'Coolers, shakes & brews',     stats: ['25 items', 'from ₹140'], book: { flip: 6, side: 'left'  } },
-  { id: 'snacks',  name: 'SNACKS',  img: dishFries,  desc: 'Small plates, big cravings',  stats: ['14 items', 'from ₹180'], book: { flip: 2, side: 'right' } },
-];
+/* CATEGORIES — built from the editable content store (see /admin → Home
+   Page → Hero showcase). Each slot points at a menu category; the item
+   count and "from ₹" price are computed live from the menu data, and the
+   deep-link target comes from categoryBookMap — so the admin only picks
+   a subheading and everything else stays in sync automatically. The
+   first slot (coffee) is the scroll-animation anchor and stays fixed. */
+const priceOf = (p) => {
+  if (typeof p === 'number') return p;
+  const m = String(p).match(/\d+/);
+  return m ? Number(m[0]) : Infinity;
+};
+const computeStats = (items, slug) => {
+  const list = items.filter((it) => it.category === slug);
+  if (!list.length) return ['0 items', '—'];
+  const min = Math.min(...list.map((it) => priceOf(it.price)));
+  return [`${list.length} item${list.length === 1 ? '' : 's'}`, `from ₹${min}`];
+};
+const buildCategories = (content) => {
+  const showcase = (content && Array.isArray(content.showcase) && content.showcase.length)
+    ? content.showcase : defaultShowcase;
+  const items = (content && content.menu && content.menu.items) || [];
+  return showcase.map((slot) => ({
+    id: slot.id,
+    name: slot.name,
+    img: slot.img,
+    desc: slot.desc,
+    stats: slot.categorySlug ? computeStats(items, slot.categorySlug) : (slot.stats || ['', '']),
+    book: slot.categorySlug
+      ? (categoryBookMap[slot.categorySlug] || { flip: 1, side: 'left' })
+      : { flip: 7, side: 'left' },
+  }));
+};
 
 /* Deep-link to the /menu flipbook: /menu?flip=N&side=left|right lands the
    book on the matching spread. `book` targets mirror The Index ledger on
@@ -133,6 +152,16 @@ const remap = (p, start, end) =>
   Math.max(0, Math.min((p - start) / (end - start), 1));
 
 export default function Hero() {
+  /* Editable showcase categories from the content store (falls back to
+     the bundled defaults outside the provider / before hydration). */
+  const contentCtx = useContent();
+  const CATEGORIES = useMemo(
+    () => buildCategories(contentCtx ? contentCtx.content : null),
+    [contentCtx ? contentCtx.content : null]
+  );
+  const CATEGORIESRef = useRef(CATEGORIES);
+  CATEGORIESRef.current = CATEGORIES;
+
   const rootRef = useRef(null);
   const textLayerRef = useRef(null);
   const mobileCupRef = useRef(null);
@@ -207,7 +236,7 @@ export default function Hero() {
   const trackXFor = (i, w) => w * SLIDE_INSET - i * w * SLIDE_W;
 
   const goToIdx = useCallback((i) => {
-    const clamped = Math.max(0, Math.min(CATEGORIES.length - 1, i));
+    const clamped = Math.max(0, Math.min(CATEGORIESRef.current.length - 1, i));
     mIdxRef.current = clamped;
     setMIdx(clamped);
     const w = mStageRef.current?.clientWidth ?? 1;
@@ -230,7 +259,7 @@ export default function Hero() {
   }, []);
 
   const onStageDown = (e) => {
-    mDrag.current = { down: true, startX: e.clientX, startY: e.clientY, lastY: e.clientY, dx: 0, axis: null, moved: false };
+    mDrag.current = { down: true, downAt: Date.now(), startX: e.clientX, startY: e.clientY, lastY: e.clientY, dx: 0, axis: null, moved: false };
     // Keep every move event flowing to the stage even if the finger
     // strays outside it — without this the drag stutters and snaps.
     try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* noop */ }
@@ -279,11 +308,17 @@ export default function Hero() {
     const w = mStageRef.current?.clientWidth ?? 1;
     const dx = mDrag.current.dx;
     let next = mIdx;
-    
-    // Require a more deliberate swipe (35% of screen width) to change items
-    if (dx < -w * 0.35) next = mIdx + 1;
-    else if (dx > w * 0.35) next = mIdx - 1;
-    
+
+    // Velocity-aware paging: small drags only page when FLICKED fast
+    // (>0.4 px/ms past 8% of width); a slow deliberate drag must pass
+    // 35% of the stage width. Tiny accidental swipes always snap back.
+    const dt = Math.max(1, Date.now() - (mDrag.current.downAt ?? Date.now()));
+    const velocity = Math.abs(dx) / dt;
+    const flicked = velocity > 0.4 && Math.abs(dx) > w * 0.08;
+    const draggedFar = Math.abs(dx) > w * 0.35;
+    if ((flicked || draggedFar) && dx < 0) next = mIdx + 1;
+    else if ((flicked || draggedFar) && dx > 0) next = mIdx - 1;
+
     goToIdx(next);
     // Clear the moved flag AFTER the click event has had a chance to fire
     setTimeout(() => { mDrag.current.moved = false; }, 60);
@@ -1033,7 +1068,7 @@ export default function Hero() {
             crossfades to whichever category row is hovered. */}
         <div ref={reelPreviewRef} className="oh4-reel-preview" aria-hidden="true">
           <div className="oh4-reel-preview-inner">
-            <img src={dishCoffee} alt="" data-cur={dishCoffee} />
+            <img src={CATEGORIES[0].img} alt="" data-cur={CATEGORIES[0].img} />
           </div>
         </div>
       </div>

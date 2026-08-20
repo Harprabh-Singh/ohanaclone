@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useState, useRef, useEffect, useMemo, forwardRef, useImperativeHandle } from 'react';
+import { useContent } from '../content/ContentContext';
 
 /* ─────────────────────────────────────────────────────────────────
    OHANA MENU FLIP BOOK  v5
@@ -14,16 +15,20 @@ import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 're
      flipped=7 → left: menu13.png | right: (empty)
 ───────────────────────────────────────────────────────────────── */
 
-const PAGES = [
-  { front: '/menu-pages/cover.jpg',  back: '/menu-pages/menu1.png'  },
-  { front: '/menu-pages/menu2.png',  back: '/menu-pages/menu3.png'  },
-  { front: '/menu-pages/menu4.png',  back: '/menu-pages/menu5.png'  },
-  { front: '/menu-pages/menu6.png',  back: '/menu-pages/menu7.png'  },
-  { front: '/menu-pages/menu8.png',  back: '/menu-pages/menu9.png'  },
-  { front: '/menu-pages/menu10.png', back: '/menu-pages/menu11.png' },
-  { front: '/menu-pages/menu12.png', back: '/menu-pages/menu13.png' },
-];
-const N = PAGES.length; // 7 pages
+/* Pair a flat page list [p0, p1, p2, …] into spreads [{front, back}, …] */
+const pairPages = (flat) => {
+  const arr = [];
+  for (let i = 0; i < flat.length; i += 2) {
+    arr.push({ front: flat[i], back: flat[i + 1] || flat[i] });
+  }
+  return arr;
+};
+
+/* Bundled fallback spreads — cover + menu1…menu13 (admin can replace each) */
+const DEFAULT_PAGES = pairPages([
+  '/menu-pages/cover.jpg',
+  ...Array.from({ length: 13 }, (_, i) => `/menu-pages/menu${i + 1}.png`),
+]);
 
 /* ────── Sub-components ────── */
 function CoverPage() {
@@ -136,6 +141,23 @@ const FlipBook = forwardRef(({ onPageChange }, ref) => {
   // Sync flippedRef with state
   useEffect(() => { flippedRef.current = flipped; }, [flipped]);
 
+  /* Pages from the content store (admin-editable) with bundled fallback */
+  const contentCtx = useContent();
+  const flatPages = (contentCtx && Array.isArray(contentCtx.content?.menuPages) && contentCtx.content.menuPages.length >= 2)
+    ? contentCtx.content.menuPages
+    : null;
+  const PAGES = useMemo(() => (flatPages ? pairPages(flatPages) : DEFAULT_PAGES), [flatPages]);
+  const N = PAGES.length;
+  const nRef = useRef(N); nRef.current = N;
+
+  /* Clamp the flip state if the book shrank after an admin edit */
+  useEffect(() => {
+    if (flippedRef.current > N) {
+      flippedRef.current = N;
+      setFlipped(N);
+    }
+  }, [N]);
+
   // Notify parent of the current spread index (0..N) whenever it settles.
   // Fires once per flip step; consumers that care only about the final
   // landing page should debounce this callback.
@@ -191,7 +213,7 @@ const FlipBook = forwardRef(({ onPageChange }, ref) => {
 
   /* ── goNext / goPrev ── */
   const goNext = () => {
-    if (busy.current || flippedRef.current >= N) return;
+    if (busy.current || flippedRef.current >= nRef.current) return;
     doFlipStep(1, () => { if (isMobileRef.current) snapLeft(); });
   };
   const goPrev = () => {
@@ -203,7 +225,7 @@ const FlipBook = forwardRef(({ onPageChange }, ref) => {
   useImperativeHandle(ref, () => ({
     goToPage: (targetIndex, side = 'left') => {
       if (busy.current) return;
-      const clamped = Math.max(0, Math.min(targetIndex, N));
+      const clamped = Math.max(0, Math.min(targetIndex, nRef.current));
       const current = flippedRef.current;
       if (clamped === current) {
         // Already on the right spread — just pan
