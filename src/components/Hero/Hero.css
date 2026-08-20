@@ -2777,9 +2777,10 @@
     min-height: 0;
     margin-top: clamp(2px, 0.6vh, 6px);
     overflow: hidden;
-    /* pan-y: horizontal swipes are owned by the inner scroller, vertical
-       swipes fall through to the page scroll — no gesture hijacking */
-    touch-action: pan-y;
+    /* touch-action must stay auto (default): the browser picks the axis per
+       gesture — horizontal swipes natively scroll the inner scroller,
+       vertical swipes chain to the page (scroller's overflow-y is hidden).
+       pan-y here would BLOCK horizontal native scrolling entirely. */
   }
 
   /* The native scroller — horizontal momentum + snap from the phone's
@@ -2797,7 +2798,6 @@
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
-    touch-action: pan-y;
     z-index: 1;
     container-type: inline-size;
   }
