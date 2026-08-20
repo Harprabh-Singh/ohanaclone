@@ -15,14 +15,33 @@ const CACHE_KEY = 'ohana-content-cache-v1';
 
 /* Older published snapshots (v1) lack the newer editable surfaces
    (showcase, palate, story, experiences, reviews, menuStats). Merge any
-   incoming snapshot over the bundled defaults so those keys always exist. */
+   incoming snapshot over the bundled defaults so those keys always exist.
+   Also heals showcase slots: local build/dev asset paths (/src/… or
+   /assets/…) baked into an early publish are swapped back to the stable
+   public defaults, and every slot gains its mobile display settings. */
+function sanitizeShowcase(slots) {
+  const source = (Array.isArray(slots) && slots.length) ? slots : defaultContent.showcase;
+  return source.map((slot, i) => {
+    const def = defaultContent.showcase[i] || {};
+    const brokenLocal = typeof slot.img === 'string' && /^\/(src|assets)\//.test(slot.img);
+    return {
+      ...def,
+      ...slot,
+      img: brokenLocal || !slot.img ? def.img || slot.img : slot.img,
+      mob: { ...(def.mob || { w: 100, h: 118, x: 0, y: 0 }), ...(slot.mob || {}) },
+    };
+  });
+}
+
 function mergeWithDefaults(snapshot) {
   if (!snapshot || !snapshot.version) return null;
-  return {
+  const merged = {
     ...defaultContent,
     ...snapshot,
     menu: { ...defaultContent.menu, ...(snapshot.menu || {}) },
   };
+  merged.showcase = sanitizeShowcase(snapshot.showcase);
+  return merged;
 }
 
 export function ContentProvider({ children }) {

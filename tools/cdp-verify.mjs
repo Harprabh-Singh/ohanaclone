@@ -10,6 +10,7 @@ const WIDTH = Number(process.argv[3] || 390);
 const HEIGHT = Number(process.argv[4] || 844);
 const SHOT = process.argv[5] || 'debug-verify.png';
 const CLICK_TEXT = process.argv[6] || '';
+const SCROLL_Y = Number(process.argv[7] || 0);
 
 const chrome = spawn(CHROME, [
   '--headless=new', '--disable-gpu', '--remote-debugging-port=9225',
@@ -71,6 +72,11 @@ if (CLICK_TEXT) {
   })()`);
   console.log('CLICK:', clicked);
   await sleep(2500);
+}
+
+if (SCROLL_Y) {
+  await evaluate(`window.scrollTo(0, ${SCROLL_Y})`);
+  await sleep(1200);
 }
 
 console.log('ERRORS:', errors.length ? errors.slice(0, 6).join('\n') : 'none');

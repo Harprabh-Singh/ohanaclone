@@ -207,7 +207,7 @@ function MenuItemsSection({ content, update, notify }) {
 
   return (
     <section>
-      <SectionHead num="01" title="Menu items"
+      <SectionHead num="02" title="Menu items"
         sub={`${items.length} dishes across ${cats.length} categories — names, prices, descriptions, badges, photos.`} />
 
       {/* Category cards */}
@@ -346,7 +346,7 @@ function HouseFavsSection({ content, update, notify }) {
   const patch = (i, p) => update((n) => { Object.assign(n.houseFavs[i], p); });
   return (
     <section>
-      <SectionHead num="02" title="House favourites"
+      <SectionHead num="03" title="House favourites"
         sub="The pinned showcase on the home page — five signature dishes, full control." />
       <div style={{ display: 'grid', gap: '26px' }}>
         {favs.map((d, i) => (
@@ -413,7 +413,7 @@ function GallerySection({ content, update, notify }) {
   const patch = (i, p) => update((n) => { Object.assign(n.gallery[i], p); });
   return (
     <section>
-      <SectionHead num="03" title="Gallery"
+      <SectionHead num="04" title="Gallery"
         sub={`${imgs.length} frames — swap photos, retitle, or file them under a room.`} />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '16px' }}>
         {imgs.map((img, i) => (
@@ -453,7 +453,7 @@ function MenuBookSection({ content, update, notify }) {
   const stats = content.menuStats || [];
   return (
     <section>
-      <SectionHead num="04" title="Menu book"
+      <SectionHead num="05" title="Menu book"
         sub="The printed menu, page by page — replace any spread of the flip book." />
 
       {/* Menu page hero stats */}
@@ -539,7 +539,7 @@ function HomePageSection({ content, update, notify }) {
 
   return (
     <section>
-      <SectionHead num="05" title="Home page"
+      <SectionHead num="01" title="Home page"
         sub="Every editable surface of the landing page — the hero menu reel, the spinning category carousel, story numbers, experience panels and guest reviews." />
 
       {/* ── A · HERO MENU SHOWCASE ── */}
@@ -604,6 +604,37 @@ function HomePageSection({ content, update, notify }) {
                   disabled={locked} readOnly={locked}
                   onChange={(e) => patchShowcase(i, { desc: e.target.value })} />
               </Field>
+              {!locked && (
+                <>
+                  <div style={{ ...labelStyle, margin: '4px 0 10px' }}>
+                    Mobile dish display — width / height % of the slide, x / y shift %
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(104px, 1fr))', gap: '0 12px' }}>
+                    {[
+                      ['w', 'Width %', 20, 220],
+                      ['h', 'Height %', 20, 220],
+                      ['x', 'Shift X %', -100, 100],
+                      ['y', 'Shift Y %', -100, 100],
+                    ].map(([key, lab, min, max]) => (
+                      <Field key={key} label={lab}>
+                        <input
+                          type="number" min={min} max={max} style={inputStyle}
+                          value={String((slot.mob && slot.mob[key] !== undefined ? slot.mob[key] : (key === 'h' ? 118 : key === 'w' ? 100 : 0)))}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            patchShowcase(i, {
+                              mob: {
+                                w: 100, h: 118, x: 0, y: 0,
+                                ...(slot.mob || {}),
+                                [key]: v === '' ? '' : Math.max(min, Math.min(max, Number(v))),
+                              },
+                            });
+                          }} />
+                      </Field>
+                    ))}
+                  </div>
+                </>
+              )}
               <p style={autoNote}>
                 Auto: {auto} — tap opens the book at spread {book.flip} ({book.side} page)
               </p>

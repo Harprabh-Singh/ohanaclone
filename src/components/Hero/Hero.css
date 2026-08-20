@@ -2777,13 +2777,31 @@
     min-height: 0;
     margin-top: clamp(2px, 0.6vh, 6px);
     overflow: hidden;
-    /* none (not pan-y): the browser can never hijack the gesture
-       mid-drag — vertical swipes are passed to the page scroll by
-       the axis lock in Hero.jsx instead */
-    touch-action: none;
-    cursor: grab;
+    /* pan-y: horizontal swipes are owned by the inner scroller, vertical
+       swipes fall through to the page scroll — no gesture hijacking */
+    touch-action: pan-y;
   }
-  .oh4-mstage:active { cursor: grabbing; }
+
+  /* The native scroller — horizontal momentum + snap from the phone's
+     own scroll engine. Contains ONLY the track; glow/ruler/ghost are
+     siblings so they stay put while dishes glide past.
+     container-type: inline-size lets slides size themselves in cqw
+     (76cqw = 76% of the STAGE) — percentage flex-basis can't work here
+     because the track is max-content (indefinite) width. */
+  .oh4-mstage-scroll {
+    position: absolute;
+    inset: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-y;
+    z-index: 1;
+    container-type: inline-size;
+  }
+  .oh4-mstage-scroll::-webkit-scrollbar { display: none; }
 
   /* Warm glow behind the dish */
   .oh4-mstage-glow {
@@ -2845,15 +2863,20 @@
     position: relative;
     display: flex;
     height: 100%;
-    will-change: transform;
-    z-index: 1;
+    /* max-content width + 12cqw side padding: slide i's snap-center lands
+       at scrollLeft = i * 76% of stage width — matches the index math */
+    width: max-content;
+    padding: 0 12cqw;
+    box-sizing: border-box;
   }
   .oh4-mstage-slide {
-    flex: 0 0 76%;
+    flex: 0 0 76cqw;
+    width: 76cqw;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
+    scroll-snap-align: center;
     user-select: none;
     -webkit-user-select: none;
     /* neighbors recede so the active dish owns the stage */

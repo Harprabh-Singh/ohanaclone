@@ -7,15 +7,6 @@ import { categoryData, menuItems } from '../data/menuData';
 import { galleryImages } from '../data/galleryImages';
 import { DISHES } from '../data/houseFavourites';
 
-/* Hero showcase dish photos (bundled art — the same files the hero uses) */
-import dishCoffee from '../components/Hero/models/satellites/cup5.png';
-import dishBurger from '../components/Hero/models/satellites/cup2.png';
-import dishPizza from '../components/Hero/models/satellites/cup1.png';
-import dishCake from '../components/Hero/models/satellites/cup3.png';
-import dishFries from '../components/Hero/models/satellites/cup4.png';
-import dishSplash from '../components/Hero/models/satellites/cup7.png';
-import dishBeans from '../components/Hero/models/satellites/cup6b.png';
-
 /* Menu-book page images, in order: cover, menu1 … menu13 */
 export const defaultMenuPages = [
   '/menu-pages/cover.jpg',
@@ -25,15 +16,20 @@ export const defaultMenuPages = [
 /* ─── Hero "Our Menu" showcase (home, after scroll) ───
    Every slot except the first points at a menu category; the item
    count + "from ₹" price are computed live from the menu data.
-   The first slot (coffee) is the scroll-animation anchor — locked. */
+   The first slot (coffee) is the scroll-animation anchor — locked.
+   Images live at stable public paths (/showcase/*.png) so published
+   content never carries local build URLs.
+   mob = mobile dish-stage display: width % / height % of the slide,
+   x/y shift in % of the slide. */
+const DEFAULT_MOB = { w: 100, h: 118, x: 0, y: 0 };
 export const defaultShowcase = [
-  { id: 'coffee',  name: 'COFFEE',  img: dishCoffee, desc: 'Single origin, poured slow',  locked: true, categorySlug: null,           stats: ['24 items', 'from ₹75'] },
-  { id: 'burgers', name: 'BURGERS', img: dishBurger, desc: 'Flame-grilled, stacked tall', categorySlug: 'street-bites' },
-  { id: 'pizzas',  name: 'PIZZAS',  img: dishPizza,  desc: 'Wood-fired, leopard-spotted', categorySlug: 'pizza' },
-  { id: 'pasta',   name: 'PASTA',   img: dishBeans,  desc: 'Rolled into every sauce',     categorySlug: 'mains-pasta' },
-  { id: 'cakes',   name: 'CAKES',   img: dishCake,   desc: 'Baked for the sweet tooth',   categorySlug: 'dessert' },
-  { id: 'drinks',  name: 'DRINKS',  img: dishSplash, desc: 'Coolers, shakes & brews',     categorySlug: 'beverages' },
-  { id: 'snacks',  name: 'SNACKS',  img: dishFries,  desc: 'Small plates, big cravings',  categorySlug: 'starters' },
+  { id: 'coffee',  name: 'COFFEE',  img: '/showcase/coffee.png', desc: 'Single origin, poured slow',  locked: true, categorySlug: null,           stats: ['24 items', 'from ₹75'], mob: { ...DEFAULT_MOB } },
+  { id: 'burgers', name: 'BURGERS', img: '/showcase/burger.png', desc: 'Flame-grilled, stacked tall', categorySlug: 'street-bites', mob: { ...DEFAULT_MOB } },
+  { id: 'pizzas',  name: 'PIZZAS',  img: '/showcase/pizza.png',  desc: 'Wood-fired, leopard-spotted', categorySlug: 'pizza',        mob: { ...DEFAULT_MOB } },
+  { id: 'pasta',   name: 'PASTA',   img: '/showcase/beans.png',  desc: 'Rolled into every sauce',     categorySlug: 'mains-pasta',  mob: { ...DEFAULT_MOB } },
+  { id: 'cakes',   name: 'CAKES',   img: '/showcase/cake.png',   desc: 'Baked for the sweet tooth',   categorySlug: 'dessert',      mob: { ...DEFAULT_MOB } },
+  { id: 'drinks',  name: 'DRINKS',  img: '/showcase/splash.png', desc: 'Coolers, shakes & brews',     categorySlug: 'beverages',    mob: { ...DEFAULT_MOB } },
+  { id: 'snacks',  name: 'SNACKS',  img: '/showcase/fries.png',  desc: 'Small plates, big cravings',  categorySlug: 'starters',     mob: { ...DEFAULT_MOB } },
 ];
 
 /* ─── Palate showcase — the 3-D category carousel on home ─── */

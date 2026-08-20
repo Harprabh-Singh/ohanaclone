@@ -119,6 +119,7 @@ const buildCategories = (content) => {
     name: slot.name,
     img: slot.img,
     desc: slot.desc,
+    mob: slot.mob || { w: 100, h: 118, x: 0, y: 0 },
     stats: slot.categorySlug ? computeStats(items, slot.categorySlug) : (slot.stats || ['', '']),
     book: slot.categorySlug
       ? (categoryBookMap[slot.categorySlug] || { flip: 1, side: 'left' })
@@ -214,124 +215,55 @@ export default function Hero() {
     reelPreviewApiRef.current.show();
   }, [handleCatClick]);
 
-  // ── MOBILE DISH STAGE — full-screen swipeable pager. The stage
-  // flex-grows to fill the viewport (no dead space); the dish track
-  // follows the finger with a slight tilt, the giant ghost numeral
-  // parallaxes behind it, and releasing past the threshold pages to
-  // the next category. Tap (no drag) navigates via the Link.
+  // ── MOBILE DISH STAGE — full-screen swipeable pager, rebuilt on the
+  // phone's OWN scroller: the track lives in a native overflow-x container
+  // with scroll-snap, so the dish follows the finger 1:1, glides with real
+  // momentum, and settles gently onto the next slide. No custom drag math,
+  // no velocity thresholds, no snap-back jumps. Active slide, ghost-word
+  // parallax and the coffee-cup handoff are all derived from scrollLeft.
+  // Tap (no scroll) still navigates via the Link — browsers suppress the
+  // click automatically after a real scroll gesture.
   const [mIdx, setMIdx] = useState(0);
   const mIdxRef = useRef(0);
   const mStageRef = useRef(null);
+  const mScrollerRef = useRef(null);
   const mTrackRef = useRef(null);
   const mGhostRef = useRef(null);
-  const mDrag = useRef({ down: false, startX: 0, dx: 0, moved: false });
-  // Timestamp of the last real drag's end — click suppression window
-  // covers the pointercancel → synthetic-click race on touch devices.
-  const mLastDragEndRef = useRef(0);
+  const mScrollRaf = useRef(0);
 
-  // Peek-carousel geometry: 76% slides with a 12% side inset so the
-  // neighboring dishes peek in from the edges (dimmed + scaled down).
-  const SLIDE_W = 0.76;
-  const SLIDE_INSET = (1 - SLIDE_W) / 2;
-  const trackXFor = (i, w) => w * SLIDE_INSET - i * w * SLIDE_W;
+  // Slide step = 76% of the stage width. Slides are 76% wide, centered by
+  // the track's 12% side padding, so scrollLeft of slide i is exactly
+  // i * step — this is what makes snap-centering and index math agree.
+  const slideStep = () => (mStageRef.current?.clientWidth ?? 1) * 0.76;
 
   const goToIdx = useCallback((i) => {
     const clamped = Math.max(0, Math.min(CATEGORIESRef.current.length - 1, i));
-    mIdxRef.current = clamped;
-    setMIdx(clamped);
-    const w = mStageRef.current?.clientWidth ?? 1;
-    if (mTrackRef.current) {
-      gsap.to(mTrackRef.current, { x: trackXFor(clamped, w), rotation: 0, duration: 0.6, ease: 'expo.out', overwrite: 'auto' });
-    }
-    if (mGhostRef.current) {
-      gsap.to(mGhostRef.current, { x: 0, duration: 0.6, ease: 'expo.out', overwrite: 'auto' });
-    }
-    // The docked hero cup IS the coffee dish — it only steps aside
-    // when the user pages away from coffee, and returns on page-back.
-    if (mobileCupRef.current) {
-      gsap.to(mobileCupRef.current, {
-        opacity: clamped === 0 ? 1 : 0,
-        duration: 0.35,
-        ease: 'power2.out',
-        overwrite: 'auto',
-      });
-    }
+    mScrollerRef.current?.scrollTo({ left: clamped * slideStep(), behavior: 'smooth' });
   }, []);
 
-  const onStageDown = (e) => {
-    mDrag.current = { down: true, downAt: Date.now(), startX: e.clientX, startY: e.clientY, lastY: e.clientY, dx: 0, axis: null, moved: false };
-    // Keep every move event flowing to the stage even if the finger
-    // strays outside it — without this the drag stutters and snaps.
-    try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* noop */ }
-  };
-  const onStageMove = (e) => {
-    const d = mDrag.current;
-    if (!d.down) return;
-    const dx = e.clientX - d.startX;
-    const dy = e.clientY - d.startY;
-    // Axis lock: first decisive movement decides the gesture. Vertical
-    // swipes scroll the page by hand (normalizeScroll is parked while
-    // the menu is open, so nothing double-scrolls or fights the drag).
-    if (!d.axis && Math.hypot(dx, dy) > 10) {
-      d.axis = Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
-    }
-    if (d.axis === 'y') {
-      const step = e.clientY - d.lastY;
-      d.lastY = e.clientY;
-      window.scrollBy(0, -step);
-      return;
-    }
-    if (d.axis !== 'x') return;
-    d.dx = dx;
-    if (Math.abs(dx) > 8) d.moved = true;
-    const w = mStageRef.current?.clientWidth ?? 1;
-    if (mTrackRef.current) {
-      gsap.set(mTrackRef.current, { x: trackXFor(mIdx, w) + dx, rotation: dx * 0.004 });
-    }
-    // Ghost numeral trails at 35% for depth
-    if (mGhostRef.current) {
-      gsap.set(mGhostRef.current, { x: dx * 0.35 });
-    }
-    // The docked coffee cup hands off DURING the drag — fades out over
-    // the first quarter-width instead of lingering until release.
-    if (mIdx === 0 && mobileCupRef.current) {
-      const fadeT = Math.min(1, Math.abs(dx) / (w * 0.25));
-      gsap.set(mobileCupRef.current, { opacity: 1 - fadeT });
-    }
-  };
-  const onStageUp = () => {
-    if (!mDrag.current.down) return;
-    mDrag.current.down = false;
-    if (mDrag.current.moved) {
-      mLastDragEndRef.current = Date.now();
-    }
-    const w = mStageRef.current?.clientWidth ?? 1;
-    const dx = mDrag.current.dx;
-    let next = mIdx;
-
-    // Velocity-aware paging: small drags only page when FLICKED fast
-    // (>0.4 px/ms past 8% of width); a slow deliberate drag must pass
-    // 35% of the stage width. Tiny accidental swipes always snap back.
-    const dt = Math.max(1, Date.now() - (mDrag.current.downAt ?? Date.now()));
-    const velocity = Math.abs(dx) / dt;
-    const flicked = velocity > 0.4 && Math.abs(dx) > w * 0.08;
-    const draggedFar = Math.abs(dx) > w * 0.35;
-    if ((flicked || draggedFar) && dx < 0) next = mIdx + 1;
-    else if ((flicked || draggedFar) && dx > 0) next = mIdx - 1;
-
-    goToIdx(next);
-    // Clear the moved flag AFTER the click event has had a chance to fire
-    setTimeout(() => { mDrag.current.moved = false; }, 60);
-  };
-  // Suppress Link navigation when the gesture was a drag, not a tap.
-  // The timestamp window catches the case where the browser fired
-  // pointercancel mid-swipe (gesture handoff) and the moved flag
-  // never got set before the synthetic click arrived.
-  const onStageClickCapture = (e) => {
-    if (mDrag.current.moved || Date.now() - mLastDragEndRef.current < 350) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+  const onStageScroll = () => {
+    if (mScrollRaf.current) return;
+    mScrollRaf.current = requestAnimationFrame(() => {
+      mScrollRaf.current = 0;
+      const sc = mScrollerRef.current;
+      if (!sc) return;
+      const step = slideStep();
+      const idx = Math.max(0, Math.min(CATEGORIESRef.current.length - 1, Math.round(sc.scrollLeft / step)));
+      if (idx !== mIdxRef.current) {
+        mIdxRef.current = idx;
+        setMIdx(idx);
+      }
+      // Ghost word trails at 35% of the offset from the active slide —
+      // the halfway jump is masked by the word-change animation.
+      if (mGhostRef.current) {
+        mGhostRef.current.style.transform = `translateX(${-(sc.scrollLeft - idx * step) * 0.35}px)`;
+      }
+      // The docked coffee cup hands off continuously over the first
+      // half-slide of scroll, and fades back in as coffee returns.
+      if (mobileCupRef.current) {
+        mobileCupRef.current.style.opacity = String(Math.max(0, 1 - sc.scrollLeft / (step * 0.5)));
+      }
+    });
   };
 
   // Ref to prevent multiple snap animations firing simultaneously
@@ -418,7 +350,7 @@ export default function Hero() {
       if (!c.h || !s.h) return; // image not decoded yet — keep fallback
       cupDelta.x = s.cx - c.cx;
       cupDelta.y = s.cy - c.cy;
-      cupDelta.scale = Math.min((s.h * 1.14) / c.h, (s.w * SLIDE_W * 1.1) / c.w);
+      cupDelta.scale = Math.min((s.h * 1.14) / c.h, (s.w * 0.76 * 1.1) / c.w);
     };
     measureCupTarget();
     // The cup is purely visual — never intercept taps on the stage.
@@ -566,10 +498,9 @@ export default function Hero() {
         if (p < RESET_THRESHOLD && mIdxRef.current !== 0) {
           mIdxRef.current = 0;
           setMIdx(0);
-          const w = mStageRef.current?.clientWidth ?? 1;
-          if (mTrackRef.current) gsap.set(mTrackRef.current, { x: trackXFor(0, w), rotation: 0 });
-          if (mGhostRef.current) gsap.set(mGhostRef.current, { x: 0 });
-          if (mobileCupRef.current) gsap.set(mobileCupRef.current, { opacity: 1 });
+          mScrollerRef.current?.scrollTo({ left: 0, behavior: 'auto' });
+          if (mGhostRef.current) mGhostRef.current.style.transform = '';
+          if (mobileCupRef.current) mobileCupRef.current.style.opacity = '1';
         }
 
         // ── 1. Text layer fades out ───────────────────────
@@ -758,17 +689,16 @@ export default function Hero() {
     };
   }, []);
 
-  // Keep the mobile stage track aligned on viewport resize
+  // Keep the mobile stage centered on the active slide across resizes —
+  // the step width changes with the viewport, so re-apply scrollLeft.
   useEffect(() => {
     const onResize = () => {
-      const w = mStageRef.current?.clientWidth ?? 1;
-      if (mTrackRef.current) gsap.set(mTrackRef.current, { x: trackXFor(mIdx, w) });
+      mScrollerRef.current?.scrollTo({ left: mIdxRef.current * slideStep(), behavior: 'auto' });
     };
     window.addEventListener('resize', onResize);
-    onResize(); // align the initial peek position on mount
     return () => window.removeEventListener('resize', onResize);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mIdx]);
+  }, []);
 
   return (
     <section ref={rootRef} className="oh4-hero" aria-label="Ohana Cafe Hero">
@@ -851,16 +781,7 @@ export default function Hero() {
               actual hero cup travels here on scroll (see 1c/cupDelta)
               and parks in this space, so the cup you watched rise is
               the same element sitting in the menu — no replacement. */}
-          <div
-            ref={mStageRef}
-            className="oh4-mstage"
-            onPointerDown={onStageDown}
-            onPointerMove={onStageMove}
-            onPointerUp={onStageUp}
-            onPointerCancel={onStageUp}
-            onPointerLeave={onStageUp}
-            onClickCapture={onStageClickCapture}
-          >
+          <div ref={mStageRef} className="oh4-mstage">
             <div className="oh4-mstage-glow" aria-hidden="true" />
 
             {/* Editorial ruler — frames the stage like a printed index */}
@@ -870,28 +791,48 @@ export default function Hero() {
             </div>
 
             {/* Giant outlined category word bleeding behind the dish —
-                parallaxes at 35% of drag distance */}
+                parallaxes at 35% of the scroll offset */}
             <div ref={mGhostRef} className="oh4-mstage-ghost" aria-hidden="true">
               <span key={mIdx} className="oh4-mstage-ghost-word">
                 {CATEGORIES[mIdx].name}
               </span>
             </div>
 
-            <div ref={mTrackRef} className="oh4-mstage-track">
-              {CATEGORIES.map((cat, i) => (
-                <Link
-                  to={menuBookUrl(cat)}
-                  key={cat.id}
-                  className={`oh4-mstage-slide${i === mIdx ? ' on' : ''}`}
-                  style={{ textDecoration: 'none' }}
-                >
-                  {cat.id === 'coffee' ? (
-                    <span className="oh4-mstage-cup-slot" aria-hidden="true" />
-                  ) : (
-                    <img src={cat.img} alt={cat.name} draggable="false" />
-                  )}
-                </Link>
-              ))}
+            {/* The native scroller — the ONLY moving part. momentum +
+                snap come straight from the phone's own scroll engine. */}
+            <div
+              ref={mScrollerRef}
+              className="oh4-mstage-scroll"
+              onScroll={onStageScroll}
+            >
+              <div ref={mTrackRef} className="oh4-mstage-track">
+                {CATEGORIES.map((cat, i) => (
+                  <Link
+                    to={menuBookUrl(cat)}
+                    key={cat.id}
+                    className={`oh4-mstage-slide${i === mIdx ? ' on' : ''}`}
+                    style={{ textDecoration: 'none' }}
+                  >
+                    {cat.id === 'coffee' ? (
+                      <span className="oh4-mstage-cup-slot" aria-hidden="true" />
+                    ) : (
+                      /* Position wrapper carries the admin-tuned x/y shift so it
+                         never fights the img's float animation; w/h size the dish
+                         box relative to the slide (/admin → Home Page). */
+                      <span style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        width: '100%', height: '100%',
+                        transform: `translate(${cat.mob.x || 0}%, ${cat.mob.y || 0}%)`,
+                      }}>
+                        <img
+                          src={cat.img} alt={cat.name} draggable="false"
+                          style={{ width: `${cat.mob.w || 100}%`, height: `${cat.mob.h || 118}%`, maxWidth: 'none' }}
+                        />
+                      </span>
+                    )}
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
 
