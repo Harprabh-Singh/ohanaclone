@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -29,12 +30,26 @@ const PageTransition = ({ children }) => (
   </motion.div>
 );
 
+/* Route changes must start at the top of the new page — React Router keeps
+   the previous scroll position by default, so deep-scrolling the home hero
+   and then opening About/Menu/etc. used to land halfway down the page.
+   (Menu's ?flip= deep-links still win: they scrollIntoView after mount.) */
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
+
 function App() {
   const location = useLocation();
   const isAdmin = location.pathname === '/admin';
 
   return (
     <div className="min-h-screen bg-cream text-text-dark">
+      <ScrollToTop />
       {!isAdmin && <Navbar />}
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
