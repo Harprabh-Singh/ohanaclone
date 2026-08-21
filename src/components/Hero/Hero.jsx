@@ -353,6 +353,18 @@ export default function Hero() {
       cupDelta.scale = Math.min((s.h * 1.14) / c.h, (s.w * 0.76 * 1.1) / c.w);
     };
     measureCupTarget();
+    // The cup's measured height depends on its intrinsic aspect ratio — if
+    // we measure before the image decodes, we silently keep the rough
+    // fallback and the cup docks too high (the "sometimes wrong, fine after
+    // refresh" race). Re-measure as soon as the images actually load.
+    [mobileCupRef.current, mobileDishesRef.current].forEach((img) => {
+      if (img && !(img.complete && img.naturalWidth)) {
+        img.addEventListener('load', measureCupTarget, { once: true });
+      }
+    });
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(measureCupTarget).catch(() => {});
+    }
     // The cup is purely visual — never intercept taps on the stage.
     if (mobileCupRef.current) mobileCupRef.current.style.pointerEvents = 'none';
 
@@ -453,8 +465,11 @@ export default function Hero() {
         }
 
         // ── Auto-snap: forbidden zone enforcement ────────
-        // Mobile only! On desktop, we want a continuous, smooth trackpad scrub.
-        if (isMobile && !isSnappingRef.current && p > 0.05 && p < 0.95) {
+        // Any scroll into the middle zone glides to the nearest resting
+        // state (menu fully open / hero fully closed) — same behavior on
+        // desktop and mobile, so nobody has to manually crank through the
+        // pin range.
+        if (!isSnappingRef.current && p > 0.05 && p < 0.95) {
           const scrollStart = self.start;
           const scrollEnd   = self.end;
           const totalRange  = scrollEnd - scrollStart;

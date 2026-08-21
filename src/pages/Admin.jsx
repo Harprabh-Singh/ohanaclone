@@ -46,6 +46,8 @@ const inputStyle = {
   width: '100%', background: 'rgba(242,231,208,0.045)', border: `1px solid ${C.hairline}`,
   borderRadius: '3px', color: C.cream, fontFamily: BODY, fontSize: '13px',
   padding: '10px 12px', outline: 'none', boxSizing: 'border-box',
+  // dark color-scheme → native dropdown lists & picker indicators render dark
+  colorScheme: 'dark',
 };
 const labelStyle = {
   display: 'block', fontSize: '9px', fontWeight: 700, letterSpacing: '0.32em',
@@ -1358,6 +1360,10 @@ export default function Admin() {
   return (
     <div className="oh-admin" style={{ minHeight: '100svh', background: C.bg, color: C.cream, fontFamily: BODY }}>
       <style>{`
+        /* Native select dropdown lists: dark panel + readable cream text
+           (Windows Chrome otherwise renders a white list with pale text) */
+        .oh-admin select option { background-color: #171208; color: #F2E7D0; }
+        .oh-admin select { color-scheme: dark; }
         .oh-sidebar { position: fixed; inset: 0 auto 0 0; width: 252px; z-index: 70;
           display: flex; flex-direction: column; border-right: 1px solid ${C.hairline};
           transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1); }

@@ -512,6 +512,10 @@ export default function Menu() {
       ══════════════════════════════════════════════ */}
       <div id="menu-gallery" style={{ position: 'relative' }}>
         <style>{`
+          /* Sticky dock: sits just below the fixed main navbar (z-50) so it
+             never covers it — matches every other sticky element on the site */
+          .idx-sticky { top: 52px; }
+          @media (min-width: 701px) { .idx-sticky { top: 56px; } }
           .idx-sheet-grid { display: grid; grid-template-columns: 1fr; }
           @media (min-width: 900px) { .idx-sheet-grid { grid-template-columns: 1fr 1fr; } }
           .idx-row-name { transition: transform 0.35s cubic-bezier(0.2,0.8,0.2,1), color 0.35s ease; }
@@ -541,12 +545,12 @@ export default function Menu() {
           <div
             aria-hidden
             onClick={() => setIndexOpen(false)}
-            style={{ position: 'fixed', inset: 0, zIndex: 45, background: 'transparent' }}
+            style={{ position: 'fixed', inset: 0, zIndex: 25, background: 'transparent' }}
           />
         )}
 
-        <div style={{
-          position: 'sticky', top: 0, zIndex: 50,
+        <div className="idx-sticky" style={{
+          position: 'sticky', zIndex: 30,
           animation: 'idxBarIn 1s cubic-bezier(0.16,1,0.3,1) 0.5s both',
         }}>
           {/* ── Collapsed bar ── */}

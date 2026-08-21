@@ -400,18 +400,26 @@ const PillarsSection = ({ reduced }) => {
             { opacity: 1, y: 0, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: row, start: 'top 82%', once: true } }
           );
         }
-        // sticky index updates
-        ScrollTrigger.create({
-          trigger: row, start: 'top 55%', end: 'bottom 55%',
-          onToggle: (self) => {
-            if (self.isActive && activeRef.current !== i && counterNumRef.current) {
-              activeRef.current = i;
-              counterNumRef.current.textContent = `0${i + 1}`;
-              if (!reduced) gsap.fromTo(counterNumRef.current, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: 'expo.out' });
-            }
-          },
-        });
       });
+      // Sticky index: the active row = the LAST row whose top has passed the
+      // 40% reading line. One section-level trigger instead of per-row bands —
+      // the old per-row onToggle bands skipped 01 and 04 on tall desktop
+      // viewports because two bands could hand off in a single scroll frame.
+      const updateCounter = () => {
+        const line = window.innerHeight * 0.4;
+        let idx = 0;
+        rows.forEach((row, i) => { if (row.getBoundingClientRect().top <= line) idx = i; });
+        if (activeRef.current !== idx && counterNumRef.current) {
+          activeRef.current = idx;
+          counterNumRef.current.textContent = `0${idx + 1}`;
+          if (!reduced) gsap.fromTo(counterNumRef.current, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: 'expo.out' });
+        }
+      };
+      ScrollTrigger.create({
+        trigger: sectionRef.current, start: 'top bottom', end: 'bottom top',
+        onUpdate: updateCounter, onToggle: updateCounter, onRefresh: updateCounter,
+      });
+      updateCounter();
     }, sectionRef);
     return () => ctx.revert();
   }, [reduced]);

@@ -28,15 +28,6 @@ const IMG = {
   interlude: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=80',
 };
 
-/* Time slots — 11:00 AM → 9:30 PM, 30-minute steps (20 slots) */
-const times = Array.from({ length: 20 }, (_, index) => {
-  const hour = 11 + Math.floor(index / 2);
-  const minute = index % 2 === 0 ? '00' : '30';
-  const period = hour < 12 ? 'AM' : 'PM';
-  const displayHour = hour <= 12 ? hour : hour - 12;
-  return `${displayHour}:${minute} ${period}`;
-});
-
 const GoldLabel = ({ children, center = false }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: '14px', justifyContent: center ? 'center' : 'flex-start' }}>
     <span style={{ width: 'clamp(32px, 8vw, 48px)', height: '1px', background: C.gold, flexShrink: 0 }} />
@@ -165,14 +156,20 @@ const LedgerSection = ({ reduced }) => {
   const confirmRef = useRef(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [timeError, setTimeError] = useState(false);
-  const [formState, setFormState] = useState({ date: '', time: '', size: '2', name: '', phone: '', requests: '' });
+  const [formState, setFormState] = useState({ date: '', size: '2', name: '', phone: '', requests: '' });
+  // Manual time entry: hour (1–12) + minute (00–59) + AM/PM dropdown
+  const [timeParts, setTimeParts] = useState({ hour: '', minute: '', ampm: 'PM' });
 
   const set = (key) => (e) => setFormState((s) => ({ ...s, [key]: e.target.value }));
   const largeGroup = parseInt(formState.size, 10) > 8 || formState.size === '20+';
+  const composedTime = timeParts.hour
+    ? `${timeParts.hour}:${(timeParts.minute || '00').padStart(2, '0')} ${timeParts.ampm}`
+    : '';
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!formState.time) { setTimeError(true); return; }
+    const h = parseInt(timeParts.hour, 10);
+    if (!timeParts.hour || isNaN(h) || h < 1 || h > 12) { setTimeError(true); return; }
     setTimeError(false);
     setConfirmOpen(true);
   };
@@ -240,45 +237,72 @@ const LedgerSection = ({ reduced }) => {
               <span style={fieldLabel}>Date</span>
               <input id="rv-date" name="date" type="date" required
                 value={formState.date} onChange={set('date')}
-                style={fieldInput} onFocus={onFieldFocus} onBlur={onFieldBlur} />
+                onClick={(e) => { try { e.currentTarget.showPicker?.(); } catch { /* older Safari */ } }}
+                style={{ ...fieldInput, cursor: 'pointer' }} onFocus={onFieldFocus} onBlur={onFieldBlur} />
             </label>
 
             <span style={{ ...fieldLabel, display: 'block', marginTop: 'clamp(28px, 4vh, 40px)' }}>Time</span>
-            <div style={{ position: 'relative' }}>
-              <div className="rv-chip-row no-scrollbar" style={{
-                display: 'flex', gap: '10px', overflowX: 'auto',
-                scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch',
-                paddingBottom: '8px', margin: '0 -22px', padding: '2px 22px 10px',
-              }}>
-                {times.map((time) => {
-                  const active = formState.time === time;
-                  return (
-                    <button key={time} type="button"
-                      onClick={() => { setFormState((s) => ({ ...s, time })); setTimeError(false); }}
-                      aria-pressed={active}
-                      style={{
-                        flexShrink: 0, scrollSnapAlign: 'center', cursor: 'pointer',
-                        padding: '12px 20px', borderRadius: '100px',
-                        border: active ? `1px solid ${C.gold}` : `1px solid ${C.hairline}`,
-                        background: active ? C.gold : 'transparent',
-                        color: active ? '#0B0906' : C.muted,
-                        fontSize: '12px', fontWeight: active ? 800 : 600, letterSpacing: '0.08em',
-                        fontFamily: BODY, transition: 'background 0.25s ease, color 0.25s ease, border-color 0.25s ease',
-                        whiteSpace: 'nowrap',
-                      }}>
-                      {time}
-                    </button>
-                  );
-                })}
-              </div>
-              {/* edge fades */}
-              <div aria-hidden style={{ position: 'absolute', top: 0, bottom: '8px', left: '-22px', width: '22px', background: `linear-gradient(to right, ${C.bg2}, transparent)`, pointerEvents: 'none' }} />
-              <div aria-hidden style={{ position: 'absolute', top: 0, bottom: '8px', right: '-22px', width: '22px', background: `linear-gradient(to left, ${C.bg2}, transparent)`, pointerEvents: 'none' }} />
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 'clamp(10px, 3vw, 16px)' }}>
+              <label htmlFor="rv-hour" style={{ ...fieldWrap, flex: '0 0 clamp(64px, 18vw, 84px)' }}>
+                <input id="rv-hour" name="hour" inputMode="numeric" autoComplete="off"
+                  placeholder="7" maxLength={2}
+                  value={timeParts.hour}
+                  onChange={(e) => {
+                    const digits = e.target.value.replace(/\D/g, '').slice(0, 2);
+                    const n = parseInt(digits, 10);
+                    // clamp live: 1–12 only, keep typing flow natural
+                    const next = digits === '' ? '' : (n > 12 ? '12' : String(n));
+                    setTimeParts((p) => ({ ...p, hour: next }));
+                    setTimeError(false);
+                  }}
+                  onFocus={onFieldFocus} onBlur={onFieldBlur}
+                  aria-label="Hour (1 to 12)"
+                  style={{ ...fieldInput, textAlign: 'center', fontSize: 'clamp(20px, 5.5vw, 26px)', fontWeight: 600 }} />
+              </label>
+              <span aria-hidden style={{ paddingBottom: '14px', fontFamily: DISPLAY, fontSize: 'clamp(20px, 5.5vw, 26px)', color: C.gold }}>:</span>
+              <label htmlFor="rv-minute" style={{ ...fieldWrap, flex: '0 0 clamp(64px, 18vw, 84px)' }}>
+                <input id="rv-minute" name="minute" inputMode="numeric" autoComplete="off"
+                  placeholder="00" maxLength={2}
+                  value={timeParts.minute}
+                  onChange={(e) => {
+                    const digits = e.target.value.replace(/\D/g, '').slice(0, 2);
+                    const n = parseInt(digits, 10);
+                    const next = digits === '' ? '' : (digits.length === 2 && n > 59 ? '59' : digits);
+                    setTimeParts((p) => ({ ...p, minute: next }));
+                    setTimeError(false);
+                  }}
+                  onBlur={(e) => {
+                    // pad single digits → "5" becomes "05"
+                    setTimeParts((p) => (p.minute && p.minute.length === 1 ? { ...p, minute: '0' + p.minute } : p));
+                    onFieldBlur(e);
+                  }}
+                  onFocus={onFieldFocus}
+                  aria-label="Minute (00 to 59)"
+                  style={{ ...fieldInput, textAlign: 'center', fontSize: 'clamp(20px, 5.5vw, 26px)', fontWeight: 600 }} />
+              </label>
+              <label htmlFor="rv-ampm" style={{ ...fieldWrap, flex: '0 0 auto', position: 'relative' }}>
+                <select id="rv-ampm" name="ampm"
+                  value={timeParts.ampm}
+                  onChange={(e) => { setTimeParts((p) => ({ ...p, ampm: e.target.value })); setTimeError(false); }}
+                  onFocus={onFieldFocus} onBlur={onFieldBlur}
+                  aria-label="AM or PM"
+                  style={{
+                    ...fieldInput, width: 'auto', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none',
+                    paddingRight: '26px', fontSize: 'clamp(15px, 4vw, 17px)', fontWeight: 700, letterSpacing: '0.12em',
+                  }}>
+                  <option value="AM" style={{ background: C.bg2 }}>AM</option>
+                  <option value="PM" style={{ background: C.bg2 }}>PM</option>
+                </select>
+                <span aria-hidden style={{ position: 'absolute', right: '2px', bottom: '16px', pointerEvents: 'none', color: C.gold, fontSize: '10px' }}>▾</span>
+              </label>
+              <span aria-hidden style={{ marginLeft: 'auto', paddingBottom: '16px', fontFamily: SERIF, fontStyle: 'italic', fontSize: '0.9rem', color: C.faint, whiteSpace: 'nowrap' }}>
+                kitchen 11 AM – 10 PM
+              </span>
             </div>
-            <input type="hidden" name="time" value={formState.time} />
+            <input type="hidden" name="time" value={composedTime} />
             {timeError && (
               <p role="alert" style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: '0.95rem', color: C.goldBright, margin: '8px 0 0' }}>
-                Pick a slot — golden hour included.
+                Tell us the hour — golden hour included.
               </p>
             )}
           </fieldset>
